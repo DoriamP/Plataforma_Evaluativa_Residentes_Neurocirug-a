@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participación en Sesiones Clínicas Diarias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+        <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 text-white text-center">
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Participación en Sesiones Clínicas Diarias</h1>
+            <p class="text-xs sm:text-sm text-blue-200 mt-2">Formulario para evaluar la participación activa y la calidad del conocimiento demostrado por el residente en las discusiones clínicas diarias.</p>
+        </div>
+
+        <form id="clinicalForm" class="p-6 space-y-6">
+            
+            <div class="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Información General</h2>
+                
+                <div>
+                    <label for="fecha" class="block text-xs font-semibold text-gray-600 mb-1">Fecha de la Sesión Clínica</label>
+                    <input type="date" id="fecha" name="fecha" readonly class="w-full rounded-lg border-gray-200 bg-gray-200/60 p-2 text-sm text-gray-500 cursor-not-allowed focus:outline-none">
+                </div>
+
+                <div>
+                    <label for="anioResidente" class="block text-xs font-semibold text-gray-600 mb-1">Año de residente a evaluar</label>
+                    <select id="anioResidente" name="anioResidente" required class="w-full rounded-lg border-gray-300 border p-2 text-sm bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled selected>Seleccione el año...</option>
+                        <option value="I">I año de residencia</option>
+                        <option value="II">II año de residencia</option>
+                        <option value="III">III año de residencia</option>
+                        <option value="IV">IV año de residencia</option>
+                        <option value="V">V año de residencia</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="nombreResidente" class="block text-xs font-semibold text-gray-600 mb-1">Nombre del Residente Evaluado</label>
+                    <select id="nombreResidente" name="nombreResidente" disabled required class="w-full rounded-lg border-gray-300 border p-2 text-sm bg-gray-100 text-gray-400 cursor-not-allowed focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled selected>Primero seleccione el año de residencia...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="especialista" class="block text-xs font-semibold text-gray-600 mb-1">Nombre del especialista evaluador</label>
+                    <select id="especialista" name="especialista" required class="w-full rounded-lg border-gray-300 border p-2 text-sm bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled selected>Seleccione al especialista...</option>
+                        <option value="Luis Zapata">Dr. Luis Zapata</option>
+                        <option value="Edgar Herrera">Dr. Edgar Herrera</option>
+                        <option value="Doriam Perera">Dr. Doriam Perera</option>
+                        <option value="José Hurtado">Dr. José Hurtado</option>
+                        <option value="Mauricio Matus">Dr. Mauricio Matus</option>
+                        <option value="Oswaldo Pérez">Dr. Oswaldo Pérez</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="space-y-6">
+                
+                <div class="bg-gradient-to-b from-blue-50/70 to-white p-5 rounded-xl border-2 border-blue-500/30 shadow-md transition hover:shadow-lg">
+                    <div class="flex items-start space-x-2">
+                        <span class="flex items-center justify-center bg-blue-600 text-white font-bold rounded-lg text-xs px-2.5 py-1 mt-0.5">1</span>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-900">Aspecto: Profundidad y Calidad del Conocimiento Neuroquirúrgico Aplicado</label>
+                            <p class="text-xs text-blue-700 font-medium mt-1">Escala de 0 a 10 — Excelente (Dominio y aplicación experta)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-6 gap-1.5 mt-4 sm:flex sm:justify-between">
+                        <script>
+                            for(let i=0; i<=10; i++) {
+                                document.write(`
+                                    <label class="flex flex-col items-center justify-center p-2.5 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-600 hover:text-white transition text-xs font-bold shadow-sm select-none sm:w-11">
+                                        <input type="radio" name="aspecto1" value="${i}" class="mb-1 text-blue-600 focus:ring-blue-500 score-input" required>
+                                        ${i}
+                                    </label>
+                                `);
+                            }
+                        </script>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-b from-indigo-50/70 to-white p-5 rounded-xl border-2 border-indigo-500/30 shadow-md transition hover:shadow-lg">
+                    <div class="flex items-start space-x-2">
+                        <span class="flex items-center justify-center bg-indigo-600 text-white font-bold rounded-lg text-xs px-2.5 py-1 mt-0.5">2</span>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-900">Aspecto: Habilidad para Analizar Críticamente y Contribuir a la Estrategia de Manejo Clínico/Quirúrgico</label>
+                            <p class="text-xs text-indigo-700 font-medium mt-1">Escala de 0 a 10 — Excepcional (Aporta ideas clave y soluciones innovadoras)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-6 gap-1.5 mt-4 sm:flex sm:justify-between">
+                        <script>
+                            for(let i=0; i<=10; i++) {
+                                document.write(`
+                                    <label class="flex flex-col items-center justify-center p-2.5 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-600 hover:text-white transition text-xs font-bold shadow-sm select-none sm:w-11">
+                                        <input type="radio" name="aspecto2" value="${i}" class="mb-1 text-indigo-600 focus:ring-indigo-500 score-input" required>
+                                        ${i}
+                                    </label>
+                                `);
+                            }
+                        </script>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <label for="observaciones" class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Observaciones Adicionales sobre el Desempeño General del Residente (Opcional)</label>
+                <textarea id="observaciones" name="observaciones" rows="3" class="w-full rounded-lg border-gray-300 border p-2.5 text-sm bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Añada aquí comentarios de retroalimentación..."></textarea>
+            </div>
+
+
+            <div class="bg-slate-900 text-white p-5 rounded-xl flex flex-col sm:flex-row items-center justify-around space-y-4 sm:space-y-0 shadow-inner">
+                <div class="text-center sm:text-left">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Puntuación Alcanzada</h3>
+                    <p class="text-3xl font-black mt-1" id="scoreText">0 <span class="text-sm font-normal text-slate-400">/ 20 pts</span></p>
+                    <p class="text-xs font-semibold mt-1 text-slate-300" id="porcentajeText">Cumplimiento: 0%</p>
+                </div>
+                
+                <div class="relative w-24 h-24 flex items-center justify-center">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle cx="48" cy="48" r="38" stroke="#334155" stroke-width="8" fill="transparent"></circle>
+                        <circle id="progressCircle" cx="48" cy="48" r="38" stroke="#ef4444" stroke-width="8" fill="transparent" stroke-dasharray="238.76" stroke-dashoffset="238.76" class="transition-all duration-500 ease-out"></circle>
+                    </svg>
+                    <div class="absolute text-lg font-black" id="graphCenterText">0%</div>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-700 to-indigo-700 text-white font-bold p-3.5 rounded-lg shadow-md hover:from-blue-800 hover:to-indigo-800 transition text-sm uppercase tracking-wider">
+                    Registrar Evaluación en Sistema
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Relleno automático de la fecha actual
+        document.addEventListener('DOMContentLoaded', () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').value = hoy;
+        });
+
+        // Base de datos de residentes por año
+        const residentesPorAnio = {
+            "I": ["María Teresa Quintana Duarte", "Kevin Yassir Bobb García"],
+            "II": ["Axly Olivas Ivania Olivas Jiménez", "Fernando Antonio De Jesús Cuadra Jiménez"],
+            "III": ["Vivian Iveth Díaz", "José Luis Cerrato Lemus"],
+            "IV": ["Angel Benigno Rayo Bravo", "Lagree Guzman Reynoso", "Liuska Ninoska Blandón Cortés"],
+            "V": ["Martha Elena Abarca Morales", "Jissella Joammet Membreño Vivas"]
+        };
+
+        const selectorAnio = document.getElementById('anioResidente');
+        const selectorResidente = document.getElementById('nombreResidente');
+
+        selectorAnio.addEventListener('change', function() {
+            const anioSeleccionado = this.value;
+            const listaResidentes = residentesPorAnio[anioSeleccionado] || [];
+            
+            selectorResidente.innerHTML = '';
+            
+            if (listaResidentes.length > 0) {
+                selectorResidente.disabled = false;
+                selectorResidente.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                selectorResidente.classList.add('bg-white', 'text-gray-900');
+                
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = "";
+                defaultOpt.textContent = "Seleccione el residente...";
+                defaultOpt.disabled = true;
+                defaultOpt.selected = true;
+                selectorResidente.appendChild(defaultOpt);
+
+                listaResidentes.forEach(residente => {
+                    const opt = document.createElement('option');
+                    opt.value = residente;
+                    opt.textContent = residente;
+                    selectorResidente.appendChild(opt);
+                });
+            } else {
+                selectorResidente.disabled = true;
+                selectorResidente.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "No hay residentes registrados para este año.";
+                selectorResidente.appendChild(opt);
+            }
+        });
+
+        // Cálculo dinámico y gráfico reactivo
+        const inputsPuntaje = document.querySelectorAll('.score-input');
+        const textPuntaje = document.getElementById('scoreText');
+        const textPorcentaje = document.getElementById('porcentajeText');
+        const circuloProgreso = document.getElementById('progressCircle');
+        const textoCentroGrafico = document.getElementById('graphCenterText');
+        
+        const MAX_CIRCUNFERENCIA = 238.76; 
+
+        function actualizarPuntaje() {
+            let asp1 = document.querySelector('input[name="aspecto1"]:checked');
+            let asp2 = document.querySelector('input[name="aspecto2"]:checked');
+            
+            let nota1 = asp1 ? parseInt(asp1.value) : 0;
+            let nota2 = asp2 ? parseInt(asp2.value) : 0;
+            
+            let total = nota1 + nota2;
+            let porcentaje = (total / 20) * 100;
+
+            textPuntaje.innerHTML = `${total} <span class="text-xs font-normal text-slate-400">/ 20 pts</span>`;
+            textPorcentaje.textContent = `Cumplimiento: ${porcentaje.toFixed(0)}%`;
+            textoCentroGrafico.textContent = `${porcentaje.toFixed(0)}%`;
+
+            const offset = MAX_CIRCUNFERENCIA - (porcentaje / 100) * MAX_CIRCUNFERENCIA;
+            circuloProgreso.style.strokeDashoffset = offset;
+
+            if (porcentaje < 70) {
+                circuloProgreso.setAttribute('stroke', '#ef4444');
+                textoCentroGrafico.className = "absolute text-lg font-black text-red-500";
+            } else {
+                circuloProgreso.setAttribute('stroke', '#22c55e');
+                textoCentroGrafico.className = "absolute text-lg font-black text-green-500";
+            }
+        }
+
+        inputsPuntaje.forEach(input => {
+            input.addEventListener('change', actualizarPuntaje);
+        });
+
+        document.getElementById('clinicalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // 1. Seleccionar el botón de enviar y cambiar su estado para evitar duplicados
+    const botonEnviar = this.querySelector('button[type="submit"]');
+    botonEnviar.disabled = true;
+    botonEnviar.classList.remove('from-blue-700', 'to-indigo-700', 'hover:from-blue-800', 'hover:to-indigo-800');
+    botonEnviar.classList.add('from-gray-500', 'to-gray-600', 'cursor-not-allowed');
+    botonEnviar.textContent = "Procesando...";
+
+    // 2. Recopilar los valores del formulario
+    const payload = {
+        tipo_evaluacion: "Sesiones Diarias",
+        fecha: document.getElementById('fecha').value,
+        anioResidente: document.getElementById('anioResidente').value,
+        nombreResidente: document.getElementById('nombreResidente').value,
+        especialista: document.getElementById('especialista').value,
+        aspecto1: document.querySelector('input[name="aspecto1"]:checked').value,
+        aspecto2: document.querySelector('input[name="aspecto2"]:checked').value,
+        total: document.getElementById('scoreText').textContent.split(' ')[0], 
+        porcentaje: document.getElementById('graphCenterText').textContent,
+        observaciones: document.getElementById('observaciones').value
+    };
+
+    // 3. URL de tu Google Web App
+    const urlScript = "https://script.google.com/macros/s/AKfycbxhOiPzRwlX3Iqkm4tfCxAXOk3PiOgiWO3IIPZ29YhrHQccuMH3l_BxFkQbYMRNQQSh/exec";
+
+    // 4. Enviar datos mediante Fetch API
+    fetch(urlScript, {
+        method: 'POST',
+        mode: 'no-cors', 
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(() => {
+        alert('¡Evaluación guardada exitosamente en el sistema central!');
+        
+        // 5. Reiniciar el formulario y el botón tras el éxito
+        this.reset();
+        actualizarPuntaje(); // Resetea el gráfico a 0%
+        
+        // Restaurar estado original del botón
+        botonEnviar.disabled = false;
+        botonEnviar.classList.remove('from-gray-500', 'to-gray-600', 'cursor-not-allowed');
+        botonEnviar.classList.add('from-blue-700', 'to-indigo-700', 'hover:from-blue-800', 'hover:to-indigo-800');
+        botonEnviar.textContent = "Registrar Evaluación en Sistema";
+        
+        // Volver a colocar la fecha de hoy automáticamente
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha').value = hoy;
+        
+        // Bloquear de nuevo el selector de residentes
+        selectorResidente.disabled = true;
+        selectorResidente.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un problema al conectar con el servidor.');
+        
+        // En caso de error, reactivar el botón para permitir reintentar
+        botonEnviar.disabled = false;
+        botonEnviar.classList.remove('from-gray-500', 'to-gray-600', 'cursor-not-allowed');
+        botonEnviar.classList.add('from-blue-700', 'to-indigo-700', 'hover:from-blue-800', 'hover:to-indigo-800');
+        botonEnviar.textContent = "Registrar Evaluación en Sistema";
+    });
+});
+    </script>
+</body>
+</html>

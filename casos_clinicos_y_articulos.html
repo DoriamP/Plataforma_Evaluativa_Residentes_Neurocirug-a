@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Presentaciones de casos clínicos y revisión de artículos científicos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen py-6 px-4 md:py-10">
+
+    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden border border-slate-200">
+        <div class="bg-indigo-900 text-white p-6 md:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">Evaluación de Presentaciones de casos clínicos y revisión de artículos científicos</h1>
+            <p class="text-indigo-200 font-medium">Residentes de Neurocirugía</p>
+        </div>
+
+        <form id="evaluationForm" class="p-6 md:p-8 space-y-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="fechaEvaluacion" class="block text-sm font-semibold text-slate-700 mb-2">Fecha de Evaluación</label>
+                    <input type="text" id="fechaEvaluacion" name="fechaEvaluacion" readonly
+                        class="w-full px-4 py-2 bg-slate-100 border border-slate-300 rounded-lg outline-none text-slate-600 font-medium cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label for="anoResidencia" class="block text-sm font-semibold text-slate-700 mb-2">Año de residente a evaluar *</label>
+                    <select id="anoResidencia" name="anoResidencia" required
+                        class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition appearance-none cursor-pointer">
+                        <option value="" disabled selected>Seleccione el año...</option>
+                        <option value="I">I año de residencia</option>
+                        <option value="II">II año de residencia</option>
+                        <option value="III">III año de residencia</option>
+                        <option value="IV">IV año de residencia</option>
+                        <option value="V">V año de residencia</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="residente" class="block text-sm font-semibold text-slate-700 mb-2">Nombre del residente que presenta *</label>
+                    <select id="residente" name="residente" required disabled
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition appearance-none cursor-not-allowed">
+                        <option value="" disabled selected>Primero seleccione el año...</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="tema" class="block text-sm font-semibold text-slate-700 mb-2">Título o Tema de la Presentación *</label>
+                    <input type="text" id="tema" name="tema" required
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="evaluador" class="block text-sm font-semibold text-slate-700 mb-2">¿Quién realiza esta evaluación? *</label>
+                    <select id="evaluador" name="evaluador" required
+                        class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition appearance-none cursor-pointer">
+                        <option value="" disabled selected>Seleccione al evaluador...</option>
+                        <option value="Dr. Luis zapata">Dr. Luis zapata</option>
+                        <option value="Dr. Edgar Herrera">Dr. Edgar Herrera</option>
+                        <option value="Dr. Doriam perera">Dr. Doriam perera</option>
+                        <option value="Dr. José Hurtado">Dr. José Hurtado</option>
+                        <option value="Dr. Mauricio Matus">Dr. Mauricio Matus</option>
+                        <option value="Dr. Oswaldo Pérez">Dr. Oswaldo Pérez</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div class="space-y-3">
+                <label class="block text-sm font-semibold text-slate-700">
+                    1. Adecuada estructura y organización de la presentación *
+                </label>
+                <p class="text-xs text-slate-500 italic bg-slate-100 p-2 rounded border border-slate-200">
+                    Presenta las ideas claras y concisas (sin exceso de letras) y presenta adecuadas figuras anatómicas y explicativas.
+                </p>
+                <p class="text-xs text-slate-400 italic">Rango: 0 (No evaluable/Ausente) a 7 (Muy Claro y Estructurado - Máximo 7 puntos)</p>
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-x-auto gap-2">
+                    <span class="text-xs text-slate-400 hidden sm:inline">Insuficiente</span>
+                    <div class="flex justify-around flex-1 min-w-[350px]">
+                        <script>
+                            for(let i=0; i<=7; i++) {
+                                document.write(`
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer group">
+                                        <input type="radio" name="criterio1" value="${i}" required class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                        <span class="text-sm font-medium text-slate-600 group-hover:text-indigo-600">${i}</span>
+                                    </label>
+                                `);
+                            }
+                        </script>
+                    </div>
+                    <span class="text-xs text-indigo-600 font-medium hidden sm:inline">Excelente</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <label class="block text-sm font-semibold text-slate-700">
+                    2. Profundiza con literatura científica variada y pertinente (muestra referencias bibliográficas) *
+                </label>
+                <p class="text-xs text-slate-500 italic bg-slate-100 p-2 rounded border border-slate-200">
+                    Utiliza artículos actualizados de alto impacto (últimos 5 años), metanálisis o guías de práctica clínica indexadas, citando formalmente en las diapositivas.
+                </p>
+                <p class="text-xs text-slate-400 italic">Rango: 0 (No evaluable/Ausente) a 6 (Excelente / Alta evidencia - Máximo 6 puntos)</p>
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-x-auto gap-2">
+                    <span class="text-xs text-slate-400 hidden sm:inline">Insuficiente</span>
+                    <div class="flex justify-around flex-1 min-w-[300px]">
+                        <script>
+                            for(let i=0; i<=6; i++) {
+                                document.write(`
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer group">
+                                        <input type="radio" name="criterio2" value="${i}" required class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                        <span class="text-sm font-medium text-slate-600 group-hover:text-indigo-600">${i}</span>
+                                    </label>
+                                `);
+                            }
+                        </script>
+                    </div>
+                    <span class="text-xs text-indigo-600 font-medium hidden sm:inline">Excelente</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <label class="block text-sm font-semibold text-slate-700">
+                    3. Dominio del Tema y Manejo de Preguntas *
+                </label>
+                <p class="text-xs text-slate-500 italic bg-slate-100 p-2 rounded border border-slate-200">
+                    Demuestra solidez argumentativa, criterio neuroquirúrgico propio en la discusión y responde con seguridad y base científica el interrogatorio.
+                </p>
+                <p class="text-xs text-slate-400 italic">Rango: 0 (No responde adecuadamente) a 7 (Respuesta Experta y Convincente - Máximo 7 puntos)</p>
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-x-auto gap-2">
+                    <span class="text-xs text-slate-400 hidden sm:inline">Insuficiente</span>
+                    <div class="flex justify-around flex-1 min-w-[350px]">
+                        <script>
+                            for(let i=0; i<=7; i++) {
+                                document.write(`
+                                    <label class="flex flex-col items-center gap-1 cursor-pointer group">
+                                        <input type="radio" name="criterio3" value="${i}" required class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                        <span class="text-sm font-medium text-slate-600 group-hover:text-indigo-600">${i}</span>
+                                    </label>
+                                `);
+                            }
+                        </script>
+                    </div>
+                    <span class="text-xs text-indigo-600 font-medium hidden sm:inline">Excelente</span>
+                </div>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <label for="comentarios" class="block text-sm font-semibold text-slate-700 mb-2">
+                    4. Comentarios Adicionales o Sugerencias de Mejora (Opcional)
+                </label>
+                <textarea id="comentarios" name="comentarios" rows="4" 
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition resize-y text-sm md:text-base"
+                    placeholder="Escriba aquí sus observaciones..."></textarea>
+            </div>
+
+            <div class="p-4 bg-slate-100 border border-slate-300 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="text-center sm:text-left">
+                    <span class="block text-base font-bold text-slate-700">Total de puntos alcanzados:</span>
+                    <span id="liveScore" class="inline-block mt-1 text-xl font-black text-slate-600 bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm min-w-[70px] text-center">0 / 20</span>
+                </div>
+                
+                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="relative w-16 h-16">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-200" stroke-width="3.5" stroke="currentColor" fill="none" 
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="graphProgress" class="text-red-500 transition-all duration-300 ease-out" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0, 100" stroke="currentColor" fill="none"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="graphPercentage" class="text-sm font-black text-red-500 transition-colors duration-300">0%</span>
+                        </div>
+                    </div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider leading-tight">
+                        Porcentaje<br>Obtenido
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" 
+                    class="w-full bg-indigo-900 hover:bg-indigo-950 text-white font-semibold py-3 px-6 rounded-lg shadow transition duration-200 ease-in-out transform active:scale-[0.99] text-sm md:text-base">
+                    Enviar Evaluación
+                </button>
+            </div>
+        </form>
+
+        <div id="resultCard" class="hidden m-6 md:m-8 p-6 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <h3 class="text-lg font-bold text-emerald-900 mb-2">¡Evaluación Procesada Exitosamente!</h3>
+            <p id="resultSummary" class="text-sm text-emerald-800 leading-relaxed"></p>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const hoy = new Date();
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const anio = hoy.getFullYear();
+            
+            document.getElementById('fechaEvaluacion').value = `${dia}/${mes}/${anio}`;
+        });
+
+        const residentesPorAno = {
+            "I": ["María Teresa Quintana Duarte", "Kevin Yassir Bobb García"],
+            "II": ["Axly Olivas Ivania Olivas Jiménez", "Fernando Antonio De Jesús Cuadra Jiménez"],
+            "III": ["Vivian Iveth Díaz", "José Luis Cerrato Lemus"],
+            "IV": ["Angel Benigno Rayo Bravo", "Lagree Guzman Reynoso", "Liuska Ninoska Blandón Cortés"],
+            "V": ["Martha Elena Abarca Morales", "Jissella Joammet Membreño Vivas"]
+        };
+
+        const selectAno = document.getElementById('anoResidencia');
+        const selectResidente = document.getElementById('residente');
+        const liveScoreDisplay = document.getElementById('liveScore');
+        const graphProgress = document.getElementById('graphProgress');
+        const graphPercentage = document.getElementById('graphPercentage');
+        const form = document.getElementById('evaluationForm');
+
+        selectAno.addEventListener('change', function() {
+            const anoSeleccionado = this.value;
+            const listaResidentes = residentesPorAno[anoSeleccionado] || [];
+
+            selectResidente.innerHTML = '<option value="" disabled selected>Seleccione el residente...</option>';
+
+            if (listaResidentes.length > 0) {
+                listaResidentes.forEach(nombre => {
+                    const option = document.createElement('option');
+                    option.value = nombre;
+                    option.textContent = nombre;
+                    selectResidente.appendChild(option);
+                });
+                selectResidente.disabled = false;
+                selectResidente.classList.remove('bg-slate-50', 'cursor-not-allowed');
+                selectResidente.classList.add('bg-white', 'cursor-pointer');
+            } else {
+                const option = document.createElement('option');
+                option.value = "";
+                option.disabled = true;
+                option.textContent = "No hay residentes registrados para este año";
+                selectResidente.disabled = true;
+                selectResidente.classList.add('bg-slate-50', 'cursor-not-allowed');
+            }
+        });
+
+        // Cálculo dinámico con base en un máximo de 20 puntos (7 + 6 + 7)
+        form.addEventListener('change', function() {
+            let totalPoints = 0;
+            const maxPoints = 20;
+
+            for (let i = 1; i <= 3; i++) {
+                const checkedRadio = document.querySelector(`input[name="criterio${i}"]:checked`);
+                if (checkedRadio) {
+                    totalPoints += parseInt(checkedRadio.value);
+                }
+            }
+
+            const porcentaje = Math.round((totalPoints / maxPoints) * 100);
+
+            liveScoreDisplay.textContent = `${totalPoints} / ${maxPoints}`;
+            graphPercentage.textContent = `${porcentaje}%`;
+            graphProgress.setAttribute('stroke-dasharray', `${porcentaje}, 100`);
+
+            if (porcentaje < 70) {
+                graphProgress.classList.remove('text-emerald-500');
+                graphProgress.classList.add('text-red-500');
+                graphPercentage.classList.remove('text-emerald-500');
+                graphPercentage.classList.add('text-red-500');
+                liveScoreDisplay.classList.remove('text-indigo-900');
+                liveScoreDisplay.classList.add('text-red-600');
+            } else {
+                graphProgress.classList.remove('text-red-500');
+                graphProgress.classList.add('text-emerald-500');
+                graphPercentage.classList.remove('text-red-500');
+                graphPercentage.classList.add('text-emerald-500');
+                liveScoreDisplay.classList.remove('text-red-600');
+                liveScoreDisplay.classList.add('text-indigo-900');
+            }
+        });
+
+        document.getElementById('evaluationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // 0. Evitar múltiples envíos: Desactivar botón y cambiar apariencia
+    const submitButton = this.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.innerText = "Enviando evaluación...";
+    submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+    // Capturar qué número de la escala fue seleccionado en cada criterio (0-7 o 0-6)
+    const checkedCriterio1 = document.querySelector('input[name="criterio1"]:checked');
+    const checkedCriterio2 = document.querySelector('input[name="criterio2"]:checked');
+    const checkedCriterio3 = document.querySelector('input[name="criterio3"]:checked');
+
+    // 1. Recopilar la información del formulario de Casos Clínicos y Artículos
+    const payload = {
+        tipo_evaluacion: "Casos Clínicos y Artículos", 
+        fecha: document.getElementById('fechaEvaluacion').value,
+        anoResidencia: document.getElementById('anoResidencia').value,
+        residente: document.getElementById('residente').value,
+        tema: document.getElementById('tema').value,
+        evaluador: document.getElementById('evaluador').value,
+        criterio1: checkedCriterio1 ? checkedCriterio1.value : 0,
+        criterio2: checkedCriterio2 ? checkedCriterio2.value : 0,
+        criterio3: checkedCriterio3 ? checkedCriterio3.value : 0,
+        total: document.getElementById('liveScore').textContent.split(' ')[0], 
+        porcentaje: document.getElementById('graphPercentage').textContent,
+        comentarios: document.getElementById('comentarios').value || "Ninguno"
+    };
+
+    // 2. URL de tu Google Web App
+    const urlScript = "https://script.google.com/macros/s/AKfycbxhOiPzRwlX3Iqkm4tfCxAXOk3PiOgiWO3IIPZ29YhrHQccuMH3l_BxFkQbYMRNQQSh/exec";
+
+    // 3. Envío de datos asíncrono
+    fetch(urlScript, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(() => {
+        // Mantiene la lógica nativa de tu HTML de mostrar la tarjeta de éxito visual en pantalla
+        const estadoTexto = parseInt(payload.total) < 14 ? '<span class="text-red-600 font-bold">REPROBADO (Menor al 70%)</span>' : '<span class="text-emerald-600 font-bold">APROBADO</span>';
+        
+        document.getElementById('resultSummary').innerHTML = `
+            <strong>Fecha:</strong> ${payload.fecha}<br>
+            <strong>Evaluador:</strong> ${payload.evaluador}<br>
+            <strong>Residente Evaluado:</strong> ${payload.residente} (${payload.anoResidencia} Año de Residencia)<br>
+            <strong>Tema:</strong> "${payload.tema}"<br><br>
+            <span class="text-base font-bold text-slate-900">Resultado: ${payload.total} de 20 puntos (${payload.porcentaje}) - Rendimiento: ${estadoTexto}</span><br>
+            <strong>Observaciones:</strong> ${payload.comentarios} (Guardado en Base de Datos)
+        `;
+        
+        const resultCard = document.getElementById('resultCard');
+        resultCard.classList.remove('hidden');
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+        
+        alert('¡Evaluación de Casos Clínicos y Artículos registrada y respaldada!');
+        
+        // Opcional: Cambiar el texto final del botón indicando éxito
+        submitButton.innerText = "Evaluación Enviada";
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al sincronizar con la base de datos de Google.');
+        
+        // CRÍTICO: Si falla el envío, reactivamos el botón para permitir intentarlo de nuevo
+        submitButton.disabled = false;
+        submitButton.innerText = "Enviar Evaluación";
+        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    });
+});
+    </script>
+</body>
+</html>
