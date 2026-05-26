@@ -243,6 +243,7 @@
         }
 
         // 4. Calcular estadísticas dinámicas (KPIs)
+       // 4. Calcular estadísticas dinámicas (KPIs) limpiando formatos
         function renderKPIs(data) {
             const total = data.length;
             document.getElementById('statTotalEvaluaciones').textContent = total;
@@ -259,13 +260,21 @@
             const evaluadoresContados = new Set();
 
             data.forEach(row => {
-                let pctStr = row.porcentaje || "0%";
-                let pctVal = parseInt(pctStr.replace('%', '')) || 0;
+                let pctStr = row.porcentaje || "0";
+                // Eliminar el símbolo % si existe y espacios para convertirlo a número puro
+                let pctVal = parseFloat(pctStr.toString().replace('%', '').trim()) || 0;
+                
+                // Si el porcentaje viene expresado en decimal (ej: 0.85 en vez de 85), lo normalizamos
+                if (pctVal > 0 && pctVal <= 1) {
+                    pctVal = pctVal * 100;
+                }
+                
                 sumaPorcentajes += pctVal;
 
+                // Criterio de aprobación académica (>= 70%)
                 if (pctVal >= 70) aprobados++;
 
-                const evalName = row.especialista || row.evaluatorName || row.evaluador;
+                const evalName = row.especialista;
                 if (evalName) evaluadoresContados.add(evalName.trim());
             });
 
@@ -293,18 +302,21 @@
 
             data.forEach(row => {
                 const fecha = row.fecha || "--/--/----";
-                const residente = row.nombreResidente || row.residentName || row.residente || "No especificado";
-                const evaluador = row.especialista || row.evaluatorName || row.evaluador || "No especificado";
+                const residente = row.nombreResidente || "No especificado";
+                const evaluador = row.especialista || "No especificado";
                 const componente = row.tipo_evaluacion || "General";
+                const detalle = row.tema || "";
                 
-                // Detalle opcional (tema expuesto o tipo de cirugía)
-                const detalle = row.tema || row.surgeryType || "";
+                let pctStr = row.porcentaje || "0";
+                let pctVal = parseFloat(pctStr.toString().replace('%', '').trim()) || 0;
                 
-                let pctStr = row.porcentaje || "0%";
-                let pctVal = parseInt(pctStr.replace('%', '')) || 0;
+                // Normalizar formato visual
+                if (pctVal > 0 && pctVal <= 1) pctVal = pctVal * 100;
+                pctVal = Math.round(pctVal);
+
                 let totalPts = row.total || "0";
 
-                // Badges dinámicos de estado por fila
+                // Definir colores según rendimiento académico
                 const badgeColor = pctVal >= 70 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
                 const componentBadge = componente === 'Práctica Quirúrgica' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-blue-50 text-blue-800 border-blue-200';
 
@@ -320,7 +332,7 @@
                     <td class="p-4 text-slate-700 font-medium">${evaluador}</td>
                     <td class="p-4 text-center whitespace-nowrap">
                         <div class="inline-flex flex-col items-center px-3 py-1 rounded-xl border ${badgeColor} shadow-sm min-w-[75px]">
-                            <span class="text-sm font-black leading-tight">${pctStr}</span>
+                            <span class="text-sm font-black leading-tight">${pctVal}%</span>
                             <span class="text-[10px] opacity-75 font-bold">${totalPts} pts</span>
                         </div>
                     </td>
