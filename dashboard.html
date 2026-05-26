@@ -310,13 +310,13 @@
                 let pctStr = row.porcentaje || "0";
                 let pctVal = parseFloat(pctStr.toString().replace('%', '').trim()) || 0;
                 
-                // Normalizar formato visual
+                // Normalizar formato si viene en formato decimal (ej: 0.85 -> 85)
                 if (pctVal > 0 && pctVal <= 1) pctVal = pctVal * 100;
+                
+                // CORRECCIÓN MÓVIL: Forzar redondeo absoluto a entero para evitar decimales largos
                 pctVal = Math.round(pctVal);
 
-                let totalPts = row.total || "0";
-
-                // Definir colores según rendimiento académico
+                // Definir colores según rendimiento académico (Aprobación >= 70%)
                 const badgeColor = pctVal >= 70 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
                 const componentBadge = componente === 'Práctica Quirúrgica' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-blue-50 text-blue-800 border-blue-200';
 
@@ -331,9 +331,8 @@
                     </td>
                     <td class="p-4 text-slate-700 font-medium">${evaluador}</td>
                     <td class="p-4 text-center whitespace-nowrap">
-                        <div class="inline-flex flex-col items-center px-3 py-1 rounded-xl border ${badgeColor} shadow-sm min-w-[75px]">
-                            <span class="text-sm font-black leading-tight">${pctVal}%</span>
-                            <span class="text-[10px] opacity-75 font-bold">${totalPts} pts</span>
+                        <div class="inline-flex items-center justify-center px-3 py-2 rounded-xl border ${badgeColor} shadow-sm min-w-[70px]">
+                            <span class="text-sm font-black leading-none">${pctVal}%</span>
                         </div>
                     </td>
                 `;
