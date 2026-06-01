@@ -6,6 +6,12 @@
     <title>Panel de Rendimiento Histórico - Neurocirugía</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .scroll-snap-x { scroll-snap-type: x mandatory; }
+        .scroll-snap-start { scroll-snap-align: start; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
@@ -27,13 +33,69 @@
     </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-8">
-        
+
+        <!-- Estado de carga -->
         <div id="loadingState" class="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
             <div class="animate-spin inline-block w-8 h-8 border-[4px] border-current border-t-transparent text-indigo-600 rounded-full" role="status"></div>
             <p class="mt-4 text-slate-600 font-medium">Sincronizando con la base de datos de Google Sheets...</p>
         </div>
 
+        <!-- Contenido principal (oculto hasta cargar datos) -->
         <div id="dashboardContent" class="hidden space-y-8">
+
+            <!-- ── SECCIÓN 1: AGENDA DOCENTE ─────────────────────────────────── -->
+            <section>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-indigo-900 p-2 rounded-lg text-indigo-200">
+                        <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-900">Agenda Académica 2026</h2>
+                    <span class="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Plan Docente Activo</span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+                    <!-- Clases próximas -->
+                    <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="bg-gradient-to-r from-indigo-900 to-indigo-800 px-5 py-4 flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-white">
+                                <i data-lucide="presentation" class="w-5 h-5 text-indigo-200"></i>
+                                <h3 class="font-bold text-sm">Clases Programadas</h3>
+                            </div>
+                            <div class="flex gap-1">
+                                <button id="btnPrev" onclick="scrollClases(-1)" class="bg-indigo-800 hover:bg-indigo-700 text-white rounded-lg p-1.5 transition border border-indigo-700">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                </button>
+                                <button id="btnNext" onclick="scrollClases(1)" class="bg-indigo-800 hover:bg-indigo-700 text-white rounded-lg p-1.5 transition border border-indigo-700">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="px-5 pt-3 pb-1">
+                            <p id="rangoClases" class="text-xs text-indigo-600 font-semibold bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-lg inline-block"></p>
+                        </div>
+                        <div id="clasesCarousel" class="flex overflow-x-auto scroll-snap-x hide-scrollbar gap-3 px-5 pb-5 pt-3" style="scroll-behavior: smooth;"></div>
+                        <div class="px-5 pb-4">
+                            <p class="text-xs text-slate-400 italic">Deslice horizontalmente para ver más clases próximas →</p>
+                        </div>
+                    </div>
+
+                    <!-- Fechas importantes -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                        <div class="bg-gradient-to-r from-amber-700 to-orange-700 px-5 py-4 flex items-center gap-2 text-white">
+                            <i data-lucide="flag" class="w-5 h-5 text-amber-200"></i>
+                            <h3 class="font-bold text-sm">Fechas Importantes</h3>
+                            <span class="ml-auto text-xs bg-amber-600/50 border border-amber-500/50 px-2 py-0.5 rounded-full">Próximas 5</span>
+                        </div>
+                        <div id="fechasImportantesList" class="flex-grow p-4 space-y-2"></div>
+                        <div class="px-4 pb-4">
+                            <p class="text-xs text-slate-400 italic">Líneas en negrita del plan docente</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── SECCIÓN 2: KPIs GLOBALES ──────────────────────────────────── -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
                     <div class="p-3 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl">
@@ -44,7 +106,6 @@
                         <span id="statTotalEvaluaciones" class="text-2xl font-black text-slate-900">0</span>
                     </div>
                 </div>
-
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
                     <div class="p-3 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl">
                         <i data-lucide="line-chart" class="w-6 h-6"></i>
@@ -54,7 +115,6 @@
                         <span id="statPromedioGlobal" class="text-2xl font-black text-slate-900">0%</span>
                     </div>
                 </div>
-
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
                     <div class="p-3 bg-teal-50 border border-teal-100 text-teal-600 rounded-xl">
                         <i data-lucide="check-circle-2" class="w-6 h-6"></i>
@@ -64,7 +124,6 @@
                         <span id="statTasaAprobacion" class="text-2xl font-black text-slate-900">0%</span>
                     </div>
                 </div>
-
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
                     <div class="p-3 bg-amber-50 border border-amber-100 text-amber-600 rounded-xl">
                         <i data-lucide="users" class="w-6 h-6"></i>
@@ -76,6 +135,53 @@
                 </div>
             </div>
 
+            <!-- ── SECCIÓN 3: PROMEDIOS POR RESIDENTE ────────────────────────── -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-r from-violet-900 to-indigo-900 text-white px-6 py-4 flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-violet-300"></i>
+                        <h3 class="font-bold text-sm md:text-base">Promedios por Residente y Clase</h3>
+                    </div>
+                    <p class="text-xs text-violet-300">Agrupado por residente + tema/día evaluado. Muestra el promedio cuando múltiples docentes evaluaron la misma clase.</p>
+                </div>
+
+                <!-- Filtro de residente para promedios -->
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-3 items-center">
+                    <label class="text-xs font-semibold text-slate-600">Ver residente:</label>
+                    <select id="filterPromedioResidente" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-400 outline-none">
+                        <option value="ALL">Todos los residentes</option>
+                    </select>
+                    <label class="text-xs font-semibold text-slate-600 ml-2">Componente:</label>
+                    <select id="filterPromedioComponente" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-400 outline-none">
+                        <option value="ALL">Todos</option>
+                        <option value="Clases Programadas">Clases Programadas</option>
+                        <option value="Casos Clínicos y Artículos">Casos Clínicos y Artículos</option>
+                        <option value="Sesiones Diarias">Sesiones Clínicas Diarias</option>
+                        <option value="Práctica Quirúrgica">Práctica Quirúrgica</option>
+                    </select>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-500">
+                                <th class="p-4">Residente</th>
+                                <th class="p-4">Componente / Clase o Día</th>
+                                <th class="p-4 text-center">Evaluaciones</th>
+                                <th class="p-4 text-center">Promedio</th>
+                                <th class="p-4 text-center">Rango</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promediosTableBody" class="divide-y divide-slate-200 text-sm"></tbody>
+                    </table>
+                </div>
+                <div id="promediosEmpty" class="hidden p-10 text-center text-slate-500">
+                    <i data-lucide="bar-chart-3" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+                    <p class="text-sm font-medium">Sin datos de evaluación disponibles aún.</p>
+                </div>
+            </div>
+
+            <!-- ── SECCIÓN 4: FILTROS Y TABLA HISTORIAL ──────────────────────── -->
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
                     <i data-lucide="sliders-horizontal" class="w-5 h-5 text-slate-500"></i>
@@ -111,11 +217,10 @@
                 <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
                     <div class="flex items-center gap-2">
                         <i data-lucide="clock" class="w-5 h-5 text-slate-400"></i>
-                        <h3 class="font-bold text-sm md:text-base">Historial de Evaluaciones Encontradas</h3>
+                        <h3 class="font-bold text-sm md:text-base">Historial Completo de Evaluaciones</h3>
                     </div>
                     <span id="recordsCount" class="text-xs bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full font-medium">Mostrando 0 registros</span>
                 </div>
-
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -127,11 +232,9 @@
                                 <th class="p-4 text-center">Rendimiento</th>
                             </tr>
                         </thead>
-                        <tbody id="timelineTableBody" class="divide-y divide-slate-200 text-sm">
-                            </tbody>
+                        <tbody id="timelineTableBody" class="divide-y divide-slate-200 text-sm"></tbody>
                     </table>
                 </div>
-                
                 <div id="emptyState" class="hidden p-12 text-center text-slate-500">
                     <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-slate-300 mb-3"></i>
                     <p class="font-medium text-sm">No se encontraron evaluaciones con los filtros seleccionados.</p>
@@ -148,177 +251,169 @@
     </footer>
 
     <script>
-        // URL de tu Google Web App (Misma que procesa tus POST)
-        const URL_SCRIPT_GOOGLE = "https://script.google.com/macros/s/AKfycbxhOiPzRwlX3Iqkm4tfCxAXOk3PiOgiWO3IIPZ29YhrHQccuMH3l_BxFkQbYMRNQQSh/exec";
+        // ═══════════════════════════════════════════════════════════════════
+        // CONFIGURACIÓN — cambia solo esta URL cuando republiques tu script
+        // ═══════════════════════════════════════════════════════════════════
+        const URL_SCRIPT_GOOGLE = "https://script.google.com/macros/s/AKfycbzwxFznLdmraLeYOP3VxEGm53p6MZLmYWt5AyjJ72j-vSUkhkTBDWprNCtK1yfm82m_/exec";
 
         let dbMasterData = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            renderAgenda();
             fetchDataFromSheets();
 
-            // Listeners para filtros reactivos
             document.getElementById('filterResidente').addEventListener('change', applyFiltersAndRender);
             document.getElementById('filterEvaluador').addEventListener('change', applyFiltersAndRender);
             document.getElementById('filterComponente').addEventListener('change', applyFiltersAndRender);
+            document.getElementById('filterPromedioResidente').addEventListener('change', renderPromedios);
+            document.getElementById('filterPromedioComponente').addEventListener('change', renderPromedios);
         });
 
-        // 1. Obtener los datos del Google Sheet centralizado
+        // ─── 1. Fetch de Google Sheets ──────────────────────────────────────
         function fetchDataFromSheets() {
             fetch(`${URL_SCRIPT_GOOGLE}?action=getEvaluations`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    // Se asume que el backend devuelve un arreglo ordenado por cronología inversa (más reciente primero)
                     dbMasterData = data;
-                    
                     document.getElementById('loadingState').classList.add('hidden');
                     document.getElementById('dashboardContent').classList.remove('hidden');
-                    
                     populateFilterOptions();
                     applyFiltersAndRender();
+                    renderPromedios();
+                    lucide.createIcons();
                 })
-                .catch(error => {
-                    console.error('Error al descargar datos:', error);
+                .catch(err => {
+                    console.error(err);
                     document.getElementById('loadingState').innerHTML = `
                         <div class="text-red-500">
                             <i data-lucide="alert-triangle" class="w-12 h-12 mx-auto mb-2"></i>
-                            <p class="font-bold">Error de sincronización</p>
-                            <p class="text-xs text-slate-500 mt-1">Asegúrate de que tu método doGet(e) esté publicado en Apps Script.</p>
-                        </div>
-                    `;
+                            <p class="font-bold text-lg">Error de sincronización</p>
+                            <p class="text-xs text-slate-500 mt-2 max-w-md mx-auto">Verifica que tu Google Apps Script tenga la función <code class="bg-red-50 px-1 rounded">doGet(e)</code> publicada correctamente. Consulta el archivo <strong>INSTRUCCIONES_GOOGLE_SHEETS.md</strong> incluido en este proyecto.</p>
+                        </div>`;
                     lucide.createIcons();
                 });
         }
 
-        // 2. Extraer valores únicos para alimentar dinámicamente los selectores
+        // ─── 2. Poblar selectores de filtro ────────────────────────────────
         function populateFilterOptions() {
-            const residentesUnicos = new Set();
-            const evaluadoresUnicos = new Set();
-
+            const residentes = new Set();
+            const evaluadores = new Set();
             dbMasterData.forEach(row => {
-                // Estandarizar mapeos debido a variaciones menores de llaves en tus JSON adjuntos
-                const resName = row.nombreResidente || row.residentName || row.residente;
-                const evalName = row.especialista || row.evaluatorName || row.evaluador;
-                
-                if (resName) residentesUnicos.add(resName.trim());
-                if (evalName) evaluadoresUnicos.add(evalName.trim());
+                const r = getNombreResidente(row);
+                const e = getNombreEvaluador(row);
+                if (r) residentes.add(r);
+                if (e) evaluadores.add(e);
             });
 
-            const selResidente = document.getElementById('filterResidente');
-            Array.from(residentesUnicos).sort().forEach(res => {
-                const opt = document.createElement('option');
-                opt.value = res; opt.textContent = res;
-                selResidente.appendChild(opt);
-            });
+            const populate = (selId, set) => {
+                const sel = document.getElementById(selId);
+                Array.from(set).sort().forEach(v => {
+                    const o = document.createElement('option');
+                    o.value = v; o.textContent = v;
+                    sel.appendChild(o);
+                });
+            };
+            populate('filterResidente', residentes);
+            populate('filterEvaluador', evaluadores);
 
-            const selEvaluador = document.getElementById('filterEvaluador');
-            Array.from(evaluadoresUnicos).sort().forEach(ev => {
-                const opt = document.createElement('option');
-                opt.value = ev; opt.textContent = ev;
-                selEvaluador.appendChild(opt);
+            // También para el selector de promedios
+            const selProm = document.getElementById('filterPromedioResidente');
+            Array.from(residentes).sort().forEach(v => {
+                const o = document.createElement('option');
+                o.value = v; o.textContent = v;
+                selProm.appendChild(o);
             });
         }
 
-        // 3. Procesar filtros y renderizar métricas y tabla
+        // ─── Helpers de normalización de campos ────────────────────────────
+        function getNombreResidente(row) {
+            return (row.nombreResidente || row.residentName || row.residente || "").trim();
+        }
+        function getNombreEvaluador(row) {
+            return (row.especialista || row.evaluatorName || row.evaluador || "").trim();
+        }
+        function getPorcentaje(row) {
+            let v = parseFloat((row.porcentaje || "0").toString().replace('%','').trim()) || 0;
+            if (v > 0 && v <= 1) v = v * 100;
+            return Math.round(v);
+        }
+        function getComponente(row) {
+            return (row.tipo_evaluacion || "").trim();
+        }
+        // Clave para agrupar: residente + componente + tema (o fecha para sesiones diarias)
+        function getClaveAgrupacion(row) {
+            const r = getNombreResidente(row);
+            const comp = getComponente(row);
+            // Para sesiones diarias, agrupamos por fecha (el mismo día puede tener múltiples evaluadores)
+            const detalle = comp === 'Sesiones Diarias'
+                ? (row.fecha || "sin-fecha")
+                : (row.tema || row.surgeryType || "sin-tema");
+            return `${r}||${comp}||${detalle}`;
+        }
+
+        // ─── 3. Filtrado y render de KPIs + tabla historial ─────────────────
         function applyFiltersAndRender() {
-            const fResidente = document.getElementById('filterResidente').value;
-            const fEvaluador = document.getElementById('filterEvaluador').value;
-            const fComponente = document.getElementById('filterComponente').value;
+            const fR = document.getElementById('filterResidente').value;
+            const fE = document.getElementById('filterEvaluador').value;
+            const fC = document.getElementById('filterComponente').value;
 
-            // Filtrado del set de datos
             const filtrados = dbMasterData.filter(row => {
-                const resName = row.nombreResidente || row.residentName || row.residente || "";
-                const evalName = row.especialista || row.evaluatorName || row.evaluador || "";
-                const compType = row.tipo_evaluacion || "";
-
-                const matchRes = (fResidente === 'ALL' || resName.trim() === fResidente);
-                const matchEval = (fEvaluador === 'ALL' || evalName.trim() === fEvaluador);
-                const matchComp = (fComponente === 'ALL' || compType.trim() === fComponente);
-
-                return matchRes && matchEval && matchComp;
+                const matchR = fR === 'ALL' || getNombreResidente(row) === fR;
+                const matchE = fE === 'ALL' || getNombreEvaluador(row) === fE;
+                const matchC = fC === 'ALL' || getComponente(row) === fC;
+                return matchR && matchE && matchC;
             });
 
             renderKPIs(filtrados);
             renderTable(filtrados);
         }
 
-        // 4. Calcular estadísticas dinámicas (KPIs)
-       // 4. Calcular estadísticas dinámicas (KPIs) limpiando formatos
         function renderKPIs(data) {
             const total = data.length;
             document.getElementById('statTotalEvaluaciones').textContent = total;
-
             if (total === 0) {
-                document.getElementById('statPromedioGlobal').textContent = "0%";
-                document.getElementById('statTasaAprobacion').textContent = "0%";
+                document.getElementById('statPromedioGlobal').textContent = "—";
+                document.getElementById('statTasaAprobacion').textContent = "—";
                 document.getElementById('statTotalEvaluadores').textContent = 0;
                 return;
             }
-
-            let sumaPorcentajes = 0;
-            let aprobados = 0;
-            const evaluadoresContados = new Set();
-
+            let suma = 0, aprobados = 0;
+            const evals = new Set();
             data.forEach(row => {
-                let pctStr = row.porcentaje || "0";
-                // Eliminar el símbolo % si existe y espacios para convertirlo a número puro
-                let pctVal = parseFloat(pctStr.toString().replace('%', '').trim()) || 0;
-                
-                // Si el porcentaje viene expresado en decimal (ej: 0.85 en vez de 85), lo normalizamos
-                if (pctVal > 0 && pctVal <= 1) {
-                    pctVal = pctVal * 100;
-                }
-                
-                sumaPorcentajes += pctVal;
-
-                // Criterio de aprobación académica (>= 70%)
-                if (pctVal >= 70) aprobados++;
-
-                const evalName = row.especialista;
-                if (evalName) evaluadoresContados.add(evalName.trim());
+                const p = getPorcentaje(row);
+                suma += p;
+                if (p >= 70) aprobados++;
+                const e = getNombreEvaluador(row);
+                if (e) evals.add(e);
             });
-
-            const promedio = Math.round(sumaPorcentajes / total);
-            const tasaAprobacion = Math.round((aprobados / total) * 100);
-
-            document.getElementById('statPromedioGlobal').textContent = `${promedio}%`;
-            document.getElementById('statTasaAprobacion').textContent = `${tasaAprobacion}%`;
-            document.getElementById('statTotalEvaluadores').textContent = evaluadoresContados.size;
+            document.getElementById('statPromedioGlobal').textContent = `${Math.round(suma / total)}%`;
+            document.getElementById('statTasaAprobacion').textContent = `${Math.round((aprobados / total) * 100)}%`;
+            document.getElementById('statTotalEvaluadores').textContent = evals.size;
         }
 
-        // 5. Construcción de filas de la tabla cronológica
         function renderTable(data) {
             const tbody = document.getElementById('timelineTableBody');
-            const emptyState = document.getElementById('emptyState');
+            const empty = document.getElementById('emptyState');
             document.getElementById('recordsCount').textContent = `Mostrando ${data.length} registros`;
-
-            tbody.innerHTML = "";
-
-            if (data.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            emptyState.classList.add('hidden');
+            tbody.innerHTML = '';
+            if (data.length === 0) { empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
 
             data.forEach(row => {
                 const fecha = row.fecha || "--/--/----";
-                const residente = row.nombreResidente || "No especificado";
-                const evaluador = row.especialista || "No especificado";
-                const componente = row.tipo_evaluacion || "General";
-                const detalle = row.tema || "";
-                
-                let pctStr = row.porcentaje || "0";
-                let pctVal = parseFloat(pctStr.toString().replace('%', '').trim()) || 0;
-                
-                // Normalizar formato si viene en formato decimal (ej: 0.85 -> 85)
-                if (pctVal > 0 && pctVal <= 1) pctVal = pctVal * 100;
-                
-                // CORRECCIÓN MÓVIL: Forzar redondeo absoluto a entero para evitar decimales largos
-                pctVal = Math.round(pctVal);
+                const residente = getNombreResidente(row) || "No especificado";
+                const evaluador = getNombreEvaluador(row) || "No especificado";
+                const componente = getComponente(row) || "General";
+                const detalle = row.tema || row.surgeryType || "";
+                const pct = getPorcentaje(row);
 
-                // Definir colores según rendimiento académico (Aprobación >= 70%)
-                const badgeColor = pctVal >= 70 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
-                const componentBadge = componente === 'Práctica Quirúrgica' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-blue-50 text-blue-800 border-blue-200';
+                const badgeColor = pct >= 70 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
+                const compBadge = componente === 'Práctica Quirúrgica'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : componente === 'Sesiones Diarias'
+                    ? 'bg-sky-50 text-sky-800 border-sky-200'
+                    : 'bg-blue-50 text-blue-800 border-blue-200';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
@@ -326,18 +421,411 @@
                     <td class="p-4 whitespace-nowrap font-medium text-slate-600">${fecha}</td>
                     <td class="p-4 font-bold text-slate-900">${residente}</td>
                     <td class="p-4">
-                        <span class="inline-block text-xs px-2.5 py-0.5 rounded-full border ${componentBadge} font-semibold mb-1">${componente}</span>
+                        <span class="inline-block text-xs px-2.5 py-0.5 rounded-full border ${compBadge} font-semibold mb-1">${componente}</span>
                         ${detalle ? `<span class="block text-xs text-slate-500 font-medium italic truncate max-w-xs" title="${detalle}">"${detalle}"</span>` : ''}
                     </td>
                     <td class="p-4 text-slate-700 font-medium">${evaluador}</td>
                     <td class="p-4 text-center whitespace-nowrap">
                         <div class="inline-flex items-center justify-center px-3 py-2 rounded-xl border ${badgeColor} shadow-sm min-w-[70px]">
-                            <span class="text-sm font-black leading-none">${pctVal}%</span>
+                            <span class="text-sm font-black leading-none">${pct}%</span>
                         </div>
-                    </td>
-                `;
+                    </td>`;
                 tbody.appendChild(tr);
             });
+        }
+
+        // ─── 4. Promedios por residente y clase ─────────────────────────────
+        function renderPromedios() {
+            const fR = document.getElementById('filterPromedioResidente').value;
+            const fC = document.getElementById('filterPromedioComponente').value;
+
+            const datos = dbMasterData.filter(row => {
+                const matchR = fR === 'ALL' || getNombreResidente(row) === fR;
+                const matchC = fC === 'ALL' || getComponente(row) === fC;
+                return matchR && matchC;
+            });
+
+            // Agrupar
+            const grupos = {};
+            datos.forEach(row => {
+                const clave = getClaveAgrupacion(row);
+                if (!grupos[clave]) {
+                    grupos[clave] = {
+                        residente: getNombreResidente(row),
+                        componente: getComponente(row),
+                        detalle: getComponente(row) === 'Sesiones Diarias'
+                            ? (row.fecha || "—")
+                            : (row.tema || row.surgeryType || "—"),
+                        porcentajes: [],
+                        evaluadores: new Set()
+                    };
+                }
+                grupos[clave].porcentajes.push(getPorcentaje(row));
+                const e = getNombreEvaluador(row);
+                if (e) grupos[clave].evaluadores.add(e);
+            });
+
+            const filas = Object.values(grupos).sort((a, b) => {
+                if (a.residente < b.residente) return -1;
+                if (a.residente > b.residente) return 1;
+                return a.detalle.localeCompare(b.detalle);
+            });
+
+            const tbody = document.getElementById('promediosTableBody');
+            const empty = document.getElementById('promediosEmpty');
+            tbody.innerHTML = '';
+
+            if (filas.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            filas.forEach(g => {
+                const sum = g.porcentajes.reduce((a, b) => a + b, 0);
+                const prom = Math.round(sum / g.porcentajes.length);
+                const min = Math.min(...g.porcentajes);
+                const max = Math.max(...g.porcentajes);
+                const n = g.porcentajes.length;
+
+                const promColor = prom >= 70 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
+                const compBadge = g.componente === 'Práctica Quirúrgica'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : g.componente === 'Sesiones Diarias'
+                    ? 'bg-sky-50 text-sky-800 border-sky-200'
+                    : 'bg-blue-50 text-blue-800 border-blue-200';
+
+                // Barra visual del promedio
+                const barColor = prom >= 70 ? 'bg-emerald-500' : 'bg-red-400';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-900 whitespace-nowrap">${g.residente || '—'}</td>
+                    <td class="p-4">
+                        <span class="inline-block text-xs px-2 py-0.5 rounded-full border ${compBadge} font-semibold mb-1">${g.componente}</span>
+                        <span class="block text-xs text-slate-600 italic truncate max-w-xs" title="${g.detalle}">"${g.detalle}"</span>
+                        ${n > 1 ? `<span class="text-xs text-violet-600 font-semibold">Evaluado por: ${Array.from(g.evaluadores).join(', ')}</span>` : ''}
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-700 text-xs font-black border border-slate-200">${n}</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="inline-flex items-center justify-center px-3 py-1.5 rounded-xl border ${promColor} shadow-sm min-w-[64px]">
+                                <span class="text-sm font-black">${prom}%</span>
+                            </div>
+                            <div class="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                <div class="${barColor} h-1.5 rounded-full transition-all" style="width:${prom}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4 text-center">
+                        ${n > 1
+                            ? `<span class="text-xs text-slate-500 font-medium">${min}% – ${max}%</span>`
+                            : `<span class="text-xs text-slate-400 italic">—</span>`
+                        }
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // AGENDA DOCENTE (Plan Docente 2026)
+        // ═══════════════════════════════════════════════════════════════════
+        function parseDate(str) {
+            const [d, m, y] = str.split('/');
+            return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        }
+
+        const DIAS_ES = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+        const MESES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+        const ANIO_COLORES = {
+            "I":   { bg: "bg-blue-100",   text: "text-blue-800",   border: "border-blue-200"   },
+            "II":  { bg: "bg-violet-100",  text: "text-violet-800",  border: "border-violet-200"  },
+            "III": { bg: "bg-teal-100",    text: "text-teal-800",    border: "border-teal-200"    },
+            "IV":  { bg: "bg-amber-100",   text: "text-amber-800",   border: "border-amber-200"   },
+            "V":   { bg: "bg-rose-100",    text: "text-rose-800",    border: "border-rose-200"    },
+        };
+
+        const CLASES = [
+            { f:"25/05/2026",tema:"Presentación de caso clínico",dr:"Dra. Quintana",anio:"I"},
+            { f:"01/06/2026",tema:"Instrumental quirúrgico en neurocirugía",dr:"Dr. Bobb",anio:"I"},
+            { f:"08/06/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Quintana",anio:"I"},
+            { f:"22/06/2026",tema:"Posiciones básicas operatorias en cirugía craneal y espinal",dr:"Dr. Bobb",anio:"I"},
+            { f:"06/07/2026",tema:"Principios de craneotomía: topografía craneocerebral",dr:"Dra. Quintana",anio:"I"},
+            { f:"13/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Bobb",anio:"I"},
+            { f:"03/08/2026",tema:"Manejo inicial de trauma craneoencefálico del adulto",dr:"Dra. Quintana",anio:"I"},
+            { f:"10/08/2026",tema:"Investigación clínica: el proceso y bases de la investigación",dr:"Dra. Quintana",anio:"I"},
+            { f:"17/08/2026",tema:"Manejo inicial de trauma espinal",dr:"Dr. Bobb",anio:"I"},
+            { f:"24/08/2026",tema:"Presentación de caso clínico",dr:"Dra. Quintana",anio:"I"},
+            { f:"07/09/2026",tema:"Hidrocefalia",dr:"Dr. Bobb",anio:"I"},
+            { f:"14/09/2026",tema:"Craneotomía frontotemporal pterional",dr:"Dra. Quintana",anio:"I"},
+            { f:"21/09/2026",tema:"Manejo en emergencias de TCE pediátrico",dr:"Dr. Bobb",anio:"I"},
+            { f:"05/10/2026",tema:"Presentación de caso clínico",dr:"Dra. Quintana",anio:"I"},
+            { f:"26/10/2026",tema:"Investigación clínica: ética e investigación",dr:"Dr. Bobb",anio:"I"},
+            { f:"02/11/2026",tema:"Nervios craneales I-II",dr:"Dr. Bobb",anio:"I"},
+            { f:"09/11/2026",tema:"Nervios craneales III-IV-VI",dr:"Dra. Quintana",anio:"I"},
+            { f:"16/11/2026",tema:"Nervios craneales V-VIII",dr:"Dr. Bobb",anio:"I"},
+            { f:"23/11/2026",tema:"Nervios craneales IX-XII",dr:"Dra. Quintana",anio:"I"},
+            { f:"01/12/2026",tema:"Revisión de un tema y artículos científicos",dr:"",anio:"I"},
+            { f:"11/01/2027",tema:"Médula espinal (vías ascendentes)",dr:"Dr. Bobb",anio:"I"},
+            { f:"18/01/2027",tema:"Médula espinal (vías descendentes)",dr:"Dra. Quintana",anio:"I"},
+            { f:"25/01/2027",tema:"Presentación de caso clínico",dr:"Dr. Bobb",anio:"I"},
+            { f:"01/02/2027",tema:"Presentación de caso clínico",dr:"Dra. Quintana",anio:"I"},
+            { f:"08/02/2027",tema:"Irrigación del encéfalo y médula espinal",dr:"Dr. Bobb",anio:"I"},
+            { f:"26/05/2026",tema:"Presentación de caso clínico",dr:"Dr. Cuadra",anio:"II"},
+            { f:"02/06/2026",tema:"Manejo en UCI del trauma craneoencefálico",dr:"Dra. Olivas",anio:"II"},
+            { f:"09/06/2026",tema:"Manejo quirúrgico de TCE (parte 1)",dr:"Dr. Cuadra",anio:"II"},
+            { f:"16/06/2026",tema:"Investigación: clasificación de los tipos de estudio",dr:"Dra. Olivas",anio:"II"},
+            { f:"23/06/2026",tema:"Manejo quirúrgico de TCE (parte 2)",dr:"Dra. Olivas",anio:"II"},
+            { f:"07/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Cuadra",anio:"II"},
+            { f:"14/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Olivas",anio:"II"},
+            { f:"21/07/2026",tema:"Manejo quirúrgico de TCE (parte 3)",dr:"Dr. Cuadra",anio:"II"},
+            { f:"28/07/2026",tema:"Investigación: ensayo clínico aleatorio",dr:"Dr. Cuadra",anio:"II"},
+            { f:"04/08/2026",tema:"Craniectomía descompresiva",dr:"Dra. Olivas",anio:"II"},
+            { f:"01/09/2026",tema:"Trauma craneoencefálico leve",dr:"Dr. Cuadra",anio:"II"},
+            { f:"08/09/2026",tema:"Hematoma subdural crónico",dr:"Dra. Olivas",anio:"II"},
+            { f:"15/09/2026",tema:"Fístula de LCR postraumática",dr:"Dr. Cuadra",anio:"II"},
+            { f:"06/10/2026",tema:"Presentación de caso clínico",dr:"Dra. Olivas",anio:"II"},
+            { f:"13/10/2026",tema:"Presentación de caso clínico",dr:"Dr. Cuadra",anio:"II"},
+            { f:"20/10/2026",tema:"Evaluación y clasificación de inestabilidad espinal",dr:"Dra. Olivas",anio:"II"},
+            { f:"03/11/2026",tema:"Lesiones craneocervicales",dr:"Dr. Cuadra",anio:"II"},
+            { f:"10/11/2026",tema:"Lesiones de C2",dr:"Dra. Olivas",anio:"II"},
+            { f:"15/01/2027",tema:"Lesiones subaxiales cervicales",dr:"Dr. Cuadra",anio:"II"},
+            { f:"22/01/2027",tema:"Lesiones unión cervicotorácica",dr:"Dra. Olivas",anio:"II"},
+            { f:"29/01/2027",tema:"Manejo médico de lesión medular",dr:"Dr. Cuadra",anio:"II"},
+            { f:"12/02/2027",tema:"Lesiones toracolumbares",dr:"Dra. Olivas",anio:"II"},
+            { f:"19/02/2027",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Cuadra",anio:"II"},
+            { f:"26/02/2027",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Olivas",anio:"II"},
+            { f:"27/05/2026",tema:"Presentación de caso clínico",dr:"Dra. Díaz",anio:"III"},
+            { f:"03/06/2026",tema:"Hernia discal cervical",dr:"Dr. Cerrato",anio:"III"},
+            { f:"10/06/2026",tema:"Hernia discal dorsal",dr:"Dra. Díaz",anio:"III"},
+            { f:"17/06/2026",tema:"Hernia discal lumbar",dr:"Dr. Cerrato",anio:"III"},
+            { f:"24/06/2026",tema:"Estenosis cervical, dorsal y lumbar",dr:"Dra. Díaz",anio:"III"},
+            { f:"01/07/2026",tema:"Espondilolistesis degenerativa lumbar",dr:"Dr. Cerrato",anio:"III"},
+            { f:"08/07/2026",tema:"Mielopatía cervical degenerativa",dr:"Dra. Díaz",anio:"III"},
+            { f:"15/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Cerrato",anio:"III"},
+            { f:"22/07/2026",tema:"Instrumentación posterior torácica y lumbar",dr:"Dra. Díaz",anio:"III"},
+            { f:"05/08/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Cerrato",anio:"III"},
+            { f:"02/09/2026",tema:"Investigación: estudio de cohortes",dr:"Dra. Díaz",anio:"III"},
+            { f:"09/09/2026",tema:"Instrumentación cervical anterior",dr:"Dra. Díaz",anio:"III"},
+            { f:"16/09/2026",tema:"PLIF, TLIF y ALIF",dr:"Dr. Cerrato",anio:"III"},
+            { f:"23/09/2026",tema:"Presentación de caso clínico",dr:"",anio:"III"},
+            { f:"07/10/2026",tema:"Presentación de caso clínico",dr:"Dra. Díaz",anio:"III"},
+            { f:"14/10/2026",tema:"Clasificación de deformidad espinal",dr:"Dr. Cerrato",anio:"III"},
+            { f:"21/10/2026",tema:"Evaluación de alineación espinal",dr:"Dra. Díaz",anio:"III"},
+            { f:"28/10/2026",tema:"Evaluación y tratamiento de deformidad cervical",dr:"Dr. Cerrato",anio:"III"},
+            { f:"04/11/2026",tema:"Evaluación y tratamiento de la escoliosis del adulto",dr:"Dra. Díaz",anio:"III"},
+            { f:"13/01/2027",tema:"Tumores benignos del esqueleto axial",dr:"Dra. Díaz",anio:"III"},
+            { f:"20/01/2027",tema:"Tumores malignos primarios del esqueleto axial",dr:"Dr. Cerrato",anio:"III"},
+            { f:"27/01/2027",tema:"Tumores benignos intradurales extramedulares",dr:"Dra. Díaz",anio:"III"},
+            { f:"03/02/2027",tema:"Metástasis espinal",dr:"Dr. Cerrato",anio:"III"},
+            { f:"10/02/2027",tema:"Tumores malignos primarios",dr:"Dra. Díaz",anio:"III"},
+            { f:"17/02/2027",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Cerrato",anio:"III"},
+            { f:"24/02/2027",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Díaz",anio:"III"},
+            { f:"28/05/2026",tema:"Presentación de caso clínico",dr:"Dr. Rayo",anio:"IV"},
+            { f:"04/06/2026",tema:"Gliomas de bajo grado",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"11/06/2026",tema:"Gliomas malignos",dr:"Dra. Blandón",anio:"IV"},
+            { f:"18/06/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Rayo",anio:"IV"},
+            { f:"25/06/2026",tema:"Meduloblastomas en niños y adultos",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"02/07/2026",tema:"Ependimomas intracraneales en niños y adultos",dr:"Dra. Blandón",anio:"IV"},
+            { f:"09/07/2026",tema:"Metástasis cerebral",dr:"Dr. Rayo",anio:"IV"},
+            { f:"16/07/2026",tema:"Meningiomas (no base de cráneo)",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"23/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Blandón",anio:"IV"},
+            { f:"30/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"20/08/2026",tema:"Investigación: estudios de casos control",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"27/08/2026",tema:"Investigación: estudios descriptivos",dr:"Dra. Blandón",anio:"IV"},
+            { f:"03/09/2026",tema:"Schwannomas vestibulares",dr:"Dr. Rayo",anio:"IV"},
+            { f:"10/09/2026",tema:"Meningioma de base de cráneo",dr:"Dra. Blandón",anio:"IV"},
+            { f:"17/09/2026",tema:"Tumores de hipófisis",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"24/09/2026",tema:"Presentación de caso clínico",dr:"Dr. Rayo",anio:"IV"},
+            { f:"01/10/2026",tema:"Presentación de caso clínico",dr:"Dra. Blandón",anio:"IV"},
+            { f:"08/10/2026",tema:"Presentación de caso clínico",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"15/10/2026",tema:"Investigación: protocolo y objetivos del estudio",dr:"Dr. Rayo",anio:"IV"},
+            { f:"22/10/2026",tema:"Cordomas y condrosarcomas",dr:"Dr. Rayo",anio:"IV"},
+            { f:"05/11/2026",tema:"Craneofaringiomas",dr:"Dra. Blandón",anio:"IV"},
+            { f:"14/01/2027",tema:"Evaluación de pacientes para cirugía de epilepsia",dr:"Dra. Blandón",anio:"IV"},
+            { f:"21/01/2027",tema:"Lobectomía temporal anteromedial",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"28/01/2027",tema:"Resecciones extratemporales en cirugía de epilepsia",dr:"Dr. Rayo",anio:"IV"},
+            { f:"04/02/2027",tema:"Estimulación eléctrica para epilepsia (DBS)",dr:"Dra. Blandón",anio:"IV"},
+            { f:"11/02/2027",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Reynoso",anio:"IV"},
+            { f:"18/02/2027",tema:"Cirugía para enfermedad de Parkinson",dr:"Dr. Rayo",anio:"IV"},
+            { f:"25/02/2027",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Blandón",anio:"IV"},
+            { f:"04/03/2027",tema:"Revisión de un tema y artículos científicos",dr:"Dr. Rayo",anio:"IV"},
+            { f:"29/05/2026",tema:"Presentación de caso clínico",dr:"Dra. Membreño",anio:"V"},
+            { f:"12/06/2026",tema:"Manejo microquirúrgico y endovascular de MAV",dr:"Dra. Abarca",anio:"V"},
+            { f:"19/06/2026",tema:"Investigación: variable de respuesta",dr:"Dra. Abarca",anio:"V"},
+            { f:"26/06/2026",tema:"Manejo microquirúrgico de aneurismas de carótida interna",dr:"Dra. Membreño",anio:"V"},
+            { f:"02/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Abarca",anio:"V"},
+            { f:"09/07/2026",tema:"Investigación: población de estudio",dr:"Dra. Membreño",anio:"V"},
+            { f:"17/07/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Membreño",anio:"V"},
+            { f:"24/07/2026",tema:"Manejo microquirúrgico de aneurismas de arteria comunicante anterior",dr:"Dra. Abarca",anio:"V"},
+            { f:"07/08/2026",tema:"Manejo microquirúrgico de aneurismas de arteria cerebral media",dr:"Dra. Membreño",anio:"V"},
+            { f:"04/09/2026",tema:"Endoscopia ventricular",dr:"Dra. Abarca",anio:"V"},
+            { f:"18/09/2026",tema:"Craneosinostosis no sindrómica",dr:"Dra. Membreño",anio:"V"},
+            { f:"25/09/2026",tema:"Presentación de caso clínico",dr:"Dra. Abarca",anio:"V"},
+            { f:"02/10/2026",tema:"Craneosinostosis sindrómica",dr:"Dra. Membreño",anio:"V"},
+            { f:"09/10/2026",tema:"Disrafismo espinal",dr:"Dra. Abarca",anio:"V"},
+            { f:"16/10/2026",tema:"Revisión de un tema y artículos científicos",dr:"Dra. Membreño",anio:"V"},
+            { f:"04/12/2026",tema:"Anatomía de base de cráneo anterior y media (Rhoton)",dr:"Dra. Abarca",anio:"V"},
+            { f:"08/01/2027",tema:"Anatomía del ángulo pontocerebeloso (Rhoton)",dr:"Dra. Membreño",anio:"V"},
+        ];
+
+        const FECHAS_IMPORTANTES = [
+            {f:"27/07/2026",desc:"Examen módulo I — I año",tipo:"examen"},
+            {f:"19/10/2026",desc:"Examen módulo II — I año",tipo:"examen"},
+            {f:"04/01/2027",desc:"Examen módulo III — I año (Dra. Quintana)",tipo:"examen"},
+            {f:"22/02/2027",desc:"Examen módulo IV — I año",tipo:"examen"},
+            {f:"15/03/2027",desc:"Examen final — I año",tipo:"examen"},
+            {f:"29/03/2027",desc:"Presentación avances de investigación — Dra. Quintana (I año)",tipo:"presentacion"},
+            {f:"13/04/2027",desc:"Presentación avances de investigación — Dr. Bobb (I año)",tipo:"presentacion"},
+            {f:"17/08/2026",desc:"Examen módulo I — II año",tipo:"examen"},
+            {f:"17/11/2026",desc:"Presentación avances de tesis — Dr. Cuadra (II año)",tipo:"presentacion"},
+            {f:"24/11/2026",desc:"Presentación avances de tesis — Dra. Olivas (II año)",tipo:"presentacion"},
+            {f:"15/12/2026",desc:"Examen módulo II — II año",tipo:"examen"},
+            {f:"12/03/2027",desc:"Examen final — II año",tipo:"examen"},
+            {f:"23/03/2027",desc:"Presentación avances de tesis — Dr. Cuadra (II año)",tipo:"presentacion"},
+            {f:"30/03/2027",desc:"Presentación avances de tesis — Dra. Olivas (II año)",tipo:"presentacion"},
+            {f:"19/08/2026",desc:"Examen módulo I — III año",tipo:"examen"},
+            {f:"11/11/2026",desc:"Presentación avances de tesis — Dr. Cerrato (III año)",tipo:"presentacion"},
+            {f:"18/11/2026",desc:"Presentación avances de tesis — Dra. Díaz (III año)",tipo:"presentacion"},
+            {f:"09/12/2026",desc:"Examen módulo II — III año",tipo:"examen"},
+            {f:"10/03/2027",desc:"Examen módulo III — III año",tipo:"examen"},
+            {f:"07/04/2027",desc:"Presentación avances de tesis — Dr. Cerrato (III año)",tipo:"presentacion"},
+            {f:"14/04/2027",desc:"Presentación avances de tesis — Dra. Díaz (III año)",tipo:"presentacion"},
+            {f:"19/11/2026",desc:"Presentación avances de tesis — Dra. Blandón (IV año)",tipo:"presentacion"},
+            {f:"26/11/2026",desc:"Presentación avances de tesis — Dr. Rayo (IV año)",tipo:"presentacion"},
+            {f:"03/12/2026",desc:"Presentación avances de tesis — Dr. Reynoso (IV año)",tipo:"presentacion"},
+            {f:"10/12/2026",desc:"Examen módulo II — IV año",tipo:"examen"},
+            {f:"18/03/2027",desc:"Examen módulo III — IV año",tipo:"examen"},
+            {f:"01/04/2027",desc:"Presentación avances de tesis — Dra. Blandón (IV año)",tipo:"presentacion"},
+            {f:"08/04/2027",desc:"Presentación avances de tesis — Dr. Reynoso (IV año)",tipo:"presentacion"},
+            {f:"15/04/2027",desc:"Presentación avances de tesis — Dr. Rayo (IV año)",tipo:"presentacion"},
+            {f:"27/08/2026",desc:"Examen módulo I — V año",tipo:"examen"},
+            {f:"23/10/2026",desc:"Presentación avances de tesis — Dra. Abarca (V año)",tipo:"presentacion"},
+            {f:"30/10/2026",desc:"Presentación avances de tesis — Dra. Membreño (V año)",tipo:"presentacion"},
+            {f:"13/11/2026",desc:"Examen módulo II — V año",tipo:"examen"},
+            {f:"05/02/2027",desc:"Examen módulo III — V año",tipo:"examen"},
+            {f:"19/02/2027",desc:"Examen de grado — V año",tipo:"examen"},
+        ];
+
+        let clasesOrdenadas = [];
+        let claseOffset = 0;
+
+        function renderAgenda() {
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            clasesOrdenadas = CLASES
+                .map(c => ({ ...c, dateObj: parseDate(c.f) }))
+                .filter(c => c.dateObj >= hoy)
+                .sort((a, b) => a.dateObj - b.dateObj);
+            renderCarousel();
+            renderFechasImportantes(hoy);
+        }
+
+        function getGruposPorFecha() {
+            const g = {};
+            clasesOrdenadas.forEach(c => {
+                if (!g[c.f]) g[c.f] = [];
+                g[c.f].push(c);
+            });
+            return Object.entries(g).sort((a,b) => parseDate(a[0]) - parseDate(b[0]));
+        }
+
+        function renderCarousel() {
+            const carousel = document.getElementById('clasesCarousel');
+            const rangoEl = document.getElementById('rangoClases');
+            if (!carousel) return;
+            carousel.innerHTML = '';
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            const grupos = getGruposPorFecha();
+            if (!grupos.length) {
+                carousel.innerHTML = '<p class="text-sm text-slate-400 italic py-4">Sin clases próximas.</p>';
+                rangoEl.textContent = '';
+                return;
+            }
+            const visibles = grupos.slice(claseOffset, claseOffset + 10);
+            const pF = parseDate(visibles[0][0]);
+            const uF = parseDate(visibles[visibles.length-1][0]);
+            rangoEl.textContent = `${DIAS_ES[pF.getDay()]} ${pF.getDate()} ${MESES_ES[pF.getMonth()]}  →  ${DIAS_ES[uF.getDay()]} ${uF.getDate()} ${MESES_ES[uF.getMonth()]}`;
+
+            visibles.forEach(([fStr, clases]) => {
+                const fd = parseDate(fStr);
+                const esHoy = fd.toDateString() === hoy.toDateString();
+                const manana = new Date(hoy); manana.setDate(hoy.getDate()+1);
+                const esMañana = fd.toDateString() === manana.toDateString();
+                const dias3 = (fd - hoy) / 86400000 <= 3;
+
+                const card = document.createElement('div');
+                card.className = `scroll-snap-start flex-shrink-0 w-56 rounded-xl border shadow-sm overflow-hidden ${esHoy ? 'border-indigo-400 ring-2 ring-indigo-300' : 'border-slate-200'}`;
+                const hCol = esHoy ? 'bg-indigo-700 text-white' : dias3 ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-100 text-slate-700';
+                let badge = '';
+                if (esHoy) badge = '<span class="text-xs bg-white text-indigo-700 font-bold px-1.5 py-0.5 rounded-full ml-1">HOY</span>';
+                else if (esMañana) badge = '<span class="text-xs bg-indigo-200 text-indigo-800 font-bold px-1.5 py-0.5 rounded-full ml-1">Mañana</span>';
+
+                card.innerHTML = `
+                    <div class="${hCol} px-3 py-2 flex items-center gap-1 font-bold text-sm">
+                        ${DIAS_ES[fd.getDay()]} ${fd.getDate()} ${MESES_ES[fd.getMonth()]} ${fd.getFullYear()} ${badge}
+                    </div>
+                    <div class="bg-white p-2 space-y-2">
+                        ${clases.map(c => {
+                            const col = ANIO_COLORES[c.anio] || ANIO_COLORES["I"];
+                            return `<div class="p-2 rounded-lg border ${col.border} ${col.bg}">
+                                <span class="text-xs font-black ${col.text} uppercase tracking-wide">${c.anio} año</span>
+                                <p class="text-xs font-semibold text-slate-800 leading-snug mt-0.5">${c.tema}</p>
+                                ${c.dr ? `<p class="text-xs text-slate-500">${c.dr}</p>` : ''}
+                            </div>`;
+                        }).join('')}
+                    </div>`;
+                carousel.appendChild(card);
+            });
+
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            if (btnPrev) { btnPrev.disabled = claseOffset===0; btnPrev.classList.toggle('opacity-40', claseOffset===0); }
+            if (btnNext) { btnNext.disabled = claseOffset+10>=grupos.length; btnNext.classList.toggle('opacity-40', claseOffset+10>=grupos.length); }
+        }
+
+        function scrollClases(dir) {
+            const grupos = getGruposPorFecha();
+            claseOffset = Math.max(0, Math.min(grupos.length-1, claseOffset + dir * 5));
+            renderCarousel();
+        }
+
+        function renderFechasImportantes(hoy) {
+            const el = document.getElementById('fechasImportantesList');
+            if (!el) return;
+            const prox = FECHAS_IMPORTANTES
+                .map(fi => ({ ...fi, dateObj: parseDate(fi.f) }))
+                .filter(fi => fi.dateObj >= hoy)
+                .sort((a,b) => a.dateObj - b.dateObj)
+                .slice(0, 5);
+
+            if (!prox.length) { el.innerHTML='<p class="text-sm text-slate-400 italic">Sin fechas próximas.</p>'; return; }
+
+            el.innerHTML = prox.map(fi => {
+                const dias = Math.ceil((fi.dateObj - hoy) / 86400000);
+                const inm = dias <= 14;
+                const icoCol = fi.tipo==='examen' ? 'text-red-500' : 'text-amber-500';
+                const bg = fi.tipo==='examen'
+                    ? (inm ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200')
+                    : (inm ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200');
+                const dT = dias===0 ? 'HOY' : dias===1 ? 'Mañana' : `En ${dias} días`;
+                const dC = dias<=7 ? 'text-red-600 font-bold' : dias<=14 ? 'text-amber-600 font-semibold' : 'text-slate-500';
+                return `<div class="p-3 rounded-xl border ${bg} flex gap-3 items-start">
+                    <i data-lucide="${fi.tipo==='examen'?'clipboard-check':'file-badge'}" class="w-4 h-4 ${icoCol} flex-shrink-0 mt-0.5"></i>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800 leading-snug">${fi.desc}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-slate-500">${DIAS_ES[fi.dateObj.getDay()]} ${fi.dateObj.getDate()} ${MESES_ES[fi.dateObj.getMonth()]} ${fi.dateObj.getFullYear()}</span>
+                            <span class="text-xs ${dC}">${dT}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
         }
     </script>
 </body>
