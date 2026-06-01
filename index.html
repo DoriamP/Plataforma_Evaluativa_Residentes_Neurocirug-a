@@ -6,6 +6,12 @@
     <title>Plataforma de Evaluación de Residentes de Neurocirugía</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .scroll-snap-x { scroll-snap-type: x mandatory; }
+        .scroll-snap-start { scroll-snap-align: start; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
@@ -27,27 +33,72 @@
         </div>
     </header>
 
-    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8 md:py-12">
-        
-        <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-10 flex flex-col md:flex-row items-center gap-6">
-            <div class="space-y-3 flex-1">
-                <h2 class="text-2xl font-bold text-slate-900">Panel de Control Docente</h2>
-                <p class="text-slate-600 text-sm md:text-base leading-relaxed">
-                    Bienvenido al sistema unificado de calificación para la especialidad de Neurocirugía. 
-                    Seleccione el componente correspondiente para registrar, evaluar y dar seguimiento al rendimiento académico y quirúrgico de los residentes.
-                </p>
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8 md:py-10">
+
+        <!-- SECCIÓN AGENDA DOCENTE (reemplaza el antiguo Panel de Control) -->
+        <section class="mb-10">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="bg-indigo-900 p-2 rounded-lg text-indigo-200">
+                    <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Agenda Académica 2026 - 2027</h2>
+                <span class="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Plan Docente Activo</span>
             </div>
-            <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex items-center gap-3 min-w-[240px]">
-                <i data-lucide="award" class="w-10 h-10 text-indigo-700"></i>
-                <div>
-                    <span class="block text-xs text-slate-500 uppercase tracking-wider font-semibold">Nota de Aprobación</span>
-                    <span class="text-lg font-black text-indigo-900">70% o superior</span>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+                <!-- a) Clases programadas próximas (3 columnas) -->
+                <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-gradient-to-r from-indigo-900 to-indigo-800 px-5 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-white">
+                            <i data-lucide="presentation" class="w-5 h-5 text-indigo-200"></i>
+                            <h3 class="font-bold text-sm">Clases Programadas</h3>
+                        </div>
+                        <div class="flex gap-1">
+                            <button id="btnPrev" onclick="scrollClases(-1)" class="bg-indigo-800 hover:bg-indigo-700 text-white rounded-lg p-1.5 transition border border-indigo-700">
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </button>
+                            <button id="btnNext" onclick="scrollClases(1)" class="bg-indigo-800 hover:bg-indigo-700 text-white rounded-lg p-1.5 transition border border-indigo-700">
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Etiqueta de rango visible -->
+                    <div class="px-5 pt-3 pb-1">
+                        <p id="rangoClases" class="text-xs text-indigo-600 font-semibold bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-lg inline-block"></p>
+                    </div>
+
+                    <!-- Contenedor deslizable -->
+                    <div id="clasesCarousel" class="flex overflow-x-auto scroll-snap-x hide-scrollbar gap-3 px-5 pb-5 pt-3" style="scroll-behavior: smooth;">
+                        <!-- Cards insertadas por JS -->
+                    </div>
+
+                    <div class="px-5 pb-4">
+                        <p class="text-xs text-slate-400 italic">Deslice horizontalmente para ver más clases próximas →</p>
+                    </div>
+                </div>
+
+                <!-- b) Fechas importantes (2 columnas) -->
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                    <div class="bg-gradient-to-r from-amber-700 to-orange-700 px-5 py-4 flex items-center gap-2 text-white">
+                        <i data-lucide="flag" class="w-5 h-5 text-amber-200"></i>
+                        <h3 class="font-bold text-sm">Fechas Importantes</h3>
+                        <span class="ml-auto text-xs bg-amber-600/50 border border-amber-500/50 px-2 py-0.5 rounded-full">Próximas 5</span>
+                    </div>
+                    <div id="fechasImportantesList" class="flex-grow p-4 space-y-2">
+                        <!-- Items insertados por JS -->
+                    </div>
+                    <div class="px-4 pb-4">
+                        <p class="text-xs text-slate-400 italic">Líneas en negrita del plan docente</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
+        <!-- MÓDULOS DE EVALUACIÓN -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
+
             <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                 <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 text-white flex items-center gap-3">
                     <i data-lucide="book-open" class="w-6 h-6 text-indigo-200"></i>
@@ -56,12 +107,12 @@
                         <p class="text-xs text-indigo-200">Evaluación académica y de discusión científica</p>
                     </div>
                 </div>
-                
+
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
                     <p class="text-slate-500 text-xs md:text-sm italic">
                         Instrumentos destinados a medir el dominio cognitivo, la preparación de sesiones y el análisis crítico de la literatura médica.
                     </p>
-                    
+
                     <div class="space-y-3 pt-2">
                         <a href="clases_programadas.html" class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl transition group">
                             <div class="flex items-center gap-3">
@@ -113,12 +164,12 @@
                         <p class="text-xs text-emerald-200">Evaluación de destrezas en quirófano</p>
                     </div>
                 </div>
-                
+
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
                     <p class="text-slate-500 text-xs md:text-sm italic">
                         Instrumentos enfocados en la monitorización de la habilidad técnica, juicio intraoperatorio, toma de decisiones y bioseguridad del paciente.
                     </p>
-                    
+
                     <div class="pt-2">
                         <a href="practica_quirurgica.html" class="flex items-center justify-between p-5 bg-slate-50 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-200 rounded-xl transition group h-full">
                             <div class="flex items-center gap-4">
@@ -137,36 +188,84 @@
             </section>
 
         </div>
+
         <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:col-span-2 mt-4">
-    <div class="bg-gradient-to-r from-indigo-900 to-slate-950 p-6 text-white flex items-center gap-3">
-        <i data-lucide="layout-dashboard" class="w-6 h-6 text-indigo-300"></i>
-        <div>
-            <h3 class="text-lg font-bold">3) Inteligencia Académica y Seguimiento</h3>
-            <p class="text-xs text-indigo-200">Consolidado general de calificaciones registradas</p>
-        </div>
-    </div>
-    
-    <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
-        <p class="text-slate-500 text-xs md:text-sm italic">
-            Acceda al módulo estadístico interactivo para evaluar curvas de rendimiento, filtrar registros históricos por residente o mitigar sesgos de evaluación por especialista.
-        </p>
-        
-        <div class="pt-2">
-            <a href="dashboard.html" class="flex items-center justify-between p-5 bg-indigo-50/40 hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-300 rounded-xl transition group h-full">
-                <div class="flex items-center gap-4">
-                    <div class="bg-white p-3 rounded-xl border border-indigo-100 text-indigo-700 group-hover:text-indigo-900 shadow-sm">
-                        <i data-lucide="trending-up" class="w-6 h-6"></i>
-                    </div>
-                    <div class="text-left">
-                        <span class="block text-base font-bold text-slate-800 group-hover:text-indigo-950">Visualizar Dashboard General</span>
-                        <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Análisis cronológico y estadísticas avanzadas filtrables</span>
-                    </div>
+            <div class="bg-gradient-to-r from-indigo-900 to-slate-950 p-6 text-white flex items-center gap-3">
+                <i data-lucide="layout-dashboard" class="w-6 h-6 text-indigo-300"></i>
+                <div>
+                    <h3 class="text-lg font-bold">3) Inteligencia Académica y Seguimiento</h3>
+                    <p class="text-xs text-indigo-200">Consolidado general de calificaciones registradas</p>
                 </div>
-                <i data-lucide="arrow-right" class="w-5 h-5 text-indigo-600 transform group-hover:translate-x-1.5 transition"></i>
-            </a>
-        </div>
-    </div>
-</section>
+            </div>
+
+            <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
+                <p class="text-slate-500 text-xs md:text-sm italic">
+                    Acceda al módulo estadístico interactivo para evaluar curvas de rendimiento, filtrar registros históricos por residente o mitigar sesgos de evaluación por especialista.
+                </p>
+
+                <div class="pt-2 space-y-3">
+                    <a href="dashboard.html" class="flex items-center justify-between p-5 bg-indigo-50/40 hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-300 rounded-xl transition group h-full">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-white p-3 rounded-xl border border-indigo-100 text-indigo-700 group-hover:text-indigo-900 shadow-sm">
+                                <i data-lucide="trending-up" class="w-6 h-6"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-base font-bold text-slate-800 group-hover:text-indigo-950">Dashboard Docente</span>
+                                <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Análisis cronológico, promedios por residente y estadísticas avanzadas filtrables</span>
+                            </div>
+                        </div>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-indigo-600 transform group-hover:translate-x-1.5 transition"></i>
+                    </a>
+                    <a href="dashboard_residentes.html" class="flex items-center justify-between p-5 bg-emerald-50/40 hover:bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-xl transition group h-full">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100 text-emerald-700 group-hover:text-emerald-900 shadow-sm">
+                                <i data-lucide="user-check" class="w-6 h-6"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-base font-bold text-slate-800 group-hover:text-emerald-950">Notas del Residente</span>
+                                <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Notas acumuladas por módulo, componente teórico y práctico, con gráficas</span>
+                            </div>
+                        </div>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-600 transform group-hover:translate-x-1.5 transition"></i>
+                    </a>
+                    <a href="dashboard_residentes.html#pendientes" class="flex items-center justify-between p-5 bg-rose-50/40 hover:bg-rose-50 border border-rose-100 hover:border-rose-300 rounded-xl transition group h-full">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-white p-3 rounded-xl border border-rose-100 text-rose-700 group-hover:text-rose-900 shadow-sm">
+                                <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-base font-bold text-slate-800 group-hover:text-rose-950">Actividades Pendientes</span>
+                                <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Clases sin evaluar del plan docente, práctica quirúrgica y sesiones por módulo</span>
+                            </div>
+                        </div>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-rose-600 transform group-hover:translate-x-1.5 transition"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ RESUMEN DE ACTIVIDADES ATRASADAS ════════════════════════════════ -->
+        <section class="mt-8">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="bg-rose-900 p-2 rounded-lg text-rose-200">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Actividades Atrasadas por Residente</h2>
+                <span id="badgePend" class="hidden text-xs font-bold bg-rose-600 text-white px-2.5 py-0.5 rounded-full"></span>
+            </div>
+
+            <!-- estado carga -->
+            <div id="pendResumen" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
+                <div class="flex items-center justify-center gap-2 text-slate-400 text-sm">
+                    <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                    Cargando datos desde Google Sheets…
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="bg-slate-900 text-slate-400 text-center py-6 border-t border-slate-800 mt-auto">
@@ -177,16 +276,529 @@
     </footer>
 
     <script>
-        // Inicializa los iconos estéticos
         lucide.createIcons();
 
-        // Inserta la fecha actual en la barra superior
         document.addEventListener('DOMContentLoaded', () => {
             const hoy = new Date();
             const dia = String(hoy.getDate()).padStart(2, '0');
             const mes = String(hoy.getMonth() + 1).padStart(2, '0');
             const anio = hoy.getFullYear();
             document.getElementById('currentDate').textContent = `${dia}/${mes}/${anio}`;
+            renderAgenda();
+        });
+
+        // ─── Datos del Plan Docente 2026 ───────────────────────────────────────────
+        // Formato de fecha: YYYY-MM-DD para comparación fácil
+        function parseDate(str) {
+            // str = "DD/MM/YYYY"
+            const [d, m, y] = str.split('/');
+            return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        }
+
+        const CLASES = [
+            // I año
+            { f: "25/05/2026", tema: "Presentación de caso clínico", dr: "Dra. Quintana", anio: "I" },
+            { f: "01/06/2026", tema: "Instrumental quirúrgico en neurocirugía", dr: "Dr. Bobb", anio: "I" },
+            { f: "08/06/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Quintana", anio: "I" },
+            { f: "22/06/2026", tema: "Posiciones básicas operatorias en cirugía craneal y espinal", dr: "Dr. Bobb", anio: "I" },
+            { f: "06/07/2026", tema: "Principios de craneotomía: topografía craneocerebral", dr: "Dra. Quintana", anio: "I" },
+            { f: "13/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Bobb", anio: "I" },
+            { f: "03/08/2026", tema: "Manejo inicial de trauma craneoencefálico del adulto", dr: "Dra. Quintana", anio: "I" },
+            { f: "10/08/2026", tema: "Investigación clínica: el proceso y bases de la investigación", dr: "Dra. Quintana", anio: "I" },
+            { f: "17/08/2026", tema: "Manejo inicial de trauma espinal", dr: "Dr. Bobb", anio: "I" },
+            { f: "24/08/2026", tema: "Presentación de caso clínico", dr: "Dra. Quintana", anio: "I" },
+            { f: "07/09/2026", tema: "Hidrocefalia", dr: "Dr. Bobb", anio: "I" },
+            { f: "14/09/2026", tema: "Craneotomía frontotemporal pterional", dr: "Dra. Quintana", anio: "I" },
+            { f: "21/09/2026", tema: "Manejo en emergencias de TCE pediátrico", dr: "Dr. Bobb", anio: "I" },
+            { f: "05/10/2026", tema: "Presentación de caso clínico", dr: "Dra. Quintana", anio: "I" },
+            { f: "26/10/2026", tema: "Investigación clínica: ética e investigación", dr: "Dr. Bobb", anio: "I" },
+            { f: "02/11/2026", tema: "Nervios craneales I-II", dr: "Dr. Bobb", anio: "I" },
+            { f: "09/11/2026", tema: "Nervios craneales III-IV-VI", dr: "Dra. Quintana", anio: "I" },
+            { f: "16/11/2026", tema: "Nervios craneales V-VIII", dr: "Dr. Bobb", anio: "I" },
+            { f: "23/11/2026", tema: "Nervios craneales IX-XII", dr: "Dra. Quintana", anio: "I" },
+            { f: "01/12/2026", tema: "Revisión de un tema y artículos científicos", dr: "", anio: "I" },
+            { f: "11/01/2027", tema: "Médula espinal (vías ascendentes)", dr: "Dr. Bobb", anio: "I" },
+            { f: "18/01/2027", tema: "Médula espinal (vías descendentes)", dr: "Dra. Quintana", anio: "I" },
+            { f: "25/01/2027", tema: "Presentación de caso clínico", dr: "Dr. Bobb", anio: "I" },
+            { f: "01/02/2027", tema: "Presentación de caso clínico", dr: "Dra. Quintana", anio: "I" },
+            { f: "08/02/2027", tema: "Irrigación del encéfalo y médula espinal", dr: "Dr. Bobb", anio: "I" },
+            // II año
+            { f: "26/05/2026", tema: "Presentación de caso clínico", dr: "Dr. Cuadra", anio: "II" },
+            { f: "02/06/2026", tema: "Manejo en UCI del trauma craneoencefálico", dr: "Dra. Olivas", anio: "II" },
+            { f: "09/06/2026", tema: "Manejo quirúrgico de TCE (parte 1)", dr: "Dr. Cuadra", anio: "II" },
+            { f: "16/06/2026", tema: "Investigación: clasificación de los tipos de estudio", dr: "Dra. Olivas", anio: "II" },
+            { f: "23/06/2026", tema: "Manejo quirúrgico de TCE (parte 2)", dr: "Dra. Olivas", anio: "II" },
+            { f: "07/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Cuadra", anio: "II" },
+            { f: "14/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Olivas", anio: "II" },
+            { f: "21/07/2026", tema: "Manejo quirúrgico de TCE (parte 3)", dr: "Dr. Cuadra", anio: "II" },
+            { f: "28/07/2026", tema: "Investigación: ensayo clínico aleatorio", dr: "Dr. Cuadra", anio: "II" },
+            { f: "04/08/2026", tema: "Craniectomía descompresiva", dr: "Dra. Olivas", anio: "II" },
+            { f: "01/09/2026", tema: "Trauma craneoencefálico leve", dr: "Dr. Cuadra", anio: "II" },
+            { f: "08/09/2026", tema: "Hematoma subdural crónico", dr: "Dra. Olivas", anio: "II" },
+            { f: "15/09/2026", tema: "Fístula de LCR postraumática", dr: "Dr. Cuadra", anio: "II" },
+            { f: "06/10/2026", tema: "Presentación de caso clínico", dr: "Dra. Olivas", anio: "II" },
+            { f: "13/10/2026", tema: "Presentación de caso clínico", dr: "Dr. Cuadra", anio: "II" },
+            { f: "20/10/2026", tema: "Evaluación y clasificación de inestabilidad espinal", dr: "Dra. Olivas", anio: "II" },
+            { f: "03/11/2026", tema: "Lesiones craneocervicales", dr: "Dr. Cuadra", anio: "II" },
+            { f: "10/11/2026", tema: "Lesiones de C2", dr: "Dra. Olivas", anio: "II" },
+            { f: "15/01/2027", tema: "Lesiones subaxiales cervicales", dr: "Dr. Cuadra", anio: "II" },
+            { f: "22/01/2027", tema: "Lesiones unión cervicotorácica", dr: "Dra. Olivas", anio: "II" },
+            { f: "29/01/2027", tema: "Manejo médico de lesión medular", dr: "Dr. Cuadra", anio: "II" },
+            { f: "12/02/2027", tema: "Lesiones toracolumbares", dr: "Dra. Olivas", anio: "II" },
+            { f: "19/02/2027", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Cuadra", anio: "II" },
+            { f: "26/02/2027", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Olivas", anio: "II" },
+            // III año
+            { f: "27/05/2026", tema: "Presentación de caso clínico", dr: "Dra. Díaz", anio: "III" },
+            { f: "03/06/2026", tema: "Hernia discal cervical", dr: "Dr. Cerrato", anio: "III" },
+            { f: "10/06/2026", tema: "Hernia discal dorsal", dr: "Dra. Díaz", anio: "III" },
+            { f: "17/06/2026", tema: "Hernia discal lumbar", dr: "Dr. Cerrato", anio: "III" },
+            { f: "24/06/2026", tema: "Estenosis cervical, dorsal y lumbar", dr: "Dra. Díaz", anio: "III" },
+            { f: "01/07/2026", tema: "Espondilolistesis degenerativa lumbar", dr: "Dr. Cerrato", anio: "III" },
+            { f: "08/07/2026", tema: "Mielopatía cervical degenerativa", dr: "Dra. Díaz", anio: "III" },
+            { f: "15/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Cerrato", anio: "III" },
+            { f: "22/07/2026", tema: "Instrumentación posterior torácica y lumbar", dr: "Dra. Díaz", anio: "III" },
+            { f: "05/08/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Cerrato", anio: "III" },
+            { f: "02/09/2026", tema: "Investigación: estudio de cohortes", dr: "Dra. Díaz", anio: "III" },
+            { f: "09/09/2026", tema: "Instrumentación cervical anterior", dr: "Dra. Díaz", anio: "III" },
+            { f: "16/09/2026", tema: "PLIF, TLIF y ALIF", dr: "Dr. Cerrato", anio: "III" },
+            { f: "23/09/2026", tema: "Presentación de caso clínico", dr: "", anio: "III" },
+            { f: "07/10/2026", tema: "Presentación de caso clínico", dr: "Dra. Díaz", anio: "III" },
+            { f: "14/10/2026", tema: "Clasificación de deformidad espinal", dr: "Dr. Cerrato", anio: "III" },
+            { f: "21/10/2026", tema: "Evaluación de alineación espinal", dr: "Dra. Díaz", anio: "III" },
+            { f: "28/10/2026", tema: "Evaluación y tratamiento de deformidad cervical", dr: "Dr. Cerrato", anio: "III" },
+            { f: "04/11/2026", tema: "Evaluación y tratamiento de la escoliosis del adulto", dr: "Dra. Díaz", anio: "III" },
+            { f: "13/01/2027", tema: "Tumores benignos del esqueleto axial", dr: "Dra. Díaz", anio: "III" },
+            { f: "20/01/2027", tema: "Tumores malignos primarios del esqueleto axial", dr: "Dr. Cerrato", anio: "III" },
+            { f: "27/01/2027", tema: "Tumores benignos intradurales extramedulares", dr: "Dra. Díaz", anio: "III" },
+            { f: "03/02/2027", tema: "Metástasis espinal", dr: "Dr. Cerrato", anio: "III" },
+            { f: "10/02/2027", tema: "Tumores malignos primarios", dr: "Dra. Díaz", anio: "III" },
+            { f: "17/02/2027", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Cerrato", anio: "III" },
+            { f: "24/02/2027", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Díaz", anio: "III" },
+            // IV año
+            { f: "28/05/2026", tema: "Presentación de caso clínico", dr: "Dr. Rayo", anio: "IV" },
+            { f: "04/06/2026", tema: "Gliomas de bajo grado", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "11/06/2026", tema: "Gliomas malignos", dr: "Dra. Blandón", anio: "IV" },
+            { f: "18/06/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Rayo", anio: "IV" },
+            { f: "25/06/2026", tema: "Meduloblastomas en niños y adultos", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "02/07/2026", tema: "Ependimomas intracraneales en niños y adultos", dr: "Dra. Blandón", anio: "IV" },
+            { f: "09/07/2026", tema: "Metástasis cerebral", dr: "Dr. Rayo", anio: "IV" },
+            { f: "16/07/2026", tema: "Meningiomas (no base de cráneo)", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "23/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Blandón", anio: "IV" },
+            { f: "30/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "20/08/2026", tema: "Investigación: estudios de casos control", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "27/08/2026", tema: "Investigación: estudios descriptivos", dr: "Dra. Blandón", anio: "IV" },
+            { f: "03/09/2026", tema: "Schwannomas vestibulares", dr: "Dr. Rayo", anio: "IV" },
+            { f: "10/09/2026", tema: "Meningioma de base de cráneo", dr: "Dra. Blandón", anio: "IV" },
+            { f: "17/09/2026", tema: "Tumores de hipófisis", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "24/09/2026", tema: "Presentación de caso clínico", dr: "Dr. Rayo", anio: "IV" },
+            { f: "01/10/2026", tema: "Presentación de caso clínico", dr: "Dra. Blandón", anio: "IV" },
+            { f: "08/10/2026", tema: "Presentación de caso clínico", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "15/10/2026", tema: "Investigación: protocolo y objetivos del estudio", dr: "Dr. Rayo", anio: "IV" },
+            { f: "22/10/2026", tema: "Cordomas y condrosarcomas", dr: "Dr. Rayo", anio: "IV" },
+            { f: "05/11/2026", tema: "Craneofaringiomas", dr: "Dra. Blandón", anio: "IV" },
+            { f: "14/01/2027", tema: "Evaluación de pacientes para cirugía de epilepsia", dr: "Dra. Blandón", anio: "IV" },
+            { f: "21/01/2027", tema: "Lobectomía temporal anteromedial", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "28/01/2027", tema: "Resecciones extratemporales en cirugía de epilepsia", dr: "Dr. Rayo", anio: "IV" },
+            { f: "04/02/2027", tema: "Estimulación eléctrica para epilepsia (DBS)", dr: "Dra. Blandón", anio: "IV" },
+            { f: "11/02/2027", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Reynoso", anio: "IV" },
+            { f: "18/02/2027", tema: "Cirugía para enfermedad de Parkinson", dr: "Dr. Rayo", anio: "IV" },
+            { f: "25/02/2027", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Blandón", anio: "IV" },
+            { f: "04/03/2027", tema: "Revisión de un tema y artículos científicos", dr: "Dr. Rayo", anio: "IV" },
+            // V año
+            { f: "29/05/2026", tema: "Presentación de caso clínico", dr: "Dra. Membreño", anio: "V" },
+            { f: "12/06/2026", tema: "Manejo microquirúrgico y endovascular de MAV", dr: "Dra. Abarca", anio: "V" },
+            { f: "19/06/2026", tema: "Investigación: variable de respuesta", dr: "Dra. Abarca", anio: "V" },
+            { f: "26/06/2026", tema: "Manejo microquirúrgico de aneurismas de carótida interna", dr: "Dra. Membreño", anio: "V" },
+            { f: "02/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Abarca", anio: "V" },
+            { f: "09/07/2026", tema: "Investigación: población de estudio", dr: "Dra. Membreño", anio: "V" },
+            { f: "17/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Membreño", anio: "V" },
+            { f: "24/07/2026", tema: "Manejo microquirúrgico de aneurismas de arteria comunicante anterior", dr: "Dra. Abarca", anio: "V" },
+            { f: "07/08/2026", tema: "Manejo microquirúrgico de aneurismas de arteria cerebral media", dr: "Dra. Membreño", anio: "V" },
+            { f: "04/09/2026", tema: "Endoscopia ventricular", dr: "Dra. Abarca", anio: "V" },
+            { f: "18/09/2026", tema: "Craneosinostosis no sindrómica", dr: "Dra. Membreño", anio: "V" },
+            { f: "25/09/2026", tema: "Presentación de caso clínico", dr: "Dra. Abarca", anio: "V" },
+            { f: "02/10/2026", tema: "Craneosinostosis sindrómica", dr: "Dra. Membreño", anio: "V" },
+            { f: "09/10/2026", tema: "Disrafismo espinal", dr: "Dra. Abarca", anio: "V" },
+            { f: "16/10/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Membreño", anio: "V" },
+            { f: "04/12/2026", tema: "Anatomía de base de cráneo anterior y media (Rhoton)", dr: "Dra. Abarca", anio: "V" },
+            { f: "08/01/2027", tema: "Anatomía del ángulo pontocerebeloso (Rhoton)", dr: "Dra. Membreño", anio: "V" },
+        ];
+
+        const FECHAS_IMPORTANTES = [
+            // I año
+            { f: "27/07/2026", desc: "Examen módulo I — I año", tipo: "examen" },
+            { f: "19/10/2026", desc: "Examen módulo II — I año", tipo: "examen" },
+            { f: "04/01/2027", desc: "Examen módulo III — I año (Dra. Quintana)", tipo: "examen" },
+            { f: "22/02/2027", desc: "Examen módulo IV — I año", tipo: "examen" },
+            { f: "15/03/2027", desc: "Examen final — I año", tipo: "examen" },
+            { f: "29/03/2027", desc: "Presentación avances de investigación — Dra. Quintana (I año)", tipo: "presentacion" },
+            { f: "13/04/2027", desc: "Presentación avances de investigación — Dr. Bobb (I año)", tipo: "presentacion" },
+            // II año
+            { f: "17/08/2026", desc: "Examen módulo I — II año", tipo: "examen" },
+            { f: "17/11/2026", desc: "Presentación avances de tesis — Dr. Cuadra (II año)", tipo: "presentacion" },
+            { f: "24/11/2026", desc: "Presentación avances de tesis — Dra. Olivas (II año)", tipo: "presentacion" },
+            { f: "15/12/2026", desc: "Examen módulo II — II año", tipo: "examen" },
+            { f: "12/03/2027", desc: "Examen final — II año", tipo: "examen" },
+            { f: "23/03/2027", desc: "Presentación avances de tesis — Dr. Cuadra (II año)", tipo: "presentacion" },
+            { f: "30/03/2027", desc: "Presentación avances de tesis — Dra. Olivas (II año)", tipo: "presentacion" },
+            // III año
+            { f: "19/08/2026", desc: "Examen módulo I — III año", tipo: "examen" },
+            { f: "11/11/2026", desc: "Presentación avances de tesis — Dr. Cerrato (III año)", tipo: "presentacion" },
+            { f: "18/11/2026", desc: "Presentación avances de tesis — Dra. Díaz (III año)", tipo: "presentacion" },
+            { f: "09/12/2026", desc: "Examen módulo II — III año", tipo: "examen" },
+            { f: "10/03/2027", desc: "Examen módulo III — III año", tipo: "examen" },
+            { f: "07/04/2027", desc: "Presentación avances de tesis — Dr. Cerrato (III año)", tipo: "presentacion" },
+            { f: "14/04/2027", desc: "Presentación avances de tesis — Dra. Díaz (III año)", tipo: "presentacion" },
+            // IV año
+            { f: "19/11/2026", desc: "Presentación avances de tesis — Dra. Blandón (IV año)", tipo: "presentacion" },
+            { f: "26/11/2026", desc: "Presentación avances de tesis — Dr. Rayo (IV año)", tipo: "presentacion" },
+            { f: "03/12/2026", desc: "Presentación avances de tesis — Dr. Reynoso (IV año)", tipo: "presentacion" },
+            { f: "10/12/2026", desc: "Examen módulo II — IV año", tipo: "examen" },
+            { f: "18/03/2027", desc: "Examen módulo III — IV año", tipo: "examen" },
+            { f: "01/04/2027", desc: "Presentación avances de tesis — Dra. Blandón (IV año)", tipo: "presentacion" },
+            { f: "08/04/2027", desc: "Presentación avances de tesis — Dr. Reynoso (IV año)", tipo: "presentacion" },
+            { f: "15/04/2027", desc: "Presentación avances de tesis — Dr. Rayo (IV año)", tipo: "presentacion" },
+            // V año
+            { f: "27/08/2026", desc: "Examen módulo I — V año", tipo: "examen" },
+            { f: "23/10/2026", desc: "Presentación avances de tesis — Dra. Abarca (V año)", tipo: "presentacion" },
+            { f: "30/10/2026", desc: "Presentación avances de tesis — Dra. Membreño (V año)", tipo: "presentacion" },
+            { f: "13/11/2026", desc: "Examen módulo II — V año", tipo: "examen" },
+            { f: "05/02/2027", desc: "Examen módulo III — V año", tipo: "examen" },
+            { f: "19/02/2027", desc: "Examen de grado — V año", tipo: "examen" },
+        ];
+
+        const DIAS_ES = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+        const MESES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+        const ANIO_COLORES = {
+            "I":   { bg: "bg-blue-100",   text: "text-blue-800",   border: "border-blue-200"   },
+            "II":  { bg: "bg-violet-100",  text: "text-violet-800",  border: "border-violet-200"  },
+            "III": { bg: "bg-teal-100",    text: "text-teal-800",    border: "border-teal-200"    },
+            "IV":  { bg: "bg-amber-100",   text: "text-amber-800",   border: "border-amber-200"   },
+            "V":   { bg: "bg-rose-100",    text: "text-rose-800",    border: "border-rose-200"    },
+        };
+
+        let clasesOrdenadas = [];
+        let claseOffset = 0; // índice del primer grupo visible
+
+        function renderAgenda() {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const limite = new Date(hoy);
+            limite.setDate(hoy.getDate() + 3); // hoy + 3 días calendario
+
+            // Ordenar clases por fecha
+            clasesOrdenadas = CLASES
+                .map(c => ({ ...c, dateObj: parseDate(c.f) }))
+                .filter(c => c.dateObj >= hoy)
+                .sort((a, b) => a.dateObj - b.dateObj);
+
+            renderCarousel();
+            renderFechasImportantes(hoy);
+        }
+
+        // Agrupa las clases por fecha y muestra ventana de 1 fecha por scroll
+        function getGruposPorFecha() {
+            const grupos = {};
+            clasesOrdenadas.forEach(c => {
+                const key = c.f;
+                if (!grupos[key]) grupos[key] = [];
+                grupos[key].push(c);
+            });
+            return Object.entries(grupos).sort((a, b) => parseDate(a[0]) - parseDate(b[0]));
+        }
+
+        function renderCarousel() {
+            const carousel = document.getElementById('clasesCarousel');
+            const rangoEl = document.getElementById('rangoClases');
+            carousel.innerHTML = '';
+
+            const hoy = new Date(); hoy.setHours(0,0,0);
+            const grupos = getGruposPorFecha();
+
+            if (grupos.length === 0) {
+                carousel.innerHTML = '<p class="text-sm text-slate-400 italic py-4">No hay clases próximas programadas.</p>';
+                rangoEl.textContent = 'Sin clases próximas';
+                return;
+            }
+
+            // Mostrar grupos desde offset
+            const visibles = grupos.slice(claseOffset, claseOffset + 10);
+
+            // Etiqueta de rango
+            const primerFecha = parseDate(visibles[0][0]);
+            const ultFecha = parseDate(visibles[visibles.length - 1][0]);
+            rangoEl.textContent = `${DIAS_ES[primerFecha.getDay()]} ${primerFecha.getDate()} ${MESES_ES[primerFecha.getMonth()]}  →  ${DIAS_ES[ultFecha.getDay()]} ${ultFecha.getDate()} ${MESES_ES[ultFecha.getMonth()]}`;
+
+            visibles.forEach(([fechaStr, clases]) => {
+                const fechaObj = parseDate(fechaStr);
+                const esHoy = fechaObj.toDateString() === hoy.toDateString();
+                const esMañana = (() => { const m = new Date(hoy); m.setDate(m.getDate()+1); return fechaObj.toDateString() === m.toDateString(); })();
+                const enProximos3 = (fechaObj - hoy) / 86400000 <= 3;
+
+                const card = document.createElement('div');
+                card.className = `scroll-snap-start flex-shrink-0 w-56 rounded-xl border shadow-sm overflow-hidden ${esHoy ? 'border-indigo-400 ring-2 ring-indigo-300' : 'border-slate-200'}`;
+
+                // Header de fecha
+                const headerColor = esHoy ? 'bg-indigo-700 text-white' : enProximos3 ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-100 text-slate-700';
+                let etiqueta = '';
+                if (esHoy) etiqueta = '<span class="text-xs bg-white text-indigo-700 font-bold px-1.5 py-0.5 rounded-full ml-1">HOY</span>';
+                else if (esMañana) etiqueta = '<span class="text-xs bg-indigo-200 text-indigo-800 font-bold px-1.5 py-0.5 rounded-full ml-1">Mañana</span>';
+
+                card.innerHTML = `
+                    <div class="${headerColor} px-3 py-2 flex items-center justify-between">
+                        <div class="flex items-center gap-1 font-bold text-sm">
+                            <span>${DIAS_ES[fechaObj.getDay()]} ${fechaObj.getDate()} ${MESES_ES[fechaObj.getMonth()]} ${fechaObj.getFullYear()}</span>
+                            ${etiqueta}
+                        </div>
+                    </div>
+                    <div class="bg-white p-2 space-y-2">
+                        ${clases.map(c => {
+                            const col = ANIO_COLORES[c.anio] || ANIO_COLORES["I"];
+                            return `
+                            <div class="p-2 rounded-lg border ${col.border} ${col.bg}">
+                                <div class="flex items-center gap-1 mb-1">
+                                    <span class="text-xs font-black ${col.text} uppercase tracking-wide">${c.anio} año</span>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-800 leading-snug">${c.tema}</p>
+                                ${c.dr ? `<p class="text-xs text-slate-500 mt-0.5">${c.dr}</p>` : ''}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                `;
+                carousel.appendChild(card);
+            });
+
+            // Actualizar botones
+            document.getElementById('btnPrev').disabled = claseOffset === 0;
+            document.getElementById('btnPrev').classList.toggle('opacity-40', claseOffset === 0);
+            document.getElementById('btnNext').disabled = claseOffset + 10 >= grupos.length;
+            document.getElementById('btnNext').classList.toggle('opacity-40', claseOffset + 10 >= grupos.length);
+        }
+
+        function scrollClases(dir) {
+            const grupos = getGruposPorFecha();
+            claseOffset = Math.max(0, Math.min(grupos.length - 1, claseOffset + dir * 5));
+            renderCarousel();
+        }
+
+        function renderFechasImportantes(hoy) {
+            const lista = document.getElementById('fechasImportantesList');
+
+            const proximas = FECHAS_IMPORTANTES
+                .map(fi => ({ ...fi, dateObj: parseDate(fi.f) }))
+                .filter(fi => fi.dateObj >= hoy)
+                .sort((a, b) => a.dateObj - b.dateObj)
+                .slice(0, 5);
+
+            if (proximas.length === 0) {
+                lista.innerHTML = '<p class="text-sm text-slate-400 italic">No hay fechas importantes próximas.</p>';
+                return;
+            }
+
+            lista.innerHTML = proximas.map(fi => {
+                const diasRestantes = Math.ceil((fi.dateObj - hoy) / 86400000);
+                const esInminente = diasRestantes <= 14;
+                const iconColor = fi.tipo === 'examen' ? 'text-red-500' : 'text-amber-500';
+                const bgColor = fi.tipo === 'examen'
+                    ? (esInminente ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200')
+                    : (esInminente ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200');
+                const diasTexto = diasRestantes === 0 ? 'HOY' : diasRestantes === 1 ? 'Mañana' : `En ${diasRestantes} días`;
+                const diasColor = diasRestantes <= 7 ? 'text-red-600 font-bold' : diasRestantes <= 14 ? 'text-amber-600 font-semibold' : 'text-slate-500';
+
+                return `
+                <div class="p-3 rounded-xl border ${bgColor} flex gap-3 items-start">
+                    <div class="mt-0.5 flex-shrink-0">
+                        <i data-lucide="${fi.tipo === 'examen' ? 'clipboard-check' : 'file-badge'}" class="w-4 h-4 ${iconColor}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800 leading-snug">${fi.desc}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-slate-500">${DIAS_ES[fi.dateObj.getDay()]} ${fi.dateObj.getDate()} ${MESES_ES[fi.dateObj.getMonth()]} ${fi.dateObj.getFullYear()}</span>
+                            <span class="text-xs ${diasColor}">${diasTexto}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // ═══════════════════════════════════════════════════
+        // RESUMEN DE ACTIVIDADES ATRASADAS
+        // ═══════════════════════════════════════════════════
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzwxFznLdmraLeYOP3VxEGm53p6MZLmYWt5AyjJ72j-vSUkhkTBDWprNCtK1yfm82m_/exec";
+
+        const RESIDENTE_ANIO = {
+            "María Teresa Quintana Duarte":"I",    "Kevin Yassir Bobb García":"I",
+            "Axly Ivania Olivas Jiménez":"II",     "Fernando Antonio De Jesús Cuadra Jiménez":"II",
+            "Vivian Iveth Díaz":"III",              "José Luis Cerrato Lemus":"III",
+            "Angel Benigno Rayo Bravo":"IV",        "Lagree Guzman Reynoso":"IV",
+            "Liuska Ninoska Blandón Cortés":"IV",
+            "Martha Elena Abarca Morales":"V",      "Jissella Joammet Membreño Vivas":"V"
+        };
+
+        const TODOS_RESIDENTES = Object.keys(RESIDENTE_ANIO);
+
+        const MODULOS_FECHAS_IDX = [
+            { modulo:"I",  inicio:"2026-05-01", fin:"2026-06-30" },
+            { modulo:"II", inicio:"2026-07-01", fin:"2026-08-31" },
+            { modulo:"III",inicio:"2026-09-01", fin:"2026-10-31" },
+            { modulo:"IV", inicio:"2026-11-01", fin:"2026-12-31" },
+            { modulo:"V",  inicio:"2027-01-01", fin:"2027-02-28" },
+            { modulo:"VI", inicio:"2027-03-01", fin:"2027-04-30" },
+        ];
+
+        const STOPWORDS_IDX = new Set(['de','la','el','en','y','a','un','una','los','las','del','al','por','con','para','que','se','su','lo','es','no','o','e','i','parte','sus','este']);
+
+        function tokenizarIdx(s) {
+            return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[()]/g,' ').split(/\W+/).filter(w=>w.length>2&&!STOPWORDS_IDX.has(w));
+        }
+
+        function hayCoincidenciaIdx(planTema, evalTema) {
+            if (!evalTema) return false;
+            const t1 = new Set(tokenizarIdx(planTema));
+            return tokenizarIdx(evalTema).some(w => t1.has(w));
+        }
+
+        function getTipoClaseIdx(tema) {
+            const t = tema.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+            if (t.includes('presentacion de caso')||t.includes('presentación de caso')) return 'Casos Clínicos y Artículos';
+            if (t.includes('revision')&&t.includes('articulo')) return 'Casos Clínicos y Artículos';
+            return 'Clases Programadas';
+        }
+
+        function getModuloIdx(fechaStr) {
+            const d = parseDate(fechaStr); // reutiliza parseDate del plan docente
+            if (!d) return null;
+            for (const m of MODULOS_FECHAS_IDX) {
+                if (d >= new Date(m.inicio) && d <= new Date(m.fin)) return m.modulo;
+            }
+            return null;
+        }
+
+        function getPendientesResidente(residente, evalRes) {
+            const anio = RESIDENTE_ANIO[residente];
+            const ayer = new Date(); ayer.setHours(0,0,0,0); ayer.setDate(ayer.getDate()-1);
+
+            // Clases pasadas de este año
+            const clasesAnio = CLASES.filter(c => c.anio === anio && parseDate(c.f) <= ayer).map(c=>({
+                ...c, tipo: getTipoClaseIdx(c.tema), modulo: getModuloIdx(c.f)||"Sin módulo"
+            }));
+
+            // Pendientes teóricas
+            const pendTeorico = clasesAnio.filter(c =>
+                !evalRes.some(ev =>
+                    (ev.tipo_evaluacion||"").trim() === c.tipo &&
+                    hayCoincidenciaIdx(c.tema, ev.tema||"")
+                )
+            );
+
+            // Módulos sin práctica quirúrgica (solo módulos con clases pasadas)
+            const modulosConClases = [...new Set(clasesAnio.map(c=>c.modulo))];
+            const modsSinPractica = modulosConClases.filter(m =>
+                !evalRes.some(ev =>
+                    (ev.tipo_evaluacion||"").trim()==="Práctica Quirúrgica" &&
+                    getModuloIdx(ev.fecha)===m
+                )
+            );
+
+            return { pendTeorico: pendTeorico.length, modsSinPractica: modsSinPractica.length, total: clasesAnio.length };
+        }
+
+        async function cargarResumenPendientes() {
+            let datos = [];
+            try {
+                const resp = await fetch(`${URL_SCRIPT}?action=getEvaluations`, { mode:'cors' });
+                datos = await resp.json();
+                if (!Array.isArray(datos)) datos = [];
+            } catch(e) {
+                document.getElementById('pendResumen').innerHTML =
+                    `<p class="text-rose-500 text-sm font-medium">⚠️ No se pudo conectar con Google Sheets. Verifica la URL del script y tu conexión.</p>`;
+                return;
+            }
+
+            // Agrupar evaluaciones por residente
+            const evalPorRes = {};
+            TODOS_RESIDENTES.forEach(r => evalPorRes[r] = []);
+            datos.forEach(row => {
+                const nombre = (row.nombreResidente||"").trim();
+                if (evalPorRes[nombre]) evalPorRes[nombre].push(row);
+            });
+
+            // Calcular pendientes para cada residente
+            const resultados = TODOS_RESIDENTES.map(r => ({
+                nombre: r,
+                anio: RESIDENTE_ANIO[r],
+                ...getPendientesResidente(r, evalPorRes[r])
+            }));
+
+            const totalPend = resultados.reduce((s,r)=>s+r.pendTeorico+r.modsSinPractica,0);
+
+            // Badge global
+            const badge = document.getElementById('badgePend');
+            badge.textContent = totalPend + ' pendientes';
+            badge.classList.remove('hidden');
+
+            // Agrupar por año
+            const porAnio = { "I":[], "II":[], "III":[], "IV":[], "V":[] };
+            resultados.forEach(r => porAnio[r.anio]?.push(r));
+
+            const ANIO_NOMBRES = { "I":"I Año","II":"II Año","III":"III Año","IV":"IV Año","V":"V Año" };
+            const ANIO_BG = { "I":"bg-blue-50 border-blue-200","II":"bg-violet-50 border-violet-200","III":"bg-teal-50 border-teal-200","IV":"bg-amber-50 border-amber-200","V":"bg-rose-50 border-rose-200" };
+            const ANIO_HDR = { "I":"bg-blue-700","II":"bg-violet-700","III":"bg-teal-700","IV":"bg-amber-600","V":"bg-rose-700" };
+
+            const html = Object.keys(porAnio).map(anio => {
+                const residentes = porAnio[anio];
+                if (!residentes.length) return '';
+
+                const pendAnio = residentes.reduce((s,r)=>s+r.pendTeorico+r.modsSinPractica,0);
+
+                return `
+                <div class="rounded-2xl border overflow-hidden ${ANIO_BG[anio]}">
+                    <div class="${ANIO_HDR[anio]} text-white px-5 py-3 flex items-center justify-between">
+                        <span class="font-bold text-sm">${ANIO_NOMBRES[anio]}</span>
+                        ${pendAnio > 0
+                            ? `<span class="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">${pendAnio} atrasada${pendAnio!==1?'s':''}</span>`
+                            : `<span class="bg-emerald-400/30 text-white text-xs font-bold px-2 py-0.5 rounded-full">✓ Al día</span>`
+                        }
+                    </div>
+                    <div class="divide-y divide-white/60">
+                    ${residentes.map(r => {
+                        const sinPend = r.pendTeorico===0 && r.modsSinPractica===0;
+                        return `
+                        <div class="px-5 py-3 flex items-center justify-between gap-3 flex-wrap">
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold text-slate-800 leading-tight truncate">${r.nombre}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">
+                                    ${r.total} clase${r.total!==1?'s':''} en el plan hasta hoy
+                                </p>
+                            </div>
+                            <div class="flex gap-2 items-center flex-shrink-0">
+                                ${sinPend
+                                    ? `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl">✓ Al día</span>`
+                                    : `
+                                    ${r.pendTeorico > 0 ? `<span class="inline-flex flex-col items-center bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-xl leading-none"><span class="text-base font-black">${r.pendTeorico}</span><span class="opacity-75">teóricas</span></span>` : ''}
+                                    ${r.modsSinPractica > 0 ? `<span class="inline-flex flex-col items-center bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl leading-none"><span class="text-base font-black">${r.modsSinPractica}</span><span class="opacity-75">módulo${r.modsSinPractica!==1?'s':''} sin práctica</span></span>` : ''}
+                                    <a href="dashboard_residentes.html#pendientes" class="text-xs text-slate-500 hover:text-indigo-700 underline whitespace-nowrap">ver detalle →</a>
+                                    `
+                                }
+                            </div>
+                        </div>`;
+                    }).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('pendResumen').innerHTML = totalPend === 0
+                ? `<div class="flex items-center gap-3 text-emerald-700 font-semibold text-sm"><span class="text-2xl">✓</span> Todos los residentes están al día — no hay actividades atrasadas.</div>`
+                : `<div class="space-y-4">${html}</div>`;
+
+            lucide.createIcons();
+        }
+
+        // Arrancar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarResumenPendientes();
         });
     </script>
 </body>
