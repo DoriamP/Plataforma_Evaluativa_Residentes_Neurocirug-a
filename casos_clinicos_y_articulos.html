@@ -145,7 +145,7 @@
     </div>
 
     <script>
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxhOiPzRwlX3Iqkm4tfCxAXOk3PiOgiWO3IIPZ29YhrHQccuMH3l_BxFkQbYMRNQQSh/exec";
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzwxFznLdmraLeYOP3VxEGm53p6MZLmYWt5AyjJ72j-vSUkhkTBDWprNCtK1yfm82m_/exec";
 
         const MAX = { 1: 7, 2: 6, 3: 7 };
         const MAX_TOTAL = 20;
@@ -199,10 +199,15 @@
             const pct = Math.round((total / MAX_TOTAL) * 100);
             document.getElementById('liveScore').innerHTML = `${total} <span class="text-base font-normal text-indigo-400">/ 20 pts</span>`;
             document.getElementById('graphProgress').setAttribute('stroke-dasharray', `${pct},100`);
-            const col = pct >= 70 ? 'text-emerald-400' : 'text-red-400';
-            document.getElementById('graphProgress').className = `${col} transition-all duration-300`;
-            document.getElementById('graphProgress').setAttribute('stroke', 'currentColor');
-            document.getElementById('graphPct').className = `text-sm font-black ${col} transition-colors duration-300`;
+            
+            // MODIFICACIÓN: Cambio exacto de color según umbral del 70% (Verde/Rojo)
+            const aprobado = pct >= 70;
+            const colText = aprobado ? 'text-emerald-500' : 'text-red-500';
+            const colStroke = aprobado ? '#22c55e' : '#ef4444';
+            
+            document.getElementById('graphProgress').className = `${colText} transition-all duration-300`;
+            document.getElementById('graphProgress').setAttribute('stroke', colStroke);
+            document.getElementById('graphPct').className = `text-sm font-black ${colText} transition-colors duration-300`;
             document.getElementById('graphPct').textContent = `${pct}%`;
         }
 
@@ -219,12 +224,15 @@
             const total = (c1 ? parseInt(c1.value) : 0) + (c2 ? parseInt(c2.value) : 0) + (c3 ? parseInt(c3.value) : 0);
             const pct = Math.round((total / MAX_TOTAL) * 100);
 
+            // MODIFICACIÓN: Tema rellenado de forma automatizada y forzada
+            const temaForzado = "Presentacion casos clínico o artículo";
+
             const payload = new URLSearchParams({
                 tipo_evaluacion: "Casos Clínicos y Artículos",
                 fecha:           document.getElementById('fechaEvaluacion').value,
                 anoResidencia:   document.getElementById('anoResidencia').value,
                 nombreResidente: document.getElementById('residente').value,
-                tema:            document.getElementById('tema').value,
+                tema:            temaForzado,
                 especialista:    document.getElementById('evaluador').value,
                 criterio1:       c1 ? c1.value : 0,
                 criterio2:       c2 ? c2.value : 0,
@@ -241,7 +249,7 @@
                     `<strong>Fecha:</strong> ${document.getElementById('fechaEvaluacion').value}<br>
                      <strong>Evaluador:</strong> ${document.getElementById('evaluador').value}<br>
                      <strong>Residente:</strong> ${document.getElementById('residente').value}<br>
-                     <strong>Tema:</strong> "${document.getElementById('tema').value}"<br><br>
+                     <strong>Tema:</strong> "${temaForzado}"<br><br>
                      <strong>Resultado:</strong> ${total}/20 pts (${pct}%) —
                      <span class="${aprobado ? 'text-emerald-700' : 'text-red-600'} font-bold">${aprobado ? 'APROBADO' : 'REPROBADO'}</span>`;
                 document.getElementById('resultCard').classList.remove('hidden');
