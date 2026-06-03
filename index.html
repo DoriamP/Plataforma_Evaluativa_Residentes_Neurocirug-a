@@ -75,22 +75,35 @@
                     </div>
 
                     <div class="px-5 pb-4">
-                        <p class="text-xs text-slate-400 italic">Deslice horizontalmente para ver más clases próximas →</p>
+                        <p class="text-xs text-slate-400 italic">← Use las flechas para navegar entre clases pasadas y próximas →</p>
                     </div>
                 </div>
 
                 <!-- b) Fechas importantes (2 columnas) -->
                 <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                     <div class="bg-gradient-to-r from-amber-700 to-orange-700 px-5 py-4 flex items-center gap-2 text-white">
-                        <i data-lucide="flag" class="w-5 h-5 text-amber-200"></i>
+                        <svg width="18" height="16" viewBox="0 0 20 18" class="flex-shrink-0">
+                            <polygon points="10,1 19,17 1,17" fill="#fef08a" stroke="#fbbf24" stroke-width="1.5"/>
+                            <text x="10" y="14" text-anchor="middle" font-size="9" font-weight="900" fill="#92400e">!</text>
+                        </svg>
                         <h3 class="font-bold text-sm">Fechas Importantes</h3>
-                        <span class="ml-auto text-xs bg-amber-600/50 border border-amber-500/50 px-2 py-0.5 rounded-full">Próximas 5</span>
+                        <div class="ml-auto flex items-center gap-1.5">
+                            <span id="fechasContador" class="text-xs bg-amber-600/50 border border-amber-500/50 px-2 py-0.5 rounded-full"></span>
+                            <button id="btnFechasUp" onclick="scrollFechas(-1)"
+                                class="bg-amber-600/60 hover:bg-amber-500/80 text-white rounded-lg p-1 transition border border-amber-500/50">
+                                <i data-lucide="chevron-up" class="w-4 h-4"></i>
+                            </button>
+                            <button id="btnFechasDown" onclick="scrollFechas(1)"
+                                class="bg-amber-600/60 hover:bg-amber-500/80 text-white rounded-lg p-1 transition border border-amber-500/50">
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div id="fechasImportantesList" class="flex-grow p-4 space-y-2">
+                    <div id="fechasImportantesList" class="divide-y divide-slate-100" style="max-height:340px;overflow-y:auto;">
                         <!-- Items insertados por JS -->
                     </div>
-                    <div class="px-4 pb-4">
-                        <p class="text-xs text-slate-400 italic">Líneas en negrita del plan docente</p>
+                    <div class="px-4 py-2.5 border-t border-slate-100">
+                        <p class="text-xs text-slate-400 italic">Exámenes y presentaciones de avances</p>
                     </div>
                 </div>
             </div>
@@ -244,27 +257,6 @@
             </div>
         </section>
 
-        <!-- ═══ RESUMEN DE ACTIVIDADES ATRASADAS ════════════════════════════════ -->
-        <section class="mt-8">
-            <div class="flex items-center gap-3 mb-5">
-                <div class="bg-rose-900 p-2 rounded-lg text-rose-200">
-                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                </div>
-                <h2 class="text-xl font-bold text-slate-900">Actividades Atrasadas por Residente</h2>
-                <span id="badgePend" class="hidden text-xs font-bold bg-rose-600 text-white px-2.5 py-0.5 rounded-full"></span>
-            </div>
-
-            <!-- estado carga -->
-            <div id="pendResumen" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
-                <div class="flex items-center justify-center gap-2 text-slate-400 text-sm">
-                    <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                    </svg>
-                    Cargando datos desde Google Sheets…
-                </div>
-            </div>
-        </section>
 
     </main>
 
@@ -478,19 +470,30 @@
         };
 
         let clasesOrdenadas = [];
-        let claseOffset = 0; // índice del primer grupo visible
+        let claseOffset  = 0; // índice del primer grupo visible del carrusel
+        let fechasOffset = 0; // índice del primer item visible en fechas importantes
+        const FECHAS_POR_PAGINA = 5;
 
         function renderAgenda() {
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
-            const limite = new Date(hoy);
-            limite.setDate(hoy.getDate() + 3); // hoy + 3 días calendario
 
-            // Ordenar clases por fecha
+            // Incluir TODAS las clases (pasadas y futuras)
             clasesOrdenadas = CLASES
                 .map(c => ({ ...c, dateObj: parseDate(c.f) }))
-                .filter(c => c.dateObj >= hoy)
                 .sort((a, b) => a.dateObj - b.dateObj);
+
+            // Posicionar el carousel en la primera clase de hoy o futura
+            const grupos = getGruposPorFecha();
+            const idxHoy = grupos.findIndex(([f]) => parseDate(f) >= hoy);
+            claseOffset = idxHoy >= 0 ? Math.max(0, idxHoy) : Math.max(0, grupos.length - 10);
+
+            // Posicionar fechas importantes en la primera futura
+            const fechasOrdenadas = FECHAS_IMPORTANTES
+                .map(fi => ({ ...fi, dateObj: parseDate(fi.f) }))
+                .sort((a, b) => a.dateObj - b.dateObj);
+            const idxFechaHoy = fechasOrdenadas.findIndex(fi => fi.dateObj >= hoy);
+            fechasOffset = idxFechaHoy >= 0 ? Math.max(0, idxFechaHoy) : Math.max(0, fechasOrdenadas.length - FECHAS_POR_PAGINA);
 
             renderCarousel();
             renderFechasImportantes(hoy);
@@ -531,17 +534,20 @@
 
             visibles.forEach(([fechaStr, clases]) => {
                 const fechaObj = parseDate(fechaStr);
-                const esHoy = fechaObj.toDateString() === hoy.toDateString();
+                const esHoy   = fechaObj.toDateString() === hoy.toDateString();
+                const esPasada = fechaObj < hoy && !esHoy;
                 const esMañana = (() => { const m = new Date(hoy); m.setDate(m.getDate()+1); return fechaObj.toDateString() === m.toDateString(); })();
-                const enProximos3 = (fechaObj - hoy) / 86400000 <= 3;
+                const enProximos3 = !esPasada && (fechaObj - hoy) / 86400000 <= 3;
 
                 const card = document.createElement('div');
                 card.className = `scroll-snap-start flex-shrink-0 w-56 rounded-xl border shadow-sm overflow-hidden ${esHoy ? 'border-indigo-400 ring-2 ring-indigo-300' : 'border-slate-200'}`;
+                if (esPasada) card.style.opacity = '0.55';
 
                 // Header de fecha
-                const headerColor = esHoy ? 'bg-indigo-700 text-white' : enProximos3 ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-100 text-slate-700';
+                const headerColor = esHoy ? 'bg-indigo-700 text-white' : esPasada ? 'bg-slate-200 text-slate-500' : enProximos3 ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-100 text-slate-700';
                 let etiqueta = '';
-                if (esHoy) etiqueta = '<span class="text-xs bg-white text-indigo-700 font-bold px-1.5 py-0.5 rounded-full ml-1">HOY</span>';
+                if (esHoy)    etiqueta = '<span class="text-xs bg-white text-indigo-700 font-bold px-1.5 py-0.5 rounded-full ml-1">HOY</span>';
+                else if (esPasada)  etiqueta = '<span class="text-xs bg-slate-400 text-white font-bold px-1.5 py-0.5 rounded-full ml-1">Pasada</span>';
                 else if (esMañana) etiqueta = '<span class="text-xs bg-indigo-200 text-indigo-800 font-bold px-1.5 py-0.5 rounded-full ml-1">Mañana</span>';
 
                 card.innerHTML = `
@@ -554,6 +560,8 @@
                     <div class="bg-white p-2 space-y-2">
                         ${clases.map(c => {
                             const col = ANIO_COLORES[c.anio] || ANIO_COLORES["I"];
+                            const temaGuardado = getTemaIdx(c.f, c.anio);
+                            const editable = esEditableIdx(c.tema);
                             return `
                             <div class="p-2 rounded-lg border ${col.border} ${col.bg}">
                                 <div class="flex items-center gap-1 mb-1">
@@ -561,6 +569,8 @@
                                 </div>
                                 <p class="text-xs font-semibold text-slate-800 leading-snug">${c.tema}</p>
                                 ${c.dr ? `<p class="text-xs text-slate-500 mt-0.5">${c.dr}</p>` : ''}
+                                ${editable && temaGuardado ? `<div class="mt-1.5 pt-1.5 border-t ${col.border} flex items-start gap-1"><span class="text-indigo-500 text-xs flex-shrink-0">📌</span><p class="text-xs font-semibold text-indigo-800 leading-snug">${temaGuardado}</p></div>` : ''}
+                                ${editable && !temaGuardado ? `<p class="text-xs text-slate-400 italic mt-1">— tema por asignar —</p>` : ''}
                             </div>`;
                         }).join('')}
                     </div>
@@ -581,41 +591,97 @@
             renderCarousel();
         }
 
+        function scrollFechas(dir) {
+            const total = FECHAS_IMPORTANTES.length;
+            fechasOffset = Math.max(0, Math.min(total - 1, fechasOffset + dir));
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            renderFechasImportantes(hoy);
+        }
+
+        function svgTriangulo(colorFill, colorStroke) {
+            return `<svg width="22" height="20" viewBox="0 0 22 20" style="flex-shrink:0;">
+                <polygon points="11,1.5 20.5,18.5 1.5,18.5" fill="${colorFill}" stroke="${colorStroke}" stroke-width="1.5"/>
+                <text x="11" y="15.5" text-anchor="middle" font-size="9" font-weight="900" fill="white">!</text>
+            </svg>`;
+        }
+
         function renderFechasImportantes(hoy) {
-            const lista = document.getElementById('fechasImportantesList');
+            const lista     = document.getElementById('fechasImportantesList');
+            const contador  = document.getElementById('fechasContador');
+            const btnUp     = document.getElementById('btnFechasUp');
+            const btnDown   = document.getElementById('btnFechasDown');
 
-            const proximas = FECHAS_IMPORTANTES
+            // Ordenar TODAS (pasadas + futuras)
+            const todas = FECHAS_IMPORTANTES
                 .map(fi => ({ ...fi, dateObj: parseDate(fi.f) }))
-                .filter(fi => fi.dateObj >= hoy)
-                .sort((a, b) => a.dateObj - b.dateObj)
-                .slice(0, 5);
+                .sort((a, b) => a.dateObj - b.dateObj);
 
-            if (proximas.length === 0) {
-                lista.innerHTML = '<p class="text-sm text-slate-400 italic">No hay fechas importantes próximas.</p>';
+            if (todas.length === 0) {
+                lista.innerHTML = '<p class="text-sm text-slate-400 italic p-4">No hay fechas importantes.</p>';
                 return;
             }
 
-            lista.innerHTML = proximas.map(fi => {
-                const diasRestantes = Math.ceil((fi.dateObj - hoy) / 86400000);
-                const esInminente = diasRestantes <= 14;
-                const iconColor = fi.tipo === 'examen' ? 'text-red-500' : 'text-amber-500';
-                const bgColor = fi.tipo === 'examen'
-                    ? (esInminente ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200')
-                    : (esInminente ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200');
-                const diasTexto = diasRestantes === 0 ? 'HOY' : diasRestantes === 1 ? 'Mañana' : `En ${diasRestantes} días`;
-                const diasColor = diasRestantes <= 7 ? 'text-red-600 font-bold' : diasRestantes <= 14 ? 'text-amber-600 font-semibold' : 'text-slate-500';
+            const total    = todas.length;
+            const visibles = todas.slice(fechasOffset, fechasOffset + FECHAS_POR_PAGINA);
 
-                return `
-                <div class="p-3 rounded-xl border ${bgColor} flex gap-3 items-start">
-                    <div class="mt-0.5 flex-shrink-0">
-                        <i data-lucide="${fi.tipo === 'examen' ? 'clipboard-check' : 'file-badge'}" class="w-4 h-4 ${iconColor}"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold text-slate-800 leading-snug">${fi.desc}</p>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs text-slate-500">${DIAS_ES[fi.dateObj.getDay()]} ${fi.dateObj.getDate()} ${MESES_ES[fi.dateObj.getMonth()]} ${fi.dateObj.getFullYear()}</span>
-                            <span class="text-xs ${diasColor}">${diasTexto}</span>
+            // Contador
+            const desde = fechasOffset + 1;
+            const hasta = Math.min(fechasOffset + FECHAS_POR_PAGINA, total);
+            contador.textContent = `${desde}–${hasta} / ${total}`;
+
+            // Botones habilitados/deshabilitados
+            btnUp.disabled = fechasOffset === 0;
+            btnUp.classList.toggle('opacity-40', fechasOffset === 0);
+            btnDown.disabled = fechasOffset + FECHAS_POR_PAGINA >= total;
+            btnDown.classList.toggle('opacity-40', fechasOffset + FECHAS_POR_PAGINA >= total);
+
+            lista.innerHTML = visibles.map(fi => {
+                const diffMs   = fi.dateObj - hoy;
+                const diffDias = Math.round(diffMs / 86400000);
+                const pasada   = diffDias < 0;
+
+                // Triángulo de advertencia
+                let triangulo = '<div style="width:22px;flex-shrink:0;"></div>';
+                if (!pasada) {
+                    if (diffDias <= 7)       triangulo = svgTriangulo('#ef4444','#dc2626');
+                    else if (diffDias <= 21) triangulo = svgTriangulo('#f59e0b','#d97706');
+                }
+
+                // Texto y color de días
+                let diasTexto, diasColor;
+                if (pasada) {
+                    diasTexto = 'Hace ' + Math.abs(diffDias) + ' día' + (Math.abs(diffDias)!==1?'s':'');
+                    diasColor = '#94a3b8';
+                } else if (diffDias === 0) {
+                    diasTexto = '¡HOY!';   diasColor = '#7c3aed';
+                } else if (diffDias === 1) {
+                    diasTexto = 'Mañana';  diasColor = '#dc2626';
+                } else if (diffDias <= 7) {
+                    diasTexto = diffDias + ' días'; diasColor = '#dc2626';
+                } else if (diffDias <= 21) {
+                    diasTexto = diffDias + ' días'; diasColor = '#d97706';
+                } else {
+                    diasTexto = diffDias + ' días'; diasColor = '#64748b';
+                }
+
+                const tipoLabel = fi.tipo === 'examen'
+                    ? '<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px;">EXAMEN</span>'
+                    : '<span style="background:#ede9fe;color:#5b21b6;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px;">PRESENTACIÓN</span>';
+
+                const fechaStr = fi.dateObj.getDate() + ' ' + MESES_ES[fi.dateObj.getMonth()] + ' ' + fi.dateObj.getFullYear();
+
+                return `<div style="padding:11px 16px;display:flex;align-items:center;gap:10px;${pasada?'opacity:.5;':''}border-bottom:1px solid #f1f5f9;">
+                    ${triangulo}
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px;">
+                            ${tipoLabel}
+                            <span style="font-size:10px;color:#94a3b8;font-weight:500;">${fechaStr}</span>
                         </div>
+                        <p style="font-size:12px;font-weight:700;color:#1e293b;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${fi.desc}</p>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <p style="font-size:12px;font-weight:800;color:${diasColor};white-space:nowrap;">${diasTexto}</p>
+                        ${!pasada && diffDias > 0 ? '<p style="font-size:9px;color:#94a3b8;margin-top:1px;">restantes</p>' : ''}
                     </div>
                 </div>`;
             }).join('');
@@ -627,6 +693,35 @@
         // RESUMEN DE ACTIVIDADES ATRASADAS
         // ═══════════════════════════════════════════════════
         const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzwxFznLdmraLeYOP3VxEGm53p6MZLmYWt5AyjJ72j-vSUkhkTBDWprNCtK1yfm82m_/exec";
+
+        // ── Temas guardados (Google Sheets + localStorage) ──
+        let _temasCache = {};
+
+        async function fetchTemas() {
+            try {
+                const resp = await fetch(`${URL_SCRIPT}?action=getTemas`, { mode: 'cors' });
+                const data = await resp.json();
+                if (Array.isArray(data)) {
+                    data.forEach(t => {
+                        if (t.fecha && t.anio && t.tema) {
+                            const key = 'manual_tema_' + t.anio + '_' + t.fecha;
+                            _temasCache[key] = t.tema;
+                            localStorage.setItem(key, t.tema);
+                        }
+                    });
+                }
+            } catch(e) { /* usa localStorage */ }
+        }
+
+        function getTemaIdx(fecha, anio) {
+            const key = 'manual_tema_' + anio + '_' + fecha;
+            return _temasCache[key] || localStorage.getItem(key) || '';
+        }
+
+        function esEditableIdx(tema) {
+            const t = tema.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+            return t.includes('presentacion de caso') || (t.includes('revision') && t.includes('articulo'));
+        }
 
         const RESIDENTE_ANIO = {
             "María Teresa Quintana Duarte":"I",    "Kevin Yassir Bobb García":"I",
@@ -799,6 +894,13 @@
         // Arrancar cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', () => {
             cargarResumenPendientes();
+            // Cargar temas guardados desde Sheets y actualizar carrusel
+            fetchTemas().then(() => {
+                const hoy = new Date(); hoy.setHours(0,0,0,0);
+                renderCarousel();
+                renderFechasImportantes(hoy);
+                lucide.createIcons();
+            });
         });
     </script>
 </body>
