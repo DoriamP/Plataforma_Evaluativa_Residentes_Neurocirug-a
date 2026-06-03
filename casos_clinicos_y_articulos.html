@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Casos Clínicos y Artículos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen py-6 px-3">
+
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-200">
+
+        <!-- Cabecera -->
+        <div class="bg-indigo-900 text-white px-6 py-6">
+            <a href="index.html" class="inline-flex items-center gap-1 text-xs text-indigo-300 hover:text-white mb-3 transition">
+                ← Volver al menú
+            </a>
+            <h1 class="text-xl font-bold leading-tight">Evaluación de Casos Clínicos y Artículos Científicos</h1>
+            <p class="text-indigo-300 text-sm mt-1">Residentes de Neurocirugía</p>
+        </div>
+
+        <form id="evaluationForm" class="p-5 space-y-6">
+
+            <!-- Fecha -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha de Evaluación</label>
+                <input type="text" id="fechaEvaluacion" readonly
+                    class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold text-sm cursor-not-allowed">
+            </div>
+
+            <!-- Año y Residente -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="anoResidencia" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Año de Residencia *</label>
+                    <select id="anoResidencia" required
+                        class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                        <option value="" disabled selected>Seleccione el año…</option>
+                        <option value="I">I año</option>
+                        <option value="II">II año</option>
+                        <option value="III">III año</option>
+                        <option value="IV">IV año</option>
+                        <option value="V">V año</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="residente" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Residente *</label>
+                    <select id="residente" required disabled
+                        class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm outline-none appearance-none cursor-not-allowed text-slate-400">
+                        <option value="" disabled selected>Primero seleccione el año…</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tema -->
+            <div>
+                <label for="tema" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Título / Tema de la Presentación *</label>
+                <input type="text" id="tema" required placeholder="Escriba el tema aquí…"
+                    class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <!-- Evaluador -->
+            <div>
+                <label for="evaluador" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Especialista Evaluador *</label>
+                <select id="evaluador" required
+                    class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                    <option value="" disabled selected>Seleccione al evaluador…</option>
+                    <option value="Dr. Luis Zapata">Dr. Luis Zapata</option>
+                    <option value="Dr. Edgar Herrera">Dr. Edgar Herrera</option>
+                    <option value="Dr. Doriam Perera">Dr. Doriam Perera</option>
+                    <option value="Dr. José Hurtado">Dr. José Hurtado</option>
+                    <option value="Dr. Mauricio Matus">Dr. Mauricio Matus</option>
+                    <option value="Dr. Oswaldo Pérez">Dr. Oswaldo Pérez</option>
+                </select>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <!-- CRITERIO 1 — máx. 7 pts -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+                <div>
+                    <p class="text-sm font-bold text-slate-800">1. Estructura y organización de la presentación</p>
+                    <p class="text-xs text-slate-500 mt-1 italic">Ideas claras y concisas, figuras anatómicas y explicativas adecuadas.</p>
+                    <p class="text-xs text-indigo-600 font-medium mt-1">0 = No evaluable &nbsp;|&nbsp; 7 = Excelente (máx. 7 pts)</p>
+                </div>
+                <div class="flex flex-wrap gap-2 justify-center" id="scale1"></div>
+            </div>
+
+            <!-- CRITERIO 2 — máx. 6 pts -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+                <div>
+                    <p class="text-sm font-bold text-slate-800">2. Literatura científica variada y pertinente</p>
+                    <p class="text-xs text-slate-500 mt-1 italic">Artículos actualizados de alto impacto, metanálisis o guías indexadas.</p>
+                    <p class="text-xs text-indigo-600 font-medium mt-1">0 = Insuficiente &nbsp;|&nbsp; 6 = Alta evidencia (máx. 6 pts)</p>
+                </div>
+                <div class="flex flex-wrap gap-2 justify-center" id="scale2"></div>
+            </div>
+
+            <!-- CRITERIO 3 — máx. 7 pts -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+                <div>
+                    <p class="text-sm font-bold text-slate-800">3. Dominio del tema y manejo de preguntas</p>
+                    <p class="text-xs text-slate-500 mt-1 italic">Solidez argumentativa, criterio neuroquirúrgico y respuestas con base científica.</p>
+                    <p class="text-xs text-indigo-600 font-medium mt-1">0 = No responde &nbsp;|&nbsp; 7 = Experto (máx. 7 pts)</p>
+                </div>
+                <div class="flex flex-wrap gap-2 justify-center" id="scale3"></div>
+            </div>
+
+            <!-- Comentarios -->
+            <div>
+                <label for="comentarios" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Comentarios adicionales (opcional)</label>
+                <textarea id="comentarios" rows="3" placeholder="Observaciones o sugerencias…"
+                    class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
+            </div>
+
+            <!-- Marcador -->
+            <div class="bg-indigo-950 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-center sm:text-left">
+                    <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Puntuación</p>
+                    <p id="liveScore" class="text-3xl font-black text-white mt-0.5">0 <span class="text-base font-normal text-indigo-400">/ 20 pts</span></p>
+                </div>
+                <div class="relative w-20 h-20 flex-shrink-0">
+                    <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                        <path class="text-indigo-800" stroke-width="3.5" stroke="currentColor" fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        <path id="graphProgress" class="text-red-400 transition-all duration-300" stroke-width="3.5"
+                            stroke-linecap="round" stroke-dasharray="0,100" stroke="currentColor" fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span id="graphPct" class="text-sm font-black text-red-400 transition-colors duration-300">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmit"
+                class="w-full bg-indigo-900 hover:bg-indigo-950 active:scale-[0.98] text-white font-bold py-3.5 px-6 rounded-xl shadow transition text-sm">
+                Enviar Evaluación
+            </button>
+        </form>
+
+        <div id="resultCard" class="hidden mx-5 mb-6 p-5 bg-emerald-50 border border-emerald-200 rounded-2xl">
+            <p class="font-bold text-emerald-800 text-base mb-1">✓ Evaluación registrada exitosamente</p>
+            <p id="resultSummary" class="text-sm text-emerald-700 leading-relaxed"></p>
+        </div>
+    </div>
+
+    <script>
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxhOiPzRwlX3Iqkm4tfCxAXOk3PiOgiWO3IIPZ29YhrHQccuMH3l_BxFkQbYMRNQQSh/exec";
+
+        const MAX = { 1: 7, 2: 6, 3: 7 };
+        const MAX_TOTAL = 20;
+
+        const residentesPorAno = {
+            "I":   ["María Teresa Quintana Duarte", "Kevin Yassir Bobb García"],
+            "II":  ["Axly Ivania Olivas Jiménez", "Fernando Antonio De Jesús Cuadra Jiménez"],
+            "III": ["Vivian Iveth Díaz", "José Luis Cerrato Lemus"],
+            "IV":  ["Angel Benigno Rayo Bravo", "Lagree Guzman Reynoso", "Liuska Ninoska Blandón Cortés"],
+            "V":   ["Martha Elena Abarca Morales", "Jissella Joammet Membreño Vivas"]
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const h = new Date();
+            document.getElementById('fechaEvaluacion').value =
+                `${String(h.getDate()).padStart(2,'0')}/${String(h.getMonth()+1).padStart(2,'0')}/${h.getFullYear()}`;
+            buildScales();
+        });
+
+        function buildScales() {
+            [1, 2, 3].forEach(n => {
+                const container = document.getElementById(`scale${n}`);
+                for (let i = 0; i <= MAX[n]; i++) {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center justify-center w-10 h-10 rounded-xl border-2 border-slate-300 bg-white text-sm font-bold text-slate-600 cursor-pointer transition hover:border-indigo-400 hover:text-indigo-600 has-[:checked]:bg-indigo-700 has-[:checked]:border-indigo-700 has-[:checked]:text-white';
+                    label.innerHTML = `<input type="radio" name="criterio${n}" value="${i}" class="sr-only" required> ${i}`;
+                    container.appendChild(label);
+                }
+            });
+        }
+
+        document.getElementById('anoResidencia').addEventListener('change', function () {
+            const sel = document.getElementById('residente');
+            const lista = residentesPorAno[this.value] || [];
+            sel.innerHTML = '<option value="" disabled selected>Seleccione el residente…</option>';
+            lista.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+            sel.disabled = lista.length === 0;
+            sel.className = lista.length
+                ? 'w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none'
+                : 'w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm outline-none appearance-none cursor-not-allowed text-slate-400';
+        });
+
+        document.getElementById('evaluationForm').addEventListener('change', calcScore);
+
+        function calcScore() {
+            let total = 0;
+            [1, 2, 3].forEach(n => {
+                const r = document.querySelector(`input[name="criterio${n}"]:checked`);
+                if (r) total += parseInt(r.value);
+            });
+            const pct = Math.round((total / MAX_TOTAL) * 100);
+            document.getElementById('liveScore').innerHTML = `${total} <span class="text-base font-normal text-indigo-400">/ 20 pts</span>`;
+            document.getElementById('graphProgress').setAttribute('stroke-dasharray', `${pct},100`);
+            const col = pct >= 70 ? 'text-emerald-400' : 'text-red-400';
+            document.getElementById('graphProgress').className = `${col} transition-all duration-300`;
+            document.getElementById('graphProgress').setAttribute('stroke', 'currentColor');
+            document.getElementById('graphPct').className = `text-sm font-black ${col} transition-colors duration-300`;
+            document.getElementById('graphPct').textContent = `${pct}%`;
+        }
+
+        document.getElementById('evaluationForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.textContent = 'Enviando…';
+            btn.className = 'w-full bg-slate-400 cursor-not-allowed text-white font-bold py-3.5 px-6 rounded-xl text-sm';
+
+            const c1 = document.querySelector('input[name="criterio1"]:checked');
+            const c2 = document.querySelector('input[name="criterio2"]:checked');
+            const c3 = document.querySelector('input[name="criterio3"]:checked');
+            const total = (c1 ? parseInt(c1.value) : 0) + (c2 ? parseInt(c2.value) : 0) + (c3 ? parseInt(c3.value) : 0);
+            const pct = Math.round((total / MAX_TOTAL) * 100);
+
+            const payload = new URLSearchParams({
+                tipo_evaluacion: "Casos Clínicos y Artículos",
+                fecha:           document.getElementById('fechaEvaluacion').value,
+                anoResidencia:   document.getElementById('anoResidencia').value,
+                nombreResidente: document.getElementById('residente').value,
+                tema:            document.getElementById('tema').value,
+                especialista:    document.getElementById('evaluador').value,
+                criterio1:       c1 ? c1.value : 0,
+                criterio2:       c2 ? c2.value : 0,
+                criterio3:       c3 ? c3.value : 0,
+                total:           total,
+                porcentaje:      pct + '%',
+                comentarios:     document.getElementById('comentarios').value || 'Ninguno'
+            });
+
+            fetch(`${URL_SCRIPT}?${payload.toString()}`, { mode: 'no-cors' })
+            .then(() => {
+                const aprobado = pct >= 70;
+                document.getElementById('resultSummary').innerHTML =
+                    `<strong>Fecha:</strong> ${document.getElementById('fechaEvaluacion').value}<br>
+                     <strong>Evaluador:</strong> ${document.getElementById('evaluador').value}<br>
+                     <strong>Residente:</strong> ${document.getElementById('residente').value}<br>
+                     <strong>Tema:</strong> "${document.getElementById('tema').value}"<br><br>
+                     <strong>Resultado:</strong> ${total}/20 pts (${pct}%) —
+                     <span class="${aprobado ? 'text-emerald-700' : 'text-red-600'} font-bold">${aprobado ? 'APROBADO' : 'REPROBADO'}</span>`;
+                document.getElementById('resultCard').classList.remove('hidden');
+                document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+                btn.textContent = '✓ Evaluación Enviada';
+            })
+            .catch(() => {
+                alert('Error al conectar. Verifica tu conexión e intenta nuevamente.');
+                btn.disabled = false;
+                btn.textContent = 'Enviar Evaluación';
+                btn.className = 'w-full bg-indigo-900 hover:bg-indigo-950 active:scale-[0.98] text-white font-bold py-3.5 px-6 rounded-xl shadow transition text-sm';
+            });
+        });
+    </script>
+</body>
+</html>
