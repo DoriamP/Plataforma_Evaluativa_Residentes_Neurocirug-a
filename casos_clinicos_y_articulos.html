@@ -21,11 +21,26 @@
 
         <form id="evaluationForm" class="p-5 space-y-6">
 
-            <!-- Fecha -->
+            <!-- Fecha de Evaluación (editable con calendario) -->
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha de Evaluación</label>
-                <input type="text" id="fechaEvaluacion" readonly
-                    class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold text-sm cursor-not-allowed">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    Fecha de Evaluación
+                    <span class="ml-1 text-indigo-500 font-normal normal-case">(toque para cambiar)</span>
+                </label>
+                <div class="relative">
+                    <input type="text" id="fechaEvaluacion"
+                        class="w-full px-3 py-2.5 bg-white border border-indigo-300 rounded-xl text-slate-700 font-semibold text-sm cursor-pointer hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                        readonly
+                        onclick="document.getElementById('fechaDatePicker').showPicker ? document.getElementById('fechaDatePicker').showPicker() : document.getElementById('fechaDatePicker').click()"
+                        title="Toque para seleccionar una fecha diferente">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </span>
+                    <input type="date" id="fechaDatePicker"
+                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                        onchange="actualizarFechaDesdeCalendario(this.value)"
+                        tabindex="-1">
+                </div>
             </div>
 
             <!-- Año y Residente -->
@@ -158,11 +173,47 @@
             "V":   ["Martha Elena Abarca Morales", "Jissella Joammet Membreño Vivas"]
         };
 
+        function formatDDMMYYYY(date) {
+            return String(date.getDate()).padStart(2,'0') + '/' +
+                   String(date.getMonth()+1).padStart(2,'0') + '/' +
+                   date.getFullYear();
+        }
+
+        function isoToDisplay(iso) {
+            var p = iso.split('-');
+            return p[2] + '/' + p[1] + '/' + p[0];
+        }
+
+        function displayToISO(disp) {
+            var p = disp.split('/');
+            return p[2] + '-' + p[1] + '-' + p[0];
+        }
+
+        function actualizarFechaDesdeCalendario(isoVal) {
+            if (!isoVal) return;
+            document.getElementById('fechaEvaluacion').value = isoToDisplay(isoVal);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const h = new Date();
-            document.getElementById('fechaEvaluacion').value =
-                `${String(h.getDate()).padStart(2,'0')}/${String(h.getMonth()+1).padStart(2,'0')}/${h.getFullYear()}`;
+            document.getElementById('fechaEvaluacion').value = formatDDMMYYYY(h);
+            document.getElementById('fechaDatePicker').value = h.toISOString().split('T')[0];
             buildScales();
+
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('fecha')) {
+                const f = params.get('fecha');
+                document.getElementById('fechaEvaluacion').value = f;
+                document.getElementById('fechaDatePicker').value = displayToISO(f);
+            }
+            if (params.get('anio')) {
+                const sel = document.getElementById('anoResidencia');
+                sel.value = params.get('anio');
+                sel.dispatchEvent(new Event('change'));
+            }
+            if (params.get('tema')) {
+                document.getElementById('tema').value = params.get('tema');
+            }
         });
 
         function buildScales() {
@@ -199,12 +250,9 @@
             const pct = Math.round((total / MAX_TOTAL) * 100);
             document.getElementById('liveScore').innerHTML = `${total} <span class="text-base font-normal text-indigo-400">/ 20 pts</span>`;
             document.getElementById('graphProgress').setAttribute('stroke-dasharray', `${pct},100`);
-            
-            // MODIFICACIÓN: Cambio exacto de color según umbral del 70% (Verde/Rojo)
             const aprobado = pct >= 70;
             const colText = aprobado ? 'text-emerald-500' : 'text-red-500';
             const colStroke = aprobado ? '#22c55e' : '#ef4444';
-            
             document.getElementById('graphProgress').className = `${colText} transition-all duration-300`;
             document.getElementById('graphProgress').setAttribute('stroke', colStroke);
             document.getElementById('graphPct').className = `text-sm font-black ${colText} transition-colors duration-300`;
@@ -224,15 +272,14 @@
             const total = (c1 ? parseInt(c1.value) : 0) + (c2 ? parseInt(c2.value) : 0) + (c3 ? parseInt(c3.value) : 0);
             const pct = Math.round((total / MAX_TOTAL) * 100);
 
-            // MODIFICACIÓN: Tema rellenado de forma automatizada y forzada
-            const temaForzado = "Presentacion casos clínico o artículo";
+            const temaVal = document.getElementById('tema').value || "Presentacion casos clínico o artículo";
 
             const payload = new URLSearchParams({
                 tipo_evaluacion: "Casos Clínicos y Artículos",
                 fecha:           document.getElementById('fechaEvaluacion').value,
                 anoResidencia:   document.getElementById('anoResidencia').value,
                 nombreResidente: document.getElementById('residente').value,
-                tema:            temaForzado,
+                tema:            temaVal,
                 especialista:    document.getElementById('evaluador').value,
                 criterio1:       c1 ? c1.value : 0,
                 criterio2:       c2 ? c2.value : 0,
@@ -249,7 +296,7 @@
                     `<strong>Fecha:</strong> ${document.getElementById('fechaEvaluacion').value}<br>
                      <strong>Evaluador:</strong> ${document.getElementById('evaluador').value}<br>
                      <strong>Residente:</strong> ${document.getElementById('residente').value}<br>
-                     <strong>Tema:</strong> "${temaForzado}"<br><br>
+                     <strong>Tema:</strong> "${temaVal}"<br><br>
                      <strong>Resultado:</strong> ${total}/20 pts (${pct}%) —
                      <span class="${aprobado ? 'text-emerald-700' : 'text-red-600'} font-bold">${aprobado ? 'APROBADO' : 'REPROBADO'}</span>`;
                 document.getElementById('resultCard').classList.remove('hidden');
