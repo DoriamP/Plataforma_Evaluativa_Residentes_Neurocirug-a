@@ -21,11 +21,27 @@
 
         <form id="clinicalForm" class="p-5 space-y-6">
 
-            <!-- Fecha -->
+            <!-- Fecha (editable con calendario) -->
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha de la Sesión</label>
-                <input type="date" id="fecha" readonly
-                    class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-semibold text-sm cursor-not-allowed">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    Fecha de la Sesión
+                    <span class="ml-1 text-blue-500 font-normal normal-case">(toque para cambiar)</span>
+                </label>
+                <div class="relative">
+                    <input type="text" id="fechaDisplay"
+                        class="w-full px-3 py-2.5 bg-white border border-blue-300 rounded-xl text-slate-700 font-semibold text-sm cursor-pointer hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                        readonly
+                        onclick="document.getElementById('fecha').showPicker ? document.getElementById('fecha').showPicker() : document.getElementById('fecha').click()"
+                        title="Toque para seleccionar una fecha diferente">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </span>
+                    <!-- Input date real (oculto, controla el valor) -->
+                    <input type="date" id="fecha"
+                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                        onchange="actualizarFechaDisplay(this.value)"
+                        tabindex="-1">
+                </div>
             </div>
 
             <!-- Año y Residente -->
@@ -143,8 +159,21 @@
             "V":   ["Martha Elena Abarca Morales", "Jissella Joammet Membreño Vivas"]
         };
 
+        // Convierte YYYY-MM-DD → DD/MM/YYYY para mostrar
+        function isoToDisplay(iso) {
+            var p = iso.split('-');
+            return p[2] + '/' + p[1] + '/' + p[0];
+        }
+
+        function actualizarFechaDisplay(isoVal) {
+            if (!isoVal) return;
+            document.getElementById('fechaDisplay').value = isoToDisplay(isoVal);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').value = hoy;
+            document.getElementById('fechaDisplay').value = isoToDisplay(hoy);
             buildScales();
         });
 
@@ -210,7 +239,8 @@
             const a2 = document.querySelector('input[name="aspecto2"]:checked');
             const total = (a1 ? parseInt(a1.value) : 0) + (a2 ? parseInt(a2.value) : 0);
             const pct = Math.round((total / 20) * 100);
-            const fechaVal = document.getElementById('fecha').value;
+            // Usar la fecha del display (DD/MM/YYYY)
+            const fechaVal = document.getElementById('fechaDisplay').value;
 
             const payload = new URLSearchParams({
                 tipo_evaluacion: "Sesiones Diarias",
