@@ -6,6 +6,7 @@
     <title>Plataforma de Evaluación de Residentes de Neurocirugía</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         .scroll-snap-x { scroll-snap-type: x mandatory; }
         .scroll-snap-start { scroll-snap-align: start; }
@@ -22,8 +23,8 @@
                     <i data-lucide="activity" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold tracking-tight">Plataforma docente y evaluación</h1>
-                    <p class="text-xs text-indigo-300 font-medium">Programa de Residentes de Neurocirugía HMEADB</p>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-tight">Plataforma de Evaluación</h1>
+                    <p class="text-xs text-indigo-300 font-medium">Programa de Residentes de Neurocirugía</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 bg-indigo-900/50 px-3 py-1.5 rounded-full border border-indigo-800 text-xs text-indigo-200">
@@ -35,7 +36,7 @@
 
     <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8 md:py-10">
 
-        <!-- SECCIÓN AGENDA DOCENTE (reemplaza el antiguo Panel de Control) -->
+        <!-- SECCIÓN AGENDA DOCENTE -->
         <section class="mb-10">
             <div class="flex items-center gap-3 mb-5">
                 <div class="bg-indigo-900 p-2 rounded-lg text-indigo-200">
@@ -47,7 +48,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-                <!-- a) Clases programadas próximas (3 columnas) -->
+                <!-- a) Clases programadas -->
                 <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="bg-gradient-to-r from-indigo-900 to-indigo-800 px-5 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-2 text-white">
@@ -63,23 +64,16 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Etiqueta de rango visible -->
                     <div class="px-5 pt-3 pb-1">
                         <p id="rangoClases" class="text-xs text-indigo-600 font-semibold bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-lg inline-block"></p>
                     </div>
-
-                    <!-- Contenedor deslizable -->
-                    <div id="clasesCarousel" class="flex overflow-x-auto scroll-snap-x hide-scrollbar gap-3 px-5 pb-5 pt-3" style="scroll-behavior: smooth;">
-                        <!-- Cards insertadas por JS -->
-                    </div>
-
+                    <div id="clasesCarousel" class="flex overflow-x-auto scroll-snap-x hide-scrollbar gap-3 px-5 pb-5 pt-3" style="scroll-behavior: smooth; touch-action: pan-x;"></div>
                     <div class="px-5 pb-4">
-                        <p class="text-xs text-slate-400 italic">← Use las flechas para navegar entre clases pasadas y próximas →</p>
+                        <p class="text-xs text-slate-400 italic">← Deslice o use las flechas para navegar →</p>
                     </div>
                 </div>
 
-                <!-- b) Fechas importantes (2 columnas) -->
+                <!-- b) Fechas importantes -->
                 <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                     <div class="bg-gradient-to-r from-amber-700 to-orange-700 px-5 py-4 flex items-center gap-2 text-white">
                         <svg width="18" height="16" viewBox="0 0 20 18" class="flex-shrink-0">
@@ -89,19 +83,15 @@
                         <h3 class="font-bold text-sm">Fechas Importantes</h3>
                         <div class="ml-auto flex items-center gap-1.5">
                             <span id="fechasContador" class="text-xs bg-amber-600/50 border border-amber-500/50 px-2 py-0.5 rounded-full"></span>
-                            <button id="btnFechasUp" onclick="scrollFechas(-1)"
-                                class="bg-amber-600/60 hover:bg-amber-500/80 text-white rounded-lg p-1 transition border border-amber-500/50">
+                            <button id="btnFechasUp" onclick="scrollFechas(-1)" class="bg-amber-600/60 hover:bg-amber-500/80 text-white rounded-lg p-1 transition border border-amber-500/50">
                                 <i data-lucide="chevron-up" class="w-4 h-4"></i>
                             </button>
-                            <button id="btnFechasDown" onclick="scrollFechas(1)"
-                                class="bg-amber-600/60 hover:bg-amber-500/80 text-white rounded-lg p-1 transition border border-amber-500/50">
+                            <button id="btnFechasDown" onclick="scrollFechas(1)" class="bg-amber-600/60 hover:bg-amber-500/80 text-white rounded-lg p-1 transition border border-amber-500/50">
                                 <i data-lucide="chevron-down" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
-                    <div id="fechasImportantesList" class="divide-y divide-slate-100" style="max-height:340px;overflow-y:auto;">
-                        <!-- Items insertados por JS -->
-                    </div>
+                    <div id="fechasImportantesList" class="divide-y divide-slate-100" style="max-height:340px;overflow-y:auto;"></div>
                     <div class="px-4 py-2.5 border-t border-slate-100">
                         <p class="text-xs text-slate-400 italic">Exámenes y presentaciones de avances</p>
                     </div>
@@ -111,7 +101,6 @@
 
         <!-- MÓDULOS DE EVALUACIÓN -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
             <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                 <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 text-white flex items-center gap-3">
                     <i data-lucide="book-open" class="w-6 h-6 text-indigo-200"></i>
@@ -120,18 +109,12 @@
                         <p class="text-xs text-indigo-200">Evaluación académica y de discusión científica</p>
                     </div>
                 </div>
-
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
-                    <p class="text-slate-500 text-xs md:text-sm italic">
-                        Instrumentos destinados a medir el dominio cognitivo, la preparación de sesiones y el análisis crítico de la literatura médica.
-                    </p>
-
+                    <p class="text-slate-500 text-xs md:text-sm italic">Instrumentos destinados a medir el dominio cognitivo, la preparación de sesiones y el análisis crítico de la literatura médica.</p>
                     <div class="space-y-3 pt-2">
                         <a href="clases_programadas.html" class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl transition group">
                             <div class="flex items-center gap-3">
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm">
-                                    <i data-lucide="presentation" class="w-5 h-5"></i>
-                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm"><i data-lucide="presentation" class="w-5 h-5"></i></div>
                                 <div class="text-left">
                                     <span class="block text-sm font-semibold text-slate-800 group-hover:text-indigo-950">a) Clases Programadas</span>
                                     <span class="block text-xs text-slate-500">Evaluación estructural y de exposición</span>
@@ -139,12 +122,9 @@
                             </div>
                             <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transform group-hover:translate-x-1 transition"></i>
                         </a>
-
                         <a href="casos_clinicos_y_articulos.html" class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl transition group">
                             <div class="flex items-center gap-3">
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm">
-                                    <i data-lucide="file-text" class="w-5 h-5"></i>
-                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm"><i data-lucide="file-text" class="w-5 h-5"></i></div>
                                 <div class="text-left">
                                     <span class="block text-sm font-semibold text-slate-800 group-hover:text-indigo-950">b) Casos Clínicos y Artículos</span>
                                     <span class="block text-xs text-slate-500">Revisión de literatura y evidencia</span>
@@ -152,12 +132,9 @@
                             </div>
                             <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transform group-hover:translate-x-1 transition"></i>
                         </a>
-
                         <a href="sesiones_diarias.html" class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl transition group">
                             <div class="flex items-center gap-3">
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm">
-                                    <i data-lucide="message-square" class="w-5 h-5"></i>
-                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm"><i data-lucide="message-square" class="w-5 h-5"></i></div>
                                 <div class="text-left">
                                     <span class="block text-sm font-semibold text-slate-800 group-hover:text-indigo-950">c) Sesiones Clínicas Diarias</span>
                                     <span class="block text-xs text-slate-500">Participación activa matutina</span>
@@ -177,18 +154,12 @@
                         <p class="text-xs text-emerald-200">Evaluación de destrezas en quirófano</p>
                     </div>
                 </div>
-
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
-                    <p class="text-slate-500 text-xs md:text-sm italic">
-                        Instrumentos enfocados en la monitorización de la habilidad técnica, juicio intraoperatorio, toma de decisiones y bioseguridad del paciente.
-                    </p>
-
+                    <p class="text-slate-500 text-xs md:text-sm italic">Instrumentos enfocados en la monitorización de la habilidad técnica, juicio intraoperatorio, toma de decisiones y bioseguridad del paciente.</p>
                     <div class="pt-2">
                         <a href="practica_quirurgica.html" class="flex items-center justify-between p-5 bg-slate-50 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-200 rounded-xl transition group h-full">
                             <div class="flex items-center gap-4">
-                                <div class="bg-white p-3 rounded-xl border border-slate-200 text-slate-600 group-hover:text-emerald-600 group-hover:border-emerald-100 shadow-sm">
-                                    <i data-lucide="shield-alert" class="w-6 h-6"></i>
-                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-slate-200 text-slate-600 group-hover:text-emerald-600 group-hover:border-emerald-100 shadow-sm"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
                                 <div class="text-left">
                                     <span class="block text-base font-bold text-slate-800 group-hover:text-emerald-950">Práctica Quirúrgica</span>
                                     <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Evaluación del desempeño en procedimientos reales</span>
@@ -199,9 +170,9 @@
                     </div>
                 </div>
             </section>
-
         </div>
 
+        <!-- INTELIGENCIA ACADÉMICA -->
         <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:col-span-2 mt-4">
             <div class="bg-gradient-to-r from-indigo-900 to-slate-950 p-6 text-white flex items-center gap-3">
                 <i data-lucide="layout-dashboard" class="w-6 h-6 text-indigo-300"></i>
@@ -210,18 +181,12 @@
                     <p class="text-xs text-indigo-200">Consolidado general de calificaciones registradas</p>
                 </div>
             </div>
-
             <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
-                <p class="text-slate-500 text-xs md:text-sm italic">
-                    Acceda al módulo estadístico interactivo para evaluar curvas de rendimiento, filtrar registros históricos por residente o mitigar sesgos de evaluación por especialista.
-                </p>
-
+                <p class="text-slate-500 text-xs md:text-sm italic">Acceda al módulo estadístico interactivo para evaluar curvas de rendimiento, filtrar registros históricos por residente o mitigar sesgos de evaluación por especialista.</p>
                 <div class="pt-2 space-y-3">
                     <a href="dashboard.html" class="flex items-center justify-between p-5 bg-indigo-50/40 hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-300 rounded-xl transition group h-full">
                         <div class="flex items-center gap-4">
-                            <div class="bg-white p-3 rounded-xl border border-indigo-100 text-indigo-700 group-hover:text-indigo-900 shadow-sm">
-                                <i data-lucide="trending-up" class="w-6 h-6"></i>
-                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-indigo-100 text-indigo-700 group-hover:text-indigo-900 shadow-sm"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
                             <div class="text-left">
                                 <span class="block text-base font-bold text-slate-800 group-hover:text-indigo-950">Dashboard Docente</span>
                                 <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Análisis cronológico, promedios por residente y estadísticas avanzadas filtrables</span>
@@ -231,9 +196,7 @@
                     </a>
                     <a href="dashboard_residentes.html" class="flex items-center justify-between p-5 bg-emerald-50/40 hover:bg-emerald-50 border border-emerald-100 hover:border-emerald-300 rounded-xl transition group h-full">
                         <div class="flex items-center gap-4">
-                            <div class="bg-white p-3 rounded-xl border border-emerald-100 text-emerald-700 group-hover:text-emerald-900 shadow-sm">
-                                <i data-lucide="user-check" class="w-6 h-6"></i>
-                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100 text-emerald-700 group-hover:text-emerald-900 shadow-sm"><i data-lucide="user-check" class="w-6 h-6"></i></div>
                             <div class="text-left">
                                 <span class="block text-base font-bold text-slate-800 group-hover:text-emerald-950">Notas del Residente</span>
                                 <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Notas acumuladas por módulo, componente teórico y práctico, con gráficas</span>
@@ -243,9 +206,7 @@
                     </a>
                     <a href="dashboard_residentes.html#pendientes" class="flex items-center justify-between p-5 bg-rose-50/40 hover:bg-rose-50 border border-rose-100 hover:border-rose-300 rounded-xl transition group h-full">
                         <div class="flex items-center gap-4">
-                            <div class="bg-white p-3 rounded-xl border border-rose-100 text-rose-700 group-hover:text-rose-900 shadow-sm">
-                                <i data-lucide="clipboard-list" class="w-6 h-6"></i>
-                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-rose-100 text-rose-700 group-hover:text-rose-900 shadow-sm"><i data-lucide="clipboard-list" class="w-6 h-6"></i></div>
                             <div class="text-left">
                                 <span class="block text-base font-bold text-slate-800 group-hover:text-rose-950">Actividades Pendientes</span>
                                 <span class="block text-xs md:text-sm text-slate-500 mt-0.5">Clases sin evaluar del plan docente, práctica quirúrgica y sesiones por módulo</span>
@@ -257,6 +218,58 @@
             </div>
         </section>
 
+        <!-- ESTADÍSTICAS DE PARTICIPACIÓN DOCENTE (colapsable) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+            <button id="btnToggleStats"
+                onclick="toggleStats()"
+                class="w-full text-left bg-gradient-to-r from-violet-900 to-indigo-950 p-5 text-white flex items-center gap-3 focus:outline-none">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 text-violet-200 flex-shrink-0"></i>
+                <div class="flex-1">
+                    <h3 class="font-bold text-sm">Estadísticas de Participación Docente</h3>
+                    <p class="text-xs text-violet-200">Contribución de especialistas evaluadores — datos en tiempo real</p>
+                </div>
+                <i id="statsChevron" data-lucide="chevron-down" class="w-5 h-5 text-violet-300 flex-shrink-0 transition-transform duration-300"></i>
+            </button>
+            <div id="statsCollapsible" class="hidden">
+                <div id="statsLoading" class="p-6 text-center text-slate-400 text-sm italic">Cargando estadísticas…</div>
+                <div id="statsError" class="hidden p-6 text-rose-500 text-sm font-medium">⚠️ No se pudo conectar con Google Sheets.</div>
+                <div id="statsContent" class="hidden p-6 space-y-8">
+                    <div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-1 h-5 bg-violet-600 rounded-full"></div>
+                            <h4 class="font-bold text-slate-800 text-sm">1) Participación total por especialista evaluador</h4>
+                            <span class="text-xs text-slate-400 ml-auto">(Componentes teórico + práctico)</span>
+                        </div>
+                        <div style="position:relative;height:240px;"><canvas id="chartTotalEsp"></canvas></div>
+                    </div>
+                    <div class="border-t border-slate-100"></div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-1 h-5 bg-indigo-500 rounded-full"></div>
+                            <h4 class="font-bold text-slate-800 text-sm">2) Participación por formulario del componente teórico</h4>
+                            <span class="text-xs text-slate-400 ml-auto">(por especialista)</span>
+                        </div>
+                        <div style="position:relative;height:300px;"><canvas id="chartPorFormulario"></canvas></div>
+                        <div class="mt-5 overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200">
+                                        <th class="text-left px-3 py-2 font-bold text-slate-600">Especialista</th>
+                                        <th class="text-center px-3 py-2 font-bold text-indigo-700">Clases Prog.</th>
+                                        <th class="text-center px-3 py-2 font-bold text-violet-700">Casos Clín./Art.</th>
+                                        <th class="text-center px-3 py-2 font-bold text-sky-700">Ses. Diarias</th>
+                                        <th class="text-center px-3 py-2 font-bold text-emerald-700">Práct. Quirúrg.</th>
+                                        <th class="text-center px-3 py-2 font-bold text-slate-700">Total</th>
+                                        <th class="text-center px-3 py-2 font-bold text-slate-500">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="statsTabla" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </main>
 
@@ -270,24 +283,43 @@
     <script>
         lucide.createIcons();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const hoy = new Date();
-            const dia = String(hoy.getDate()).padStart(2, '0');
-            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-            const anio = hoy.getFullYear();
-            document.getElementById('currentDate').textContent = `${dia}/${mes}/${anio}`;
-            renderAgenda();
-        });
+        // ─── URL del Apps Script ──────────────────────────────────────────────────
+        var URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzwxFznLdmraLeYOP3VxEGm53p6MZLmYWt5AyjJ72j-vSUkhkTBDWprNCtK1yfm82m_/exec";
 
-        // ─── Datos del Plan Docente 2026 ───────────────────────────────────────────
-        // Formato de fecha: YYYY-MM-DD para comparación fácil
-        function parseDate(str) {
-            // str = "DD/MM/YYYY"
-            const [d, m, y] = str.split('/');
-            return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        // ─── Cache de evaluaciones: "tema|nombreResidente" → { esp: true }
+        var _evalCache = {};
+
+        // ─── Cache de temas manuales ──────────────────────────────────────────────
+        var _temasCache = {};
+
+        // ─── Estado colapsable de estadísticas ───────────────────────────────────
+        var _statsOpen = false;
+        var _statsLoaded = false;
+
+        function toggleStats() {
+            _statsOpen = !_statsOpen;
+            var panel = document.getElementById('statsCollapsible');
+            var chevron = document.getElementById('statsChevron');
+            if (_statsOpen) {
+                panel.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+                if (!_statsLoaded) {
+                    fetchEvaluaciones();
+                    _statsLoaded = true;
+                }
+            } else {
+                panel.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+            }
         }
 
-        const CLASES = [
+        // ─── Datos del Plan Docente 2026 ──────────────────────────────────────────
+        function parseDate(str) {
+            var p = str.split('/');
+            return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+        }
+
+        var CLASES = [
             // I año
             { f: "25/05/2026", tema: "Presentación de caso clínico", dr: "Dra. Quintana", anio: "I" },
             { f: "01/06/2026", tema: "Instrumental quirúrgico en neurocirugía", dr: "Dr. Bobb", anio: "I" },
@@ -416,8 +448,7 @@
             { f: "08/01/2027", tema: "Anatomía del ángulo pontocerebeloso (Rhoton)", dr: "Dra. Membreño", anio: "V" },
         ];
 
-        const FECHAS_IMPORTANTES = [
-            // I año
+        var FECHAS_IMPORTANTES = [
             { f: "27/07/2026", desc: "Examen módulo I — I año", tipo: "examen" },
             { f: "19/10/2026", desc: "Examen módulo II — I año", tipo: "examen" },
             { f: "04/01/2027", desc: "Examen módulo III — I año (Dra. Quintana)", tipo: "examen" },
@@ -425,7 +456,6 @@
             { f: "15/03/2027", desc: "Examen final — I año", tipo: "examen" },
             { f: "29/03/2027", desc: "Presentación avances de investigación — Dra. Quintana (I año)", tipo: "presentacion" },
             { f: "13/04/2027", desc: "Presentación avances de investigación — Dr. Bobb (I año)", tipo: "presentacion" },
-            // II año
             { f: "17/08/2026", desc: "Examen módulo I — II año", tipo: "examen" },
             { f: "17/11/2026", desc: "Presentación avances de tesis — Dr. Cuadra (II año)", tipo: "presentacion" },
             { f: "24/11/2026", desc: "Presentación avances de tesis — Dra. Olivas (II año)", tipo: "presentacion" },
@@ -433,7 +463,6 @@
             { f: "12/03/2027", desc: "Examen final — II año", tipo: "examen" },
             { f: "23/03/2027", desc: "Presentación avances de tesis — Dr. Cuadra (II año)", tipo: "presentacion" },
             { f: "30/03/2027", desc: "Presentación avances de tesis — Dra. Olivas (II año)", tipo: "presentacion" },
-            // III año
             { f: "19/08/2026", desc: "Examen módulo I — III año", tipo: "examen" },
             { f: "11/11/2026", desc: "Presentación avances de tesis — Dr. Cerrato (III año)", tipo: "presentacion" },
             { f: "18/11/2026", desc: "Presentación avances de tesis — Dra. Díaz (III año)", tipo: "presentacion" },
@@ -441,7 +470,6 @@
             { f: "10/03/2027", desc: "Examen módulo III — III año", tipo: "examen" },
             { f: "07/04/2027", desc: "Presentación avances de tesis — Dr. Cerrato (III año)", tipo: "presentacion" },
             { f: "14/04/2027", desc: "Presentación avances de tesis — Dra. Díaz (III año)", tipo: "presentacion" },
-            // IV año
             { f: "19/11/2026", desc: "Presentación avances de tesis — Dra. Blandón (IV año)", tipo: "presentacion" },
             { f: "26/11/2026", desc: "Presentación avances de tesis — Dr. Rayo (IV año)", tipo: "presentacion" },
             { f: "03/12/2026", desc: "Presentación avances de tesis — Dr. Reynoso (IV año)", tipo: "presentacion" },
@@ -450,7 +478,6 @@
             { f: "01/04/2027", desc: "Presentación avances de tesis — Dra. Blandón (IV año)", tipo: "presentacion" },
             { f: "08/04/2027", desc: "Presentación avances de tesis — Dr. Reynoso (IV año)", tipo: "presentacion" },
             { f: "15/04/2027", desc: "Presentación avances de tesis — Dr. Rayo (IV año)", tipo: "presentacion" },
-            // V año
             { f: "27/08/2026", desc: "Examen módulo I — V año", tipo: "examen" },
             { f: "23/10/2026", desc: "Presentación avances de tesis — Dra. Abarca (V año)", tipo: "presentacion" },
             { f: "30/10/2026", desc: "Presentación avances de tesis — Dra. Membreño (V año)", tipo: "presentacion" },
@@ -459,271 +486,8 @@
             { f: "19/02/2027", desc: "Examen de grado — V año", tipo: "examen" },
         ];
 
-        const DIAS_ES = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-        const MESES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-        const ANIO_COLORES = {
-            "I":   { bg: "bg-blue-100",   text: "text-blue-800",   border: "border-blue-200"   },
-            "II":  { bg: "bg-violet-100",  text: "text-violet-800",  border: "border-violet-200"  },
-            "III": { bg: "bg-teal-100",    text: "text-teal-800",    border: "border-teal-200"    },
-            "IV":  { bg: "bg-amber-100",   text: "text-amber-800",   border: "border-amber-200"   },
-            "V":   { bg: "bg-rose-100",    text: "text-rose-800",    border: "border-rose-200"    },
-        };
-
-        let clasesOrdenadas = [];
-        let claseOffset  = 0; // índice del primer grupo visible del carrusel
-        let fechasOffset = 0; // índice del primer item visible en fechas importantes
-        const FECHAS_POR_PAGINA = 5;
-
-        function renderAgenda() {
-            const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0);
-
-            // Incluir TODAS las clases (pasadas y futuras)
-            clasesOrdenadas = CLASES
-                .map(c => ({ ...c, dateObj: parseDate(c.f) }))
-                .sort((a, b) => a.dateObj - b.dateObj);
-
-            // Posicionar el carousel en la primera clase de hoy o futura
-            const grupos = getGruposPorFecha();
-            const idxHoy = grupos.findIndex(([f]) => parseDate(f) >= hoy);
-            claseOffset = idxHoy >= 0 ? Math.max(0, idxHoy) : Math.max(0, grupos.length - 10);
-
-            // Posicionar fechas importantes en la primera futura
-            const fechasOrdenadas = FECHAS_IMPORTANTES
-                .map(fi => ({ ...fi, dateObj: parseDate(fi.f) }))
-                .sort((a, b) => a.dateObj - b.dateObj);
-            const idxFechaHoy = fechasOrdenadas.findIndex(fi => fi.dateObj >= hoy);
-            fechasOffset = idxFechaHoy >= 0 ? Math.max(0, idxFechaHoy) : Math.max(0, fechasOrdenadas.length - FECHAS_POR_PAGINA);
-
-            renderCarousel();
-            renderFechasImportantes(hoy);
-        }
-
-        // Agrupa las clases por fecha y muestra ventana de 1 fecha por scroll
-        function getGruposPorFecha() {
-            const grupos = {};
-            clasesOrdenadas.forEach(c => {
-                const key = c.f;
-                if (!grupos[key]) grupos[key] = [];
-                grupos[key].push(c);
-            });
-            return Object.entries(grupos).sort((a, b) => parseDate(a[0]) - parseDate(b[0]));
-        }
-
-        function renderCarousel() {
-            const carousel = document.getElementById('clasesCarousel');
-            const rangoEl = document.getElementById('rangoClases');
-            carousel.innerHTML = '';
-
-            const hoy = new Date(); hoy.setHours(0,0,0);
-            const grupos = getGruposPorFecha();
-
-            if (grupos.length === 0) {
-                carousel.innerHTML = '<p class="text-sm text-slate-400 italic py-4">No hay clases próximas programadas.</p>';
-                rangoEl.textContent = 'Sin clases próximas';
-                return;
-            }
-
-            // Mostrar grupos desde offset
-            const visibles = grupos.slice(claseOffset, claseOffset + 10);
-
-            // Etiqueta de rango
-            const primerFecha = parseDate(visibles[0][0]);
-            const ultFecha = parseDate(visibles[visibles.length - 1][0]);
-            rangoEl.textContent = `${DIAS_ES[primerFecha.getDay()]} ${primerFecha.getDate()} ${MESES_ES[primerFecha.getMonth()]}  →  ${DIAS_ES[ultFecha.getDay()]} ${ultFecha.getDate()} ${MESES_ES[ultFecha.getMonth()]}`;
-
-            visibles.forEach(([fechaStr, clases]) => {
-                const fechaObj = parseDate(fechaStr);
-                const esHoy   = fechaObj.toDateString() === hoy.toDateString();
-                const esPasada = fechaObj < hoy && !esHoy;
-                const esMañana = (() => { const m = new Date(hoy); m.setDate(m.getDate()+1); return fechaObj.toDateString() === m.toDateString(); })();
-                const enProximos3 = !esPasada && (fechaObj - hoy) / 86400000 <= 3;
-
-                const card = document.createElement('div');
-                card.className = `scroll-snap-start flex-shrink-0 w-56 rounded-xl border shadow-sm overflow-hidden ${esHoy ? 'border-indigo-400 ring-2 ring-indigo-300' : 'border-slate-200'}`;
-                if (esPasada) card.style.opacity = '0.55';
-
-                // Header de fecha
-                const headerColor = esHoy ? 'bg-indigo-700 text-white' : esPasada ? 'bg-slate-200 text-slate-500' : enProximos3 ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-100 text-slate-700';
-                let etiqueta = '';
-                if (esHoy)    etiqueta = '<span class="text-xs bg-white text-indigo-700 font-bold px-1.5 py-0.5 rounded-full ml-1">HOY</span>';
-                else if (esPasada)  etiqueta = '<span class="text-xs bg-slate-400 text-white font-bold px-1.5 py-0.5 rounded-full ml-1">Pasada</span>';
-                else if (esMañana) etiqueta = '<span class="text-xs bg-indigo-200 text-indigo-800 font-bold px-1.5 py-0.5 rounded-full ml-1">Mañana</span>';
-
-                card.innerHTML = `
-                    <div class="${headerColor} px-3 py-2 flex items-center justify-between">
-                        <div class="flex items-center gap-1 font-bold text-sm">
-                            <span>${DIAS_ES[fechaObj.getDay()]} ${fechaObj.getDate()} ${MESES_ES[fechaObj.getMonth()]} ${fechaObj.getFullYear()}</span>
-                            ${etiqueta}
-                        </div>
-                    </div>
-                    <div class="bg-white p-2 space-y-2">
-                        ${clases.map(c => {
-                            const col = ANIO_COLORES[c.anio] || ANIO_COLORES["I"];
-                            const temaGuardado = getTemaIdx(c.f, c.anio);
-                            const editable = esEditableIdx(c.tema);
-                            return `
-                            <div class="p-2 rounded-lg border ${col.border} ${col.bg}">
-                                <div class="flex items-center gap-1 mb-1">
-                                    <span class="text-xs font-black ${col.text} uppercase tracking-wide">${c.anio} año</span>
-                                </div>
-                                <p class="text-xs font-semibold text-slate-800 leading-snug">${c.tema}</p>
-                                ${c.dr ? `<p class="text-xs text-slate-500 mt-0.5">${c.dr}</p>` : ''}
-                                ${editable && temaGuardado ? `<div class="mt-1.5 pt-1.5 border-t ${col.border} flex items-start gap-1"><span class="text-indigo-500 text-xs flex-shrink-0">📌</span><p class="text-xs font-semibold text-indigo-800 leading-snug">${temaGuardado}</p></div>` : ''}
-                                ${editable && !temaGuardado ? `<p class="text-xs text-slate-400 italic mt-1">— tema por asignar —</p>` : ''}
-                            </div>`;
-                        }).join('')}
-                    </div>
-                `;
-                carousel.appendChild(card);
-            });
-
-            // Actualizar botones
-            document.getElementById('btnPrev').disabled = claseOffset === 0;
-            document.getElementById('btnPrev').classList.toggle('opacity-40', claseOffset === 0);
-            document.getElementById('btnNext').disabled = claseOffset + 10 >= grupos.length;
-            document.getElementById('btnNext').classList.toggle('opacity-40', claseOffset + 10 >= grupos.length);
-        }
-
-        function scrollClases(dir) {
-            const grupos = getGruposPorFecha();
-            claseOffset = Math.max(0, Math.min(grupos.length - 1, claseOffset + dir * 5));
-            renderCarousel();
-        }
-
-        function scrollFechas(dir) {
-            const total = FECHAS_IMPORTANTES.length;
-            fechasOffset = Math.max(0, Math.min(total - 1, fechasOffset + dir));
-            const hoy = new Date(); hoy.setHours(0,0,0,0);
-            renderFechasImportantes(hoy);
-        }
-
-        function svgTriangulo(colorFill, colorStroke) {
-            return `<svg width="22" height="20" viewBox="0 0 22 20" style="flex-shrink:0;">
-                <polygon points="11,1.5 20.5,18.5 1.5,18.5" fill="${colorFill}" stroke="${colorStroke}" stroke-width="1.5"/>
-                <text x="11" y="15.5" text-anchor="middle" font-size="9" font-weight="900" fill="white">!</text>
-            </svg>`;
-        }
-
-        function renderFechasImportantes(hoy) {
-            const lista     = document.getElementById('fechasImportantesList');
-            const contador  = document.getElementById('fechasContador');
-            const btnUp     = document.getElementById('btnFechasUp');
-            const btnDown   = document.getElementById('btnFechasDown');
-
-            // Ordenar TODAS (pasadas + futuras)
-            const todas = FECHAS_IMPORTANTES
-                .map(fi => ({ ...fi, dateObj: parseDate(fi.f) }))
-                .sort((a, b) => a.dateObj - b.dateObj);
-
-            if (todas.length === 0) {
-                lista.innerHTML = '<p class="text-sm text-slate-400 italic p-4">No hay fechas importantes.</p>';
-                return;
-            }
-
-            const total    = todas.length;
-            const visibles = todas.slice(fechasOffset, fechasOffset + FECHAS_POR_PAGINA);
-
-            // Contador
-            const desde = fechasOffset + 1;
-            const hasta = Math.min(fechasOffset + FECHAS_POR_PAGINA, total);
-            contador.textContent = `${desde}–${hasta} / ${total}`;
-
-            // Botones habilitados/deshabilitados
-            btnUp.disabled = fechasOffset === 0;
-            btnUp.classList.toggle('opacity-40', fechasOffset === 0);
-            btnDown.disabled = fechasOffset + FECHAS_POR_PAGINA >= total;
-            btnDown.classList.toggle('opacity-40', fechasOffset + FECHAS_POR_PAGINA >= total);
-
-            lista.innerHTML = visibles.map(fi => {
-                const diffMs   = fi.dateObj - hoy;
-                const diffDias = Math.round(diffMs / 86400000);
-                const pasada   = diffDias < 0;
-
-                // Triángulo de advertencia
-                let triangulo = '<div style="width:22px;flex-shrink:0;"></div>';
-                if (!pasada) {
-                    if (diffDias <= 7)       triangulo = svgTriangulo('#ef4444','#dc2626');
-                    else if (diffDias <= 21) triangulo = svgTriangulo('#f59e0b','#d97706');
-                }
-
-                // Texto y color de días
-                let diasTexto, diasColor;
-                if (pasada) {
-                    diasTexto = 'Hace ' + Math.abs(diffDias) + ' día' + (Math.abs(diffDias)!==1?'s':'');
-                    diasColor = '#94a3b8';
-                } else if (diffDias === 0) {
-                    diasTexto = '¡HOY!';   diasColor = '#7c3aed';
-                } else if (diffDias === 1) {
-                    diasTexto = 'Mañana';  diasColor = '#dc2626';
-                } else if (diffDias <= 7) {
-                    diasTexto = diffDias + ' días'; diasColor = '#dc2626';
-                } else if (diffDias <= 21) {
-                    diasTexto = diffDias + ' días'; diasColor = '#d97706';
-                } else {
-                    diasTexto = diffDias + ' días'; diasColor = '#64748b';
-                }
-
-                const tipoLabel = fi.tipo === 'examen'
-                    ? '<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px;">EXAMEN</span>'
-                    : '<span style="background:#ede9fe;color:#5b21b6;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px;">PRESENTACIÓN</span>';
-
-                const fechaStr = fi.dateObj.getDate() + ' ' + MESES_ES[fi.dateObj.getMonth()] + ' ' + fi.dateObj.getFullYear();
-
-                return `<div style="padding:11px 16px;display:flex;align-items:center;gap:10px;${pasada?'opacity:.5;':''}border-bottom:1px solid #f1f5f9;">
-                    ${triangulo}
-                    <div style="flex:1;min-width:0;">
-                        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px;">
-                            ${tipoLabel}
-                            <span style="font-size:10px;color:#94a3b8;font-weight:500;">${fechaStr}</span>
-                        </div>
-                        <p style="font-size:12px;font-weight:700;color:#1e293b;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${fi.desc}</p>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                        <p style="font-size:12px;font-weight:800;color:${diasColor};white-space:nowrap;">${diasTexto}</p>
-                        ${!pasada && diffDias > 0 ? '<p style="font-size:9px;color:#94a3b8;margin-top:1px;">restantes</p>' : ''}
-                    </div>
-                </div>`;
-            }).join('');
-
-            lucide.createIcons();
-        }
-
-        // ═══════════════════════════════════════════════════
-        // RESUMEN DE ACTIVIDADES ATRASADAS
-        // ═══════════════════════════════════════════════════
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzwxFznLdmraLeYOP3VxEGm53p6MZLmYWt5AyjJ72j-vSUkhkTBDWprNCtK1yfm82m_/exec";
-
-        // ── Temas guardados (Google Sheets + localStorage) ──
-        let _temasCache = {};
-
-        async function fetchTemas() {
-            try {
-                const resp = await fetch(`${URL_SCRIPT}?action=getTemas`, { mode: 'cors' });
-                const data = await resp.json();
-                if (Array.isArray(data)) {
-                    data.forEach(t => {
-                        if (t.fecha && t.anio && t.tema) {
-                            const key = 'manual_tema_' + t.anio + '_' + t.fecha;
-                            _temasCache[key] = t.tema;
-                            localStorage.setItem(key, t.tema);
-                        }
-                    });
-                }
-            } catch(e) { /* usa localStorage */ }
-        }
-
-        function getTemaIdx(fecha, anio) {
-            const key = 'manual_tema_' + anio + '_' + fecha;
-            return _temasCache[key] || localStorage.getItem(key) || '';
-        }
-
-        function esEditableIdx(tema) {
-            const t = tema.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-            return t.includes('presentacion de caso') || (t.includes('revision') && t.includes('articulo'));
-        }
-
-        const RESIDENTE_ANIO = {
+        // Mapa nombre residente → año
+        var RESIDENTE_ANIO = {
             "María Teresa Quintana Duarte":"I",    "Kevin Yassir Bobb García":"I",
             "Axly Ivania Olivas Jiménez":"II",     "Fernando Antonio De Jesús Cuadra Jiménez":"II",
             "Vivian Iveth Díaz":"III",              "José Luis Cerrato Lemus":"III",
@@ -732,175 +496,410 @@
             "Martha Elena Abarca Morales":"V",      "Jissella Joammet Membreño Vivas":"V"
         };
 
-        const TODOS_RESIDENTES = Object.keys(RESIDENTE_ANIO);
+        // Mapa año → lista de residentes
+        var RESIDENTES_POR_ANIO = {
+            "I":   ["María Teresa Quintana Duarte", "Kevin Yassir Bobb García"],
+            "II":  ["Axly Ivania Olivas Jiménez", "Fernando Antonio De Jesús Cuadra Jiménez"],
+            "III": ["Vivian Iveth Díaz", "José Luis Cerrato Lemus"],
+            "IV":  ["Angel Benigno Rayo Bravo", "Lagree Guzman Reynoso", "Liuska Ninoska Blandón Cortés"],
+            "V":   ["Martha Elena Abarca Morales", "Jissella Joammet Membreño Vivas"]
+        };
 
-        const MODULOS_FECHAS_IDX = [
-            { modulo:"I",  inicio:"2026-05-01", fin:"2026-06-30" },
-            { modulo:"II", inicio:"2026-07-01", fin:"2026-08-31" },
-            { modulo:"III",inicio:"2026-09-01", fin:"2026-10-31" },
-            { modulo:"IV", inicio:"2026-11-01", fin:"2026-12-31" },
-            { modulo:"V",  inicio:"2027-01-01", fin:"2027-02-28" },
-            { modulo:"VI", inicio:"2027-03-01", fin:"2027-04-30" },
-        ];
+        var DIAS_ES  = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+        var MESES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+        var ANIO_COLORES = {
+            "I":   { bg: "bg-blue-100",   text: "text-blue-800",   border: "border-blue-200"   },
+            "II":  { bg: "bg-violet-100",  text: "text-violet-800",  border: "border-violet-200"  },
+            "III": { bg: "bg-teal-100",    text: "text-teal-800",    border: "border-teal-200"    },
+            "IV":  { bg: "bg-amber-100",   text: "text-amber-800",   border: "border-amber-200"   },
+            "V":   { bg: "bg-rose-100",    text: "text-rose-800",    border: "border-rose-200"    },
+        };
 
-        const STOPWORDS_IDX = new Set(['de','la','el','en','y','a','un','una','los','las','del','al','por','con','para','que','se','su','lo','es','no','o','e','i','parte','sus','este']);
+        var clasesOrdenadas = [];
+        var claseOffset  = 0;
+        var fechasOffset = 0;
+        var FECHAS_POR_PAGINA = 5;
 
-        function tokenizarIdx(s) {
-            return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[()]/g,' ').split(/\W+/).filter(w=>w.length>2&&!STOPWORDS_IDX.has(w));
+        // ─── Helpers carrusel ─────────────────────────────────────────────────────
+        function esEditableIdx(tema) {
+            var t = tema.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+            return t.indexOf('presentacion de caso') !== -1 || (t.indexOf('revision') !== -1 && t.indexOf('articulo') !== -1);
         }
 
-        function hayCoincidenciaIdx(planTema, evalTema) {
-            if (!evalTema) return false;
-            const t1 = new Set(tokenizarIdx(planTema));
-            return tokenizarIdx(evalTema).some(w => t1.has(w));
+        function getTemaIdx(fecha, anio) {
+            var key = 'manual_tema_' + anio + '_' + fecha;
+            return _temasCache[key] || localStorage.getItem(key) || '';
         }
 
-        function getTipoClaseIdx(tema) {
-            const t = tema.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-            if (t.includes('presentacion de caso')||t.includes('presentación de caso')) return 'Casos Clínicos y Artículos';
-            if (t.includes('revision')&&t.includes('articulo')) return 'Casos Clínicos y Artículos';
-            return 'Clases Programadas';
+        // ─── Cache de evaluaciones por clase ─────────────────────────────────────
+        // Match: tema + nombreResidente (tal como llega desde los formularios)
+        // El punto de color para una tarjeta (tema + anio) agrega sobre todos los
+        // residentes de ese año que tengan evaluaciones con ese mismo tema.
+        function buildEvalCache(datos) {
+            _evalCache = {};
+            if (!Array.isArray(datos)) return;
+            datos.forEach(function(row) {
+                var esp    = (row.especialista    || '').trim();
+                var tema   = (row.tema            || '').trim();
+                var nombre = (row.nombreResidente || '').trim();
+                if (!esp || !tema || !nombre) return;
+                var key = tema + '|' + nombre;
+                if (!_evalCache[key]) _evalCache[key] = {};
+                _evalCache[key][esp] = true;
+            });
         }
 
-        function getModuloIdx(fechaStr) {
-            const d = parseDate(fechaStr); // reutiliza parseDate del plan docente
-            if (!d) return null;
-            for (const m of MODULOS_FECHAS_IDX) {
-                if (d >= new Date(m.inicio) && d <= new Date(m.fin)) return m.modulo;
-            }
-            return null;
+        // Cuenta especialistas únicos que evaluaron cualquier residente de anioClase para ese tema
+        function getNumEsp(temaClase, anioClase) {
+            var residentes = RESIDENTES_POR_ANIO[anioClase] || [];
+            var specs = {};
+            residentes.forEach(function(r) {
+                var entry = _evalCache[temaClase + '|' + r];
+                if (entry) Object.keys(entry).forEach(function(e) { specs[e] = true; });
+            });
+            return Object.keys(specs).length;
         }
 
-        function getPendientesResidente(residente, evalRes) {
-            const anio = RESIDENTE_ANIO[residente];
-            const ayer = new Date(); ayer.setHours(0,0,0,0); ayer.setDate(ayer.getDate()-1);
+        // ─── Render agenda ────────────────────────────────────────────────────────
+        function renderAgenda() {
+            var hoy = new Date(); hoy.setHours(0,0,0,0);
+            clasesOrdenadas = CLASES.map(function(c) { return Object.assign({}, c, {dateObj: parseDate(c.f)}); })
+                                    .sort(function(a,b) { return a.dateObj - b.dateObj; });
+            var grupos = getGruposPorFecha();
+            var idxHoy = grupos.findIndex(function(g) { return parseDate(g[0]) >= hoy; });
+            claseOffset = idxHoy >= 0 ? Math.max(0, idxHoy) : Math.max(0, grupos.length - 10);
 
-            // Clases pasadas de este año
-            const clasesAnio = CLASES.filter(c => c.anio === anio && parseDate(c.f) <= ayer).map(c=>({
-                ...c, tipo: getTipoClaseIdx(c.tema), modulo: getModuloIdx(c.f)||"Sin módulo"
-            }));
+            var fechasOrd = FECHAS_IMPORTANTES.map(function(fi) { return Object.assign({}, fi, {dateObj: parseDate(fi.f)}); })
+                                              .sort(function(a,b) { return a.dateObj - b.dateObj; });
+            var idxF = fechasOrd.findIndex(function(fi) { return fi.dateObj >= hoy; });
+            fechasOffset = idxF >= 0 ? Math.max(0, idxF) : Math.max(0, fechasOrd.length - FECHAS_POR_PAGINA);
 
-            // Pendientes teóricas
-            const pendTeorico = clasesAnio.filter(c =>
-                !evalRes.some(ev =>
-                    (ev.tipo_evaluacion||"").trim() === c.tipo &&
-                    hayCoincidenciaIdx(c.tema, ev.tema||"")
-                )
-            );
-
-            // Módulos sin práctica quirúrgica (solo módulos con clases pasadas)
-            const modulosConClases = [...new Set(clasesAnio.map(c=>c.modulo))];
-            const modsSinPractica = modulosConClases.filter(m =>
-                !evalRes.some(ev =>
-                    (ev.tipo_evaluacion||"").trim()==="Práctica Quirúrgica" &&
-                    getModuloIdx(ev.fecha)===m
-                )
-            );
-
-            return { pendTeorico: pendTeorico.length, modsSinPractica: modsSinPractica.length, total: clasesAnio.length };
+            renderCarousel();
+            renderFechasImportantes(hoy);
         }
 
-        async function cargarResumenPendientes() {
-            let datos = [];
-            try {
-                const resp = await fetch(`${URL_SCRIPT}?action=getEvaluations`, { mode:'cors' });
-                datos = await resp.json();
-                if (!Array.isArray(datos)) datos = [];
-            } catch(e) {
-                document.getElementById('pendResumen').innerHTML =
-                    `<p class="text-rose-500 text-sm font-medium">⚠️ No se pudo conectar con Google Sheets. Verifica la URL del script y tu conexión.</p>`;
+        function getGruposPorFecha() {
+            var grupos = {};
+            clasesOrdenadas.forEach(function(c) {
+                if (!grupos[c.f]) grupos[c.f] = [];
+                grupos[c.f].push(c);
+            });
+            return Object.entries(grupos).sort(function(a,b) { return parseDate(a[0]) - parseDate(b[0]); });
+        }
+
+        function renderCarousel() {
+            var carousel = document.getElementById('clasesCarousel');
+            var rangoEl  = document.getElementById('rangoClases');
+            carousel.innerHTML = '';
+            var hoy    = new Date(); hoy.setHours(0,0,0,0);
+            var grupos = getGruposPorFecha();
+            if (!grupos.length) {
+                carousel.innerHTML = '<p class="text-sm text-slate-400 italic py-4">No hay clases programadas.</p>';
+                rangoEl.textContent = 'Sin clases';
                 return;
             }
+            var visibles = grupos.slice(claseOffset, claseOffset + 10);
+            var pf = parseDate(visibles[0][0]), uf = parseDate(visibles[visibles.length-1][0]);
+            rangoEl.textContent = DIAS_ES[pf.getDay()]+' '+pf.getDate()+' '+MESES_ES[pf.getMonth()]+'  →  '+DIAS_ES[uf.getDay()]+' '+uf.getDate()+' '+MESES_ES[uf.getMonth()];
 
-            // Agrupar evaluaciones por residente
-            const evalPorRes = {};
-            TODOS_RESIDENTES.forEach(r => evalPorRes[r] = []);
-            datos.forEach(row => {
-                const nombre = (row.nombreResidente||"").trim();
-                if (evalPorRes[nombre]) evalPorRes[nombre].push(row);
+            visibles.forEach(function(grupo) {
+                var fechaStr = grupo[0], clases = grupo[1];
+                var fechaObj   = parseDate(fechaStr);
+                var esHoy      = fechaObj.toDateString() === hoy.toDateString();
+                var esPasada   = fechaObj < hoy && !esHoy;
+                var esMañana   = (function(){ var m=new Date(hoy); m.setDate(m.getDate()+1); return fechaObj.toDateString()===m.toDateString(); })();
+                var enProx3    = !esPasada && (fechaObj - hoy)/86400000 <= 3;
+                var esEvaluable = esPasada || esHoy;
+
+                var card = document.createElement('div');
+                card.className = 'scroll-snap-start flex-shrink-0 w-56 rounded-xl border shadow-sm overflow-hidden ' + (esHoy ? 'border-indigo-400 ring-2 ring-indigo-300' : 'border-slate-200');
+                if (esPasada) card.style.opacity = '0.65';
+
+                var hdrColor = esHoy ? 'bg-indigo-700 text-white' : esPasada ? 'bg-slate-200 text-slate-500' : enProx3 ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-100 text-slate-700';
+                var etiqueta = '';
+                if (esHoy)        etiqueta = '<span class="text-xs bg-white text-indigo-700 font-bold px-1.5 py-0.5 rounded-full ml-1">HOY</span>';
+                else if (esPasada)  etiqueta = '<span class="text-xs bg-slate-400 text-white font-bold px-1.5 py-0.5 rounded-full ml-1">Pasada</span>';
+                else if (esMañana)  etiqueta = '<span class="text-xs bg-indigo-200 text-indigo-800 font-bold px-1.5 py-0.5 rounded-full ml-1">Mañana</span>';
+
+                var temasHTML = clases.map(function(c) {
+                    var col = ANIO_COLORES[c.anio] || ANIO_COLORES["I"];
+                    var temaGuardado = getTemaIdx(c.f, c.anio);
+                    var esCasoRev   = esEditableIdx(c.tema);
+                    var formUrl     = esCasoRev ? 'casos_clinicos_y_articulos.html' : 'clases_programadas.html';
+                    var params      = '?fecha=' + encodeURIComponent(c.f) + '&anio=' + encodeURIComponent(c.anio) + '&tema=' + encodeURIComponent(c.tema);
+
+                    // Punto de color según evaluaciones: match por tema + residentes del año
+                    var nEsp    = getNumEsp(c.tema, c.anio);
+                    var dotClr  = nEsp === 0 ? '#ef4444' : nEsp === 1 ? '#eab308' : '#22c55e';
+                    var dotTip  = nEsp === 0 ? 'Sin evaluar' : nEsp === 1 ? '1 especialista evaluó' : nEsp + ' especialistas evaluaron';
+
+                    return '<div class="p-2 rounded-lg border ' + col.border + ' ' + col.bg + '">'
+                        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
+                        +   '<span class="text-xs font-black ' + col.text + ' uppercase tracking-wide">' + c.anio + ' año</span>'
+                        +   '<span title="' + dotTip + '" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + dotClr + ';border:1.5px solid rgba(0,0,0,.15);flex-shrink:0;"></span>'
+                        + '</div>'
+                        + '<p class="text-xs font-semibold text-slate-800 leading-snug">' + c.tema + '</p>'
+                        + (c.dr ? '<p class="text-xs text-slate-500 mt-0.5">' + c.dr + '</p>' : '')
+                        + (esCasoRev && temaGuardado ? '<div class="mt-1.5 pt-1.5 border-t ' + col.border + ' flex items-start gap-1"><span class="text-indigo-500 text-xs">📌</span><p class="text-xs font-semibold text-indigo-800 leading-snug">' + temaGuardado + '</p></div>' : '')
+                        + (esCasoRev && !temaGuardado ? '<p class="text-xs text-slate-400 italic mt-1">— tema por asignar —</p>' : '')
+                        + (esEvaluable ? '<div class="mt-2 pt-1.5" style="border-top:1px solid rgba(0,0,0,.08);">'
+                            + '<a href="' + formUrl + params + '" style="display:inline-block;font-size:9px;font-weight:700;background:#4338ca;color:#fff;padding:2px 8px;border-radius:5px;text-decoration:none;">▶ Evaluar</a>'
+                            + '</div>' : '')
+                        + '</div>';
+                }).join('');
+
+                card.innerHTML = '<div class="' + hdrColor + ' px-3 py-2 flex items-center justify-between">'
+                    + '<div class="flex items-center gap-1 font-bold text-sm">'
+                    + '<span>' + DIAS_ES[fechaObj.getDay()] + ' ' + fechaObj.getDate() + ' ' + MESES_ES[fechaObj.getMonth()] + ' ' + fechaObj.getFullYear() + '</span>'
+                    + etiqueta + '</div></div>'
+                    + '<div class="bg-white p-2 space-y-2">' + temasHTML + '</div>';
+                carousel.appendChild(card);
             });
 
-            // Calcular pendientes para cada residente
-            const resultados = TODOS_RESIDENTES.map(r => ({
-                nombre: r,
-                anio: RESIDENTE_ANIO[r],
-                ...getPendientesResidente(r, evalPorRes[r])
-            }));
+            document.getElementById('btnPrev').disabled = claseOffset === 0;
+            document.getElementById('btnPrev').classList.toggle('opacity-40', claseOffset === 0);
+            document.getElementById('btnNext').disabled = claseOffset + 10 >= grupos.length;
+            document.getElementById('btnNext').classList.toggle('opacity-40', claseOffset + 10 >= grupos.length);
+        }
 
-            const totalPend = resultados.reduce((s,r)=>s+r.pendTeorico+r.modsSinPractica,0);
+        function scrollClases(dir) {
+            var grupos = getGruposPorFecha();
+            claseOffset = Math.max(0, Math.min(grupos.length - 1, claseOffset + dir * 5));
+            renderCarousel();
+        }
 
-            // Badge global
-            const badge = document.getElementById('badgePend');
-            badge.textContent = totalPend + ' pendientes';
-            badge.classList.remove('hidden');
+        function scrollFechas(dir) {
+            fechasOffset = Math.max(0, Math.min(FECHAS_IMPORTANTES.length - 1, fechasOffset + dir));
+            renderFechasImportantes(new Date());
+        }
 
-            // Agrupar por año
-            const porAnio = { "I":[], "II":[], "III":[], "IV":[], "V":[] };
-            resultados.forEach(r => porAnio[r.anio]?.push(r));
+        function svgTriangulo(f, s) {
+            return '<svg width="22" height="20" viewBox="0 0 22 20" style="flex-shrink:0;"><polygon points="11,1.5 20.5,18.5 1.5,18.5" fill="'+f+'" stroke="'+s+'" stroke-width="1.5"/><text x="11" y="15.5" text-anchor="middle" font-size="9" font-weight="900" fill="white">!</text></svg>';
+        }
 
-            const ANIO_NOMBRES = { "I":"I Año","II":"II Año","III":"III Año","IV":"IV Año","V":"V Año" };
-            const ANIO_BG = { "I":"bg-blue-50 border-blue-200","II":"bg-violet-50 border-violet-200","III":"bg-teal-50 border-teal-200","IV":"bg-amber-50 border-amber-200","V":"bg-rose-50 border-rose-200" };
-            const ANIO_HDR = { "I":"bg-blue-700","II":"bg-violet-700","III":"bg-teal-700","IV":"bg-amber-600","V":"bg-rose-700" };
+        function renderFechasImportantes(hoy) {
+            if (!(hoy instanceof Date)) hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            var lista    = document.getElementById('fechasImportantesList');
+            var contador = document.getElementById('fechasContador');
+            var btnUp    = document.getElementById('btnFechasUp');
+            var btnDown  = document.getElementById('btnFechasDown');
+            var todas = FECHAS_IMPORTANTES.map(function(fi) { return Object.assign({}, fi, {dateObj: parseDate(fi.f)}); })
+                                          .sort(function(a,b) { return a.dateObj - b.dateObj; });
+            if (!todas.length) { lista.innerHTML = '<p class="text-sm text-slate-400 italic p-4">Sin fechas.</p>'; return; }
+            var total    = todas.length;
+            var visibles = todas.slice(fechasOffset, fechasOffset + FECHAS_POR_PAGINA);
+            contador.textContent = (fechasOffset+1) + '–' + Math.min(fechasOffset+FECHAS_POR_PAGINA, total) + ' / ' + total;
+            btnUp.disabled = fechasOffset === 0; btnUp.classList.toggle('opacity-40', fechasOffset === 0);
+            btnDown.disabled = fechasOffset + FECHAS_POR_PAGINA >= total; btnDown.classList.toggle('opacity-40', fechasOffset + FECHAS_POR_PAGINA >= total);
 
-            const html = Object.keys(porAnio).map(anio => {
-                const residentes = porAnio[anio];
-                if (!residentes.length) return '';
-
-                const pendAnio = residentes.reduce((s,r)=>s+r.pendTeorico+r.modsSinPractica,0);
-
-                return `
-                <div class="rounded-2xl border overflow-hidden ${ANIO_BG[anio]}">
-                    <div class="${ANIO_HDR[anio]} text-white px-5 py-3 flex items-center justify-between">
-                        <span class="font-bold text-sm">${ANIO_NOMBRES[anio]}</span>
-                        ${pendAnio > 0
-                            ? `<span class="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">${pendAnio} atrasada${pendAnio!==1?'s':''}</span>`
-                            : `<span class="bg-emerald-400/30 text-white text-xs font-bold px-2 py-0.5 rounded-full">✓ Al día</span>`
-                        }
-                    </div>
-                    <div class="divide-y divide-white/60">
-                    ${residentes.map(r => {
-                        const sinPend = r.pendTeorico===0 && r.modsSinPractica===0;
-                        return `
-                        <div class="px-5 py-3 flex items-center justify-between gap-3 flex-wrap">
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 leading-tight truncate">${r.nombre}</p>
-                                <p class="text-xs text-slate-500 mt-0.5">
-                                    ${r.total} clase${r.total!==1?'s':''} en el plan hasta hoy
-                                </p>
-                            </div>
-                            <div class="flex gap-2 items-center flex-shrink-0">
-                                ${sinPend
-                                    ? `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl">✓ Al día</span>`
-                                    : `
-                                    ${r.pendTeorico > 0 ? `<span class="inline-flex flex-col items-center bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-xl leading-none"><span class="text-base font-black">${r.pendTeorico}</span><span class="opacity-75">teóricas</span></span>` : ''}
-                                    ${r.modsSinPractica > 0 ? `<span class="inline-flex flex-col items-center bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl leading-none"><span class="text-base font-black">${r.modsSinPractica}</span><span class="opacity-75">módulo${r.modsSinPractica!==1?'s':''} sin práctica</span></span>` : ''}
-                                    <a href="dashboard_residentes.html#pendientes" class="text-xs text-slate-500 hover:text-indigo-700 underline whitespace-nowrap">ver detalle →</a>
-                                    `
-                                }
-                            </div>
-                        </div>`;
-                    }).join('')}
-                    </div>
-                </div>`;
+            lista.innerHTML = visibles.map(function(fi) {
+                var diff  = Math.round((fi.dateObj - hoy) / 86400000);
+                var past  = diff < 0;
+                var tri   = '<div style="width:22px;flex-shrink:0;"></div>';
+                if (!past) { if (diff<=7) tri=svgTriangulo('#ef4444','#dc2626'); else if (diff<=21) tri=svgTriangulo('#f59e0b','#d97706'); }
+                var dt, dc;
+                if (past)       { dt='Hace '+Math.abs(diff)+(Math.abs(diff)!==1?' días':' día'); dc='#94a3b8'; }
+                else if (diff===0){ dt='¡HOY!'; dc='#7c3aed'; }
+                else if (diff===1){ dt='Mañana'; dc='#dc2626'; }
+                else if (diff<=7) { dt=diff+' días'; dc='#dc2626'; }
+                else if (diff<=21){ dt=diff+' días'; dc='#d97706'; }
+                else              { dt=diff+' días'; dc='#64748b'; }
+                var lbl = fi.tipo==='examen'
+                    ? '<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px;">EXAMEN</span>'
+                    : '<span style="background:#ede9fe;color:#5b21b6;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px;">PRESENTACIÓN</span>';
+                var fs = fi.dateObj.getDate()+' '+MESES_ES[fi.dateObj.getMonth()]+' '+fi.dateObj.getFullYear();
+                return '<div style="padding:11px 16px;display:flex;align-items:center;gap:10px;'+(past?'opacity:.5;':'')+'border-bottom:1px solid #f1f5f9;">'
+                    + tri
+                    + '<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px;">'+lbl+'<span style="font-size:10px;color:#94a3b8;font-weight:500;">'+fs+'</span></div>'
+                    + '<p style="font-size:12px;font-weight:700;color:#1e293b;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+fi.desc+'</p></div>'
+                    + '<div style="text-align:right;flex-shrink:0;"><p style="font-size:12px;font-weight:800;color:'+dc+';white-space:nowrap;">'+dt+'</p>'+((!past&&diff>0)?'<p style="font-size:9px;color:#94a3b8;margin-top:1px;">restantes</p>':'')+'</div></div>';
             }).join('');
-
-            document.getElementById('pendResumen').innerHTML = totalPend === 0
-                ? `<div class="flex items-center gap-3 text-emerald-700 font-semibold text-sm"><span class="text-2xl">✓</span> Todos los residentes están al día — no hay actividades atrasadas.</div>`
-                : `<div class="space-y-4">${html}</div>`;
-
             lucide.createIcons();
         }
 
-        // Arrancar cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarResumenPendientes();
-            // Cargar temas guardados desde Sheets y actualizar carrusel
-            fetchTemas().then(() => {
-                const hoy = new Date(); hoy.setHours(0,0,0,0);
-                renderCarousel();
-                renderFechasImportantes(hoy);
-                lucide.createIcons();
+        // ─── Temas manuales desde Sheets ─────────────────────────────────────────
+        function fetchTemas() {
+            fetch(URL_SCRIPT + '?action=getTemas', { mode: 'cors' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!Array.isArray(data)) return;
+                    data.forEach(function(t) {
+                        if (t.fecha && t.anio && t.tema) {
+                            var key = 'manual_tema_' + t.anio + '_' + t.fecha;
+                            _temasCache[key] = t.tema;
+                            try { localStorage.setItem(key, t.tema); } catch(e){}
+                        }
+                    });
+                    renderCarousel();
+                })
+                .catch(function(){});
+        }
+
+        // ─── Cargar evaluaciones → puntos de color ────────────────────────────────
+        var _chartTotal = null, _chartForm = null;
+        var FORMULARIOS = ["Clases Programadas", "Casos Clínicos y Artículos", "Sesiones Diarias", "Práctica Quirúrgica"];
+        var COLORES_FORM = { "Clases Programadas":"#6366f1","Casos Clínicos y Artículos":"#8b5cf6","Sesiones Diarias":"#0ea5e9","Práctica Quirúrgica":"#10b981" };
+
+        function normalizarTipo(t) {
+            t = (t || '').trim();
+            if (/clases?\s+programadas?/i.test(t))            return "Clases Programadas";
+            if (/casos?\s+cl/i.test(t) || /art[ií]culo/i.test(t)) return "Casos Clínicos y Artículos";
+            if (/sesiones?\s+(cl[ií]nicas?\s+)?diarias?/i.test(t)) return "Sesiones Diarias";
+            if (/pr[aá]ctica\s+quir[uú]rgica/i.test(t))       return "Práctica Quirúrgica";
+            return t;
+        }
+
+        function fetchEvaluaciones() {
+            fetch(URL_SCRIPT + '?action=getEvaluations', { mode: 'cors' })
+                .then(function(r) { return r.json(); })
+                .then(function(datos) {
+                    if (!Array.isArray(datos)) return;
+                    // 1. Puntos de color
+                    buildEvalCache(datos);
+                    renderCarousel();
+                    // 2. Estadísticas (solo si el panel está abierto)
+                    if (_statsOpen) renderEstadisticas(datos);
+                    else { _estadisticasDatos = datos; } // guardar para cuando se abra
+                })
+                .catch(function() {
+                    document.getElementById('statsLoading').classList.add('hidden');
+                    document.getElementById('statsError').classList.remove('hidden');
+                });
+        }
+
+        var _estadisticasDatos = null;
+
+        // Sobreescribir toggleStats para usar datos cacheados si ya se cargaron
+        function toggleStats() {
+            _statsOpen = !_statsOpen;
+            var panel = document.getElementById('statsCollapsible');
+            var chevron = document.getElementById('statsChevron');
+            if (_statsOpen) {
+                panel.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+                if (_estadisticasDatos && !_statsLoaded) {
+                    renderEstadisticas(_estadisticasDatos);
+                    _statsLoaded = true;
+                } else if (!_statsLoaded) {
+                    fetchEvaluaciones();
+                    _statsLoaded = true;
+                }
+            } else {
+                panel.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function renderEstadisticas(datos) {
+            if (!datos.length) {
+                document.getElementById('statsLoading').classList.add('hidden');
+                document.getElementById('statsContent').classList.remove('hidden');
+                document.getElementById('statsContent').innerHTML = '<p class="text-slate-400 text-sm italic">Sin evaluaciones registradas.</p>';
+                return;
+            }
+            var porEsp = {};
+            datos.forEach(function(row) {
+                var esp  = (row.especialista || '').trim();
+                var tipo = normalizarTipo(row.tipo_evaluacion);
+                if (!esp) return;
+                if (!porEsp[esp]) { porEsp[esp] = {}; FORMULARIOS.forEach(function(f){ porEsp[esp][f]=0; }); }
+                if (porEsp[esp][tipo] !== undefined) porEsp[esp][tipo]++;
+                else porEsp[esp][tipo] = (porEsp[esp][tipo]||0)+1;
             });
+            var especialistas  = Object.keys(porEsp).sort();
+            var totalGlobal    = datos.filter(function(r){ return (r.especialista||'').trim(); }).length;
+            var totalesPorEsp  = especialistas.map(function(e){ return FORMULARIOS.reduce(function(s,f){ return s+(porEsp[e][f]||0);},0); });
+            var pctPorEsp      = totalesPorEsp.map(function(t){ return totalGlobal>0?((t/totalGlobal)*100).toFixed(1):0; });
+
+            document.getElementById('statsLoading').classList.add('hidden');
+            document.getElementById('statsContent').classList.remove('hidden');
+
+            if (_chartTotal) _chartTotal.destroy();
+            _chartTotal = new Chart(document.getElementById('chartTotalEsp').getContext('2d'), {
+                type:'bar',
+                data:{ labels:especialistas, datasets:[{ label:'Evaluaciones', data:totalesPorEsp,
+                    backgroundColor: especialistas.map(function(_,i){ return 'hsl('+(210+i*30)+',65%,55%)'; }),
+                    borderRadius:6, borderSkipped:false }] },
+                options:{ responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(c){ return ' '+c.raw+' eval. ('+pctPorEsp[c.dataIndex]+'%)'; } } } },
+                    scales:{ y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'#f1f5f9'}}, x:{ticks:{font:{size:11}},grid:{display:false}} } }
+            });
+
+            if (_chartForm) _chartForm.destroy();
+            _chartForm = new Chart(document.getElementById('chartPorFormulario').getContext('2d'), {
+                type:'bar',
+                data:{ labels:especialistas, datasets: FORMULARIOS.map(function(form){ return {
+                    label:form, data:especialistas.map(function(e){ return porEsp[e][form]||0; }),
+                    backgroundColor: COLORES_FORM[form]||'#94a3b8', borderRadius:4
+                }; }) },
+                options:{ responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{position:'top',labels:{font:{size:11},padding:12}}, tooltip:{ callbacks:{ label:function(c){ return ' '+c.dataset.label+': '+c.raw; } } } },
+                    scales:{ y:{beginAtZero:true,stacked:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'#f1f5f9'}}, x:{stacked:true,ticks:{font:{size:11}},grid:{display:false}} } }
+            });
+
+            document.getElementById('statsTabla').innerHTML = especialistas.map(function(esp,i){
+                return '<tr class="hover:bg-slate-50"><td class="px-3 py-2 font-semibold text-slate-800">'+esp+'</td>'
+                    + FORMULARIOS.map(function(f){ return '<td class="px-3 py-2 text-center">'+(porEsp[esp][f]||0)+'</td>'; }).join('')
+                    + '<td class="px-3 py-2 text-center font-bold">'+totalesPorEsp[i]+'</td>'
+                    + '<td class="px-3 py-2 text-center"><span style="background:#ede9fe;color:#5b21b6;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">'+pctPorEsp[i]+'%</span></td></tr>';
+            }).join('')
+            + '<tr style="background:#f8fafc;border-top:2px solid #e2e8f0;font-weight:700;"><td class="px-3 py-2 text-slate-700">TOTAL</td>'
+            + FORMULARIOS.map(function(f){ var s=especialistas.reduce(function(a,e){return a+(porEsp[e][f]||0);},0); return '<td class="px-3 py-2 text-center">'+s+'</td>'; }).join('')
+            + '<td class="px-3 py-2 text-center">'+totalGlobal+'</td><td class="px-3 py-2 text-center"><span style="background:#e0e7ff;color:#3730a3;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">100%</span></td></tr>';
+        }
+
+        // ─── Swipe táctil en el carrusel ──────────────────────────────────────────
+        (function() {
+            var touchStartX = 0;
+            var touchStartScrollLeft = 0;
+            var isDragging = false;
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var carousel = document.getElementById('clasesCarousel');
+                if (!carousel) return;
+
+                carousel.addEventListener('touchstart', function(e) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartScrollLeft = carousel.scrollLeft;
+                    isDragging = true;
+                }, { passive: true });
+
+                carousel.addEventListener('touchmove', function(e) {
+                    if (!isDragging) return;
+                    var dx = touchStartX - e.touches[0].clientX;
+                    carousel.scrollLeft = touchStartScrollLeft + dx;
+                }, { passive: true });
+
+                carousel.addEventListener('touchend', function(e) {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    var dx = touchStartX - e.changedTouches[0].clientX;
+                    // Si el desplazamiento es suficiente, avanzar/retroceder bloque
+                    if (Math.abs(dx) > 60) {
+                        scrollClases(dx > 0 ? 1 : -1);
+                    }
+                }, { passive: true });
+            });
+        })();
+
+        // ─── Arranque ─────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            var hoy = new Date();
+            document.getElementById('currentDate').textContent =
+                String(hoy.getDate()).padStart(2,'0') + '/' + String(hoy.getMonth()+1).padStart(2,'0') + '/' + hoy.getFullYear();
+            renderAgenda();
+            fetchTemas();
+            // Cargar evaluaciones en segundo plano para los puntos del carrusel
+            fetch(URL_SCRIPT + '?action=getEvaluations', { mode: 'cors' })
+                .then(function(r) { return r.json(); })
+                .then(function(datos) {
+                    if (!Array.isArray(datos)) return;
+                    buildEvalCache(datos);
+                    renderCarousel();
+                    _estadisticasDatos = datos; // guardar para estadísticas
+                })
+                .catch(function(){});
         });
     </script>
 </body>
