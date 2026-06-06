@@ -442,16 +442,18 @@ const CLASES = [
     { f:"25/02/2027", tema:"Revisión de un tema y artículos científicos",                           anio:"IV",  dr:"Dra. Blandón" },
     { f:"04/03/2027", tema:"Revisión de un tema y artículos científicos",                           anio:"IV",  dr:"Dr. Rayo" },
     // ── V Año ──────────────────────────────────────────────
-    { f:"29/05/2026", tema:"Presentación de caso clínico",                                          anio:"V",   dr:"Dra. Membreño" },
-    { f:"12/06/2026", tema:"Manejo microquirúrgico y endovascular de MAV",                          anio:"V",   dr:"Dra. Abarca" },
-    { f:"19/06/2026", tema:"Investigación: variable de respuesta",                                  anio:"V",   dr:"Dra. Abarca" },
-    { f:"26/06/2026", tema:"Manejo microquirúrgico de aneurismas de carótida interna",              anio:"V",   dr:"Dra. Membreño" },
-    { f:"02/07/2026", tema:"Revisión de un tema y artículos científicos",                           anio:"V",   dr:"Dra. Abarca" },
-    { f:"09/07/2026", tema:"Investigación: población de estudio",                                   anio:"V",   dr:"Dra. Membreño" },
-    { f:"17/07/2026", tema:"Revisión de un tema y artículos científicos",                           anio:"V",   dr:"Dra. Membreño" },
-    { f:"24/07/2026", tema:"Manejo microquirúrgico de aneurismas de arteria comunicante anterior",  anio:"V",   dr:"Dra. Abarca" },
-    { f:"07/08/2026", tema:"Manejo microquirúrgico de aneurismas de arteria cerebral media",        anio:"V",   dr:"Dra. Membreño" },
-    { f:"04/09/2026", tema:"Endoscopia ventricular",                                                anio:"V",   dr:"Dra. Abarca" },
+    { f:"29/05/2026", tema:"Presentación de caso clínico",                                                                                                                                                          anio:"V",   dr:"Dra. Membreño" },
+    { f:"05/06/2026", tema:"Malformaciones arteriovenosas: Principios, fisiología, anatomía, epidemiología, localización, criterios quirúrgicos/endovasculares, criterios para tratamiento",                        anio:"V",   dr:"Dra. Abarca" },
+    { f:"12/06/2026", tema:"Malformaciones arteriovenosas: manejo microquirúrgico",                                                                                                                                  anio:"V",   dr:"Dra. Abarca" },
+    { f:"19/06/2026", tema:"Malformaciones arteriovenosas: manejo endovascular",                                                                                                                                     anio:"V",   dr:"Dra. Abarca" },
+    { f:"26/06/2026", tema:"Investigación: variable de respuesta",                                                                                                                                                   anio:"V",   dr:"Dra. Abarca" },
+    { f:"03/07/2026", tema:"Aneurismas cerebrales: Generalidades, clasificación, criterios quirúrgicos, conservador, endovasculares, aneurismas tratados, cuando volver a tratarlos, complicaciones, aneurismas rotos, no rotos", anio:"V",   dr:"Dra. Membreño" },
+    { f:"10/07/2026", tema:"Aneurismas cerebrales: Manejo quirúrgico para ACI, AcomA, ACM",                                                                                                                         anio:"V",   dr:"Dra. Abarca" },
+    { f:"17/07/2026", tema:"Aneurismas cerebrales: Manejo endovascular para ACI, AcomA, ACM",                                                                                                                       anio:"V",   dr:"Dra. Membreño" },
+    { f:"24/07/2026", tema:"Revisión de un tema y artículos científicos",                                                                                                                                            anio:"V",   dr:"Dra. Abarca" },
+    { f:"31/07/2026", tema:"Investigación: población de estudio",                                                                                                                                                    anio:"V",   dr:"Dra. Membreño" },
+    { f:"07/08/2026", tema:"Revisión de un tema y artículos científicos",                                                                                                                                            anio:"V",   dr:"Dra. Membreño" },
+    { f:"04/09/2026", tema:"Endoscopia ventricular",                                                                                                                                                                 anio:"V",   dr:"Dra. Abarca" },
     { f:"18/09/2026", tema:"Craneosinostosis no sindrómica",                                        anio:"V",   dr:"Dra. Membreño" },
     { f:"25/09/2026", tema:"Presentación de caso clínico",                                          anio:"V",   dr:"Dra. Abarca" },
     { f:"02/10/2026", tema:"Craneosinostosis sindrómica",                                           anio:"V",   dr:"Dra. Membreño" },
@@ -547,7 +549,8 @@ function guardarTemaManual(key, value, fecha, anio, tipo) {
 }
 
 // Guarda desde el botón explícito con feedback visual
-function guardarTemaDesdeBoton(inputId, key, fecha, anio, tipo, estadoId) {
+// containerIdx: índice de la tarjeta para actualizar el DOM al estado "guardado"
+function guardarTemaDesdeBoton(inputId, key, fecha, anio, tipo, estadoId, containerIdx) {
     const input    = document.getElementById(inputId);
     const estadoEl = document.getElementById(estadoId);
     if (!input) return;
@@ -557,21 +560,69 @@ function guardarTemaDesdeBoton(inputId, key, fecha, anio, tipo, estadoId) {
     if (v) { localStorage.setItem(key, v); _temasCache[key] = v; }
     else    { localStorage.removeItem(key); delete _temasCache[key]; }
 
-    estadoEl.textContent = 'Guardando…';
-    estadoEl.style.color = '#6366f1';
+    if (estadoEl) { estadoEl.textContent = 'Guardando…'; estadoEl.style.color = '#6366f1'; }
 
     // Envía a Google Sheets → hoja Evaluaciones, pestaña Tema_de_residentes
     const params = new URLSearchParams({ action:'saveTema', hoja:'Tema_de_residentes', fecha, anio, tipo, tema: v });
     fetch(`${URL_SCRIPT}?${params.toString()}`, { mode:'no-cors' })
         .then(() => {
-            estadoEl.textContent = '✓ Guardado en Sheets';
-            estadoEl.style.color = '#10b981';
-            setTimeout(() => { estadoEl.textContent = ''; }, 3500);
+            if (v && containerIdx !== undefined) {
+                // Cambiar al estado "guardado": ocultar input, mostrar texto en negrita + lápiz
+                const container = document.getElementById('tema-container-' + containerIdx);
+                if (container) {
+                    const bg     = container.dataset.bg     || '#f1f5f9';
+                    const text   = container.dataset.text   || '#334155';
+                    const border = container.dataset.border || '#e2e8f0';
+                    container.innerHTML = `
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;">
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:9px;color:${text};font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Tema guardado</div>
+                                <p style="font-size:11px;font-weight:800;color:${text};line-height:1.4;">${v.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+                            </div>
+                            <button onclick="editarTema(${containerIdx})" title="Editar tema"
+                                style="flex-shrink:0;background:${bg};border:1.5px solid ${border};border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px;line-height:1;margin-left:4px;">
+                                ✏️
+                            </button>
+                        </div>`;
+                }
+            } else if (estadoEl) {
+                estadoEl.textContent = '✓ Guardado';
+                estadoEl.style.color = '#10b981';
+                setTimeout(() => { estadoEl.textContent = ''; }, 3000);
+            }
         })
         .catch(() => {
-            estadoEl.textContent = '⚠️ Error de red';
-            estadoEl.style.color = '#ef4444';
+            if (estadoEl) { estadoEl.textContent = '⚠️ Error de red'; estadoEl.style.color = '#ef4444'; }
         });
+}
+
+// Vuelve al modo edición desde el estado "guardado" (ícono lápiz)
+function editarTema(containerIdx) {
+    const container = document.getElementById('tema-container-' + containerIdx);
+    if (!container) return;
+    const key    = container.dataset.key;
+    const fecha  = container.dataset.fecha;
+    const anio   = container.dataset.anio;
+    const tipo   = container.dataset.tipo;
+    const bg     = container.dataset.bg     || '#f1f5f9';
+    const text   = container.dataset.text   || '#334155';
+    const border = container.dataset.border || '#e2e8f0';
+    const currentVal = (_temasCache[key] || localStorage.getItem(key) || '').replace(/"/g, '&quot;');
+
+    container.innerHTML = `
+        <div style="font-size:10px;color:#6366f1;font-weight:700;margin-bottom:4px;">✏️ Tema a desarrollar:</div>
+        <input type="text" id="inp-${containerIdx}" placeholder="Escribe el tema específico…" value="${currentVal}"
+            style="width:100%;font-size:11px;padding:5px 8px;border:1.5px solid #c7d2fe;border-radius:7px;outline:none;background:#fff;color:#334155;box-sizing:border-box;margin-bottom:5px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+            <button onclick="guardarTemaDesdeBoton('inp-${containerIdx}','${key}','${fecha}','${anio}','${tipo}','estado-${containerIdx}',${containerIdx})"
+                style="font-size:10px;font-weight:700;background:#4f46e5;color:#fff;border:none;border-radius:6px;padding:4px 11px;cursor:pointer;flex-shrink:0;letter-spacing:.02em;">
+                💾 Guardar
+            </button>
+            <span id="estado-${containerIdx}" style="font-size:10px;color:#64748b;font-weight:600;"></span>
+        </div>`;
+
+    const inp = document.getElementById('inp-' + containerIdx);
+    if (inp) { inp.focus(); inp.select(); }
 }
 
 function scrollClaseCarousel(dir) {
@@ -635,18 +686,37 @@ function renderClases() {
             <div style="font-size:10px;font-weight:800;color:${col.text};text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;${col.badge}padding:2px 7px;border-radius:6px;display:inline-block;">${c.anio} Año</div>
             <p style="font-size:12px;font-weight:600;color:#334155;line-height:1.4;margin-top:5px;margin-bottom:4px;">${c.tema}</p>
             ${c.dr ? `<p style="font-size:10px;color:#6366f1;font-weight:600;margin-bottom:${editable?'6px':'0'};display:flex;align-items:center;gap:3px;"><span style="opacity:.7;">👨‍⚕️</span>${c.dr}</p>` : ''}
-            ${editable ? `<div style="margin-top:6px;">
-                <div style="font-size:10px;color:#6366f1;font-weight:700;margin-bottom:4px;">✏️ Tema a desarrollar:</div>
-                <input type="text" id="inp-${i}" placeholder="Escribe el tema específico…" value="${guardado.replace(/"/g,'&quot;')}"
-                    style="width:100%;font-size:11px;padding:5px 8px;border:1.5px solid #c7d2fe;border-radius:7px;outline:none;background:#fff;color:#334155;box-sizing:border-box;margin-bottom:5px;">
-                <div style="display:flex;align-items:center;gap:6px;">
-                    <button
-                        onclick="guardarTemaDesdeBoton('inp-${i}','${localKey}','${c.f}','${c.anio}','${c.tema.toLowerCase().includes('caso') ? 'caso' : 'revision'}','estado-${i}')"
-                        style="font-size:10px;font-weight:700;background:#4f46e5;color:#fff;border:none;border-radius:6px;padding:4px 11px;cursor:pointer;flex-shrink:0;letter-spacing:.02em;">
-                        💾 Guardar
-                    </button>
-                    <span id="estado-${i}" style="font-size:10px;color:#64748b;font-weight:600;"></span>
-                </div>
+            ${editable ? `<div id="tema-container-${i}"
+                data-key="${localKey}"
+                data-fecha="${c.f}"
+                data-anio="${c.anio}"
+                data-tipo="${c.tema.toLowerCase().includes('caso') ? 'caso' : 'revision'}"
+                data-bg="${col.bg}"
+                data-text="${col.text}"
+                data-border="${col.border}"
+                style="margin-top:6px;padding-top:6px;border-top:1px solid ${col.border};">
+                ${guardado
+                    ? `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;">
+                           <div style="flex:1;min-width:0;">
+                               <div style="font-size:9px;color:${col.text};font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Tema guardado</div>
+                               <p style="font-size:11px;font-weight:800;color:${col.text};line-height:1.4;">${guardado.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+                           </div>
+                           <button onclick="editarTema(${i})" title="Editar tema"
+                               style="flex-shrink:0;background:${col.bg};border:1.5px solid ${col.border};border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px;line-height:1;margin-left:4px;">
+                               ✏️
+                           </button>
+                       </div>`
+                    : `<div style="font-size:10px;color:#6366f1;font-weight:700;margin-bottom:4px;">✏️ Tema a desarrollar:</div>
+                       <input type="text" id="inp-${i}" placeholder="Escribe el tema específico…" value=""
+                           style="width:100%;font-size:11px;padding:5px 8px;border:1.5px solid #c7d2fe;border-radius:7px;outline:none;background:#fff;color:#334155;box-sizing:border-box;margin-bottom:5px;">
+                       <div style="display:flex;align-items:center;gap:6px;">
+                           <button onclick="guardarTemaDesdeBoton('inp-${i}','${localKey}','${c.f}','${c.anio}','${c.tema.toLowerCase().includes('caso') ? 'caso' : 'revision'}','estado-${i}',${i})"
+                               style="font-size:10px;font-weight:700;background:#4f46e5;color:#fff;border:none;border-radius:6px;padding:4px 11px;cursor:pointer;flex-shrink:0;letter-spacing:.02em;">
+                               💾 Guardar
+                           </button>
+                           <span id="estado-${i}" style="font-size:10px;color:#64748b;font-weight:600;"></span>
+                       </div>`
+                }
             </div>` : ''}
         </div>`;
     }).join('');
