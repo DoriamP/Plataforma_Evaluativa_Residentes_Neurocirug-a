@@ -19,6 +19,15 @@
             <p class="text-indigo-300 text-sm mt-1">Residentes de Neurocirugía</p>
         </div>
 
+        <!-- Advertencia clase futura (oculta por defecto) -->
+        <div id="warningBanner" class="hidden mx-5 mt-5 p-4 bg-amber-50 border border-amber-300 rounded-2xl flex items-start gap-3">
+            <span class="text-amber-500 text-xl flex-shrink-0 mt-0.5">⚠️</span>
+            <div>
+                <p class="text-sm font-bold text-amber-800">Evaluando clase programada para fecha futura</p>
+                <p id="warningText" class="text-xs text-amber-700 mt-1 leading-relaxed"></p>
+            </div>
+        </div>
+
         <form id="evaluationForm" class="p-5 space-y-6">
 
             <!-- Fecha de Evaluación (editable con calendario) -->
@@ -222,6 +231,17 @@
             }
             if (params.get('tema')) {
                 document.getElementById('tema').value = params.get('tema');
+            }
+
+            // Advertencia si la clase está programada para una fecha futura
+            if (params.get('aviso') === 'futura') {
+                const fechaProg = params.get('fechaProg') || '';
+                const banner = document.getElementById('warningBanner');
+                const txt    = document.getElementById('warningText');
+                if (banner && txt) {
+                    txt.textContent = 'Esta clase está programada para el ' + fechaProg + '. Está registrando una evaluación antes de la fecha prevista en el plan docente. Verifique que esto corresponde a un cambio en la programación.';
+                    banner.classList.remove('hidden');
+                }
             }
         });
 
