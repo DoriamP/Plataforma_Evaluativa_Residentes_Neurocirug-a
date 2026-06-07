@@ -1393,6 +1393,7 @@
         // ═══════════════════════════════════════════════════════════════
         // REGISTRO DE ACTIVIDAD Y ALERTAS DE EDICIÓN
         // ═══════════════════════════════════════════════════════════════
+        window.NEW_BACKEND = false;
         var _editLog = [];
         var _alertasOpen = false;
         var ALERTAS_LAST_KEY = 'alertas_last_seen';
@@ -1448,6 +1449,14 @@
             }
             panel.classList.remove('hidden');
             chevron.style.transform = 'rotate(180deg)';
+            if (!window.NEW_BACKEND) {
+                document.getElementById('alertasLoading').classList.add('hidden');
+                document.getElementById('alertasContent').classList.remove('hidden');
+                var _nota = document.getElementById('alertasNota');
+                if (_nota) _nota.textContent = 'El registro de actividad requiere la versión NUEVA del Apps Script (aún no publicada). Vuelve a publicarlo y recarga la página.';
+                document.getElementById('alertasList').innerHTML = '<p style="text-align:center;padding:28px;color:#94a3b8;font-size:13px;font-style:italic;">Función no disponible hasta publicar el backend nuevo.</p>';
+                return;
+            }
             document.getElementById('alertasLoading').classList.remove('hidden');
             document.getElementById('alertasContent').classList.add('hidden');
 
@@ -1511,6 +1520,7 @@
 
         // ─── Registrar modificaciones del plan docente en el servidor ────
         function registrarEdicionPlan(anio, fecha, accion) {
+            if (!window.NEW_BACKEND) return;
             var detalle;
             if (accion === 'restaurado') {
                 detalle = anio + ' año · ' + fecha + ': restaurado al original';
@@ -1546,8 +1556,28 @@
             };
         }
 
-        // Carga inicial del registro de actividad (define el estado rojo del botón)
-        document.addEventListener('DOMContentLoaded', function () { fetchEditLog(); });
+        function mostrarAvisoBackendViejo() {
+            var sub = document.getElementById('alertasSubtitle');
+            if (sub) sub.textContent = 'Pendiente: publicar la versión nueva del Apps Script para activar el registro de actividad.';
+            var badge = document.getElementById('alertasBadge');
+            if (badge) badge.classList.add('hidden');
+        }
+
+        // Detectar si el backend nuevo está publicado: solo el getEvaluations
+        // nuevo incluye el campo "_row". Mientras no lo esté, NO se llaman las
+        // funciones que, en la versión vieja, crean filas en blanco.
+        function detectarBackendYActivar() {
+            fetch(URL_SCRIPT + '?action=getEvaluations')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    window.NEW_BACKEND = Array.isArray(d) && d.some(function (x) { return x && x._row !== undefined; });
+                    if (window.NEW_BACKEND) fetchEditLog();
+                    else mostrarAvisoBackendViejo();
+                })
+                .catch(function () { window.NEW_BACKEND = false; mostrarAvisoBackendViejo(); });
+        }
+
+        document.addEventListener('DOMContentLoaded', detectarBackendYActivar);
 
     </script>
 </body>
