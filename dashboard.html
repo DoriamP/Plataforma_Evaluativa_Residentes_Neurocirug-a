@@ -200,6 +200,8 @@
 
         let dbMasterData    = [];
         let dbFilteredData  = [];   // registros actualmente visibles (para editar/eliminar)
+        let NEW_BACKEND     = false; // ¿está publicada la versión nueva del Apps Script?
+        const AVISO_BACKEND = 'Esta función requiere la versión NUEVA del Apps Script, que todavía no está publicada.\n\nEn el editor de Apps Script:\nImplementar → Administrar implementaciones → (lápiz) → Versión: "Nueva versión" → Implementar.\n\nLuego recarga esta página.';
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -216,6 +218,9 @@
                 .then(r => r.json())
                 .then(data => {
                     dbMasterData = data;
+                    // Detectar si el backend nuevo está publicado: solo la versión
+                    // nueva de getEvaluations incluye el campo "_row".
+                    NEW_BACKEND = Array.isArray(data) && data.some(r => r && r._row !== undefined);
                     document.getElementById('loadingState').classList.add('hidden');
                     document.getElementById('dashboardContent').classList.remove('hidden');
                     populateFilterOptions();
@@ -393,6 +398,7 @@
         function editarEvaluacion(idx) {
             const row = dbFilteredData[idx];
             if (!row) return;
+            if (!NEW_BACKEND) { alert(AVISO_BACKEND); return; }
             const componente = getComponente(row);
             const archivo = FORM_POR_COMPONENTE[componente];
             if (!archivo) {
@@ -452,6 +458,7 @@
                 alert('No se pudo identificar el registro a eliminar.');
                 return;
             }
+            if (!NEW_BACKEND) { alert(AVISO_BACKEND); return; }
             const residente = getNombreResidente(row) || 'este registro';
             const componente = getComponente(row);
             if (!confirm(`¿Eliminar definitivamente la evaluación de "${residente}" (${componente}, ${row.fecha})?\n\nEsta acción no se puede deshacer.`)) {
@@ -482,6 +489,7 @@
 
         // ─── 6. RESPALDAR BASE DE DATOS ─────────────────────────────────────
         function abrirModalRespaldo() {
+            if (!NEW_BACKEND) { alert(AVISO_BACKEND); return; }
             document.getElementById('modalRespaldo').classList.remove('hidden');
             const msg = document.getElementById('respaldoMsg');
             msg.classList.add('hidden');
