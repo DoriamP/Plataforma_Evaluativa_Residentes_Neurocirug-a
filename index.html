@@ -298,6 +298,93 @@
             </div>
         </section>
 
+        <!-- PLAN DOCENTE COMPLETO (colapsable, editable) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+            <button onclick="togglePlanDocente()"
+                class="w-full text-left bg-gradient-to-r from-slate-800 to-slate-700 px-5 py-4 text-white flex items-center justify-between focus:outline-none">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-sm">Plan Docente Completo 2026 – 2027</h3>
+                        <p class="text-xs text-slate-300 mt-0.5">Por año de residencia y módulo · Editable</p>
+                    </div>
+                </div>
+                <svg id="planChevron" class="w-5 h-5 text-slate-400 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="planDocenteCollapsible" class="hidden">
+                <!-- Filtros -->
+                <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Año</label>
+                        <select id="filtroAnioPlanDoc" onchange="renderPlanDocente()"
+                            class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-500 outline-none appearance-none">
+                            <option value="">Todos los años</option>
+                            <option value="I">I Año</option>
+                            <option value="II">II Año</option>
+                            <option value="III">III Año</option>
+                            <option value="IV">IV Año</option>
+                            <option value="V">V Año</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Módulo</label>
+                        <select id="filtroModuloPlanDoc" onchange="renderPlanDocente()"
+                            class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-500 outline-none appearance-none">
+                            <option value="">Todos los módulos</option>
+                            <option value="I">Módulo I</option>
+                            <option value="II">Módulo II</option>
+                            <option value="III">Módulo III</option>
+                            <option value="IV">Módulo IV</option>
+                            <option value="Cierre">Cierre / Evaluación final</option>
+                        </select>
+                    </div>
+                    <div id="planDocContador" class="ml-auto self-center text-xs text-slate-400 font-medium"></div>
+                </div>
+                <!-- Nota de uso -->
+                <div class="px-5 py-2 bg-amber-50 border-b border-amber-100">
+                    <p class="text-xs text-amber-700 font-medium">✏️ Los cambios se sincronizan automáticamente en el carrusel de clases de esta página y en el Dashboard del Residente (mismo navegador).</p>
+                </div>
+                <!-- datalist para autocompletar doctores -->
+                <datalist id="listaDoctores">
+                    <option value="Dra. Quintana"><option value="Dr. Bobb">
+                    <option value="Dr. Cuadra"><option value="Dra. Olivas">
+                    <option value="Dra. Díaz"><option value="Dr. Cerrato">
+                    <option value="Dr. Rayo"><option value="Dr. Reynoso"><option value="Dra. Blandón">
+                    <option value="Dra. Membreño"><option value="Dra. Abarca">
+                </datalist>
+                <!-- Lista -->
+                <div id="planDocenteList" class="divide-y divide-slate-100" style="max-height:72vh;overflow-y:auto;"></div>
+            </div>
+        </section>
+
+        <!-- REGISTRO DE ACTIVIDAD Y ALERTAS DE EDICIÓN (colapsable) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+            <button id="btnAlertas" onclick="toggleAlertas()"
+                class="w-full text-left p-5 text-white flex items-center gap-3 focus:outline-none transition-colors"
+                style="background:linear-gradient(to right,#1e293b,#0f172a);">
+                <i data-lucide="bell" class="w-5 h-5 flex-shrink-0"></i>
+                <div class="flex-1">
+                    <h3 class="font-bold text-sm">Registro de Actividad y Alertas de Edición</h3>
+                    <p class="text-xs opacity-80" id="alertasSubtitle">Ediciones de evaluaciones y cambios en el plan docente</p>
+                </div>
+                <span id="alertasBadge" class="hidden text-xs font-bold bg-white text-red-600 px-2 py-0.5 rounded-full"></span>
+                <i id="alertasChevron" data-lucide="chevron-down" class="w-5 h-5 flex-shrink-0 transition-transform duration-300"></i>
+            </button>
+            <div id="alertasCollapsible" class="hidden">
+                <div id="alertasLoading" class="p-6 text-center text-slate-400 text-sm italic">Cargando registro de actividad…</div>
+                <div id="alertasContent" class="hidden">
+                    <div class="px-5 py-3 bg-amber-50 border-b border-amber-100">
+                        <p class="text-xs text-amber-700 font-medium" id="alertasNota">Al abrir esta sección se envía una alerta con las nuevas ediciones al correo pereravaldivia@gmail.com.</p>
+                    </div>
+                    <div id="alertasList" class="divide-y divide-slate-100" style="max-height:60vh;overflow-y:auto;"></div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="bg-slate-900 text-slate-400 text-center py-6 border-t border-slate-800 mt-auto">
@@ -592,6 +679,20 @@
             return _temasCache[key] || localStorage.getItem(key) || '';
         }
 
+        // ─── Overrides editables del plan docente ─────────────────────────────────
+        // Clave: 'plan_edit_ANIO_FECHA' → JSON {tema, dr}
+        // Compartidos por localStorage entre index, dashboard_residentes y dashboard_residentes2
+        function getPlanEdit(anio, fecha) {
+            try { return JSON.parse(localStorage.getItem('plan_edit_'+anio+'_'+fecha)||'null'); }
+            catch(e) { return null; }
+        }
+        function setPlanEdit(anio, fecha, tema, dr) {
+            localStorage.setItem('plan_edit_'+anio+'_'+fecha, JSON.stringify({tema:tema.trim(), dr:dr.trim()}));
+        }
+        function resetPlanEdit(anio, fecha) {
+            localStorage.removeItem('plan_edit_'+anio+'_'+fecha);
+        }
+
         // ─── Cache de evaluaciones por clase ─────────────────────────────────────
         // Match: tema + nombreResidente (tal como llega desde los formularios)
         // El punto de color para una tarjeta (tema + anio) agrega sobre todos los
@@ -698,6 +799,13 @@
                     var formUrl     = esCasoRev ? 'casos_clinicos_y_articulos.html' : 'clases_programadas.html';
                     var params      = '?fecha=' + encodeURIComponent(c.f) + '&anio=' + encodeURIComponent(c.anio) + '&tema=' + encodeURIComponent(c.tema);
 
+                    // Leer overrides del plan docente (editados en la sección Plan Docente)
+                    var override = getPlanEdit(c.anio, c.f);
+                    var temaDisplay = (override && override.tema) ? override.tema : c.tema;
+                    var drDisplay   = (override && override.dr !== undefined) ? override.dr : c.dr;
+                    // Badge de modificado
+                    var modBadge = override ? '<span style="font-size:8px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px;">editado</span>' : '';
+
                     // Punto de color según evaluaciones: match por tema + residentes del año
                     var nEsp    = getNumEsp(c.tema, c.anio);
                     var dotClr  = nEsp === 0 ? '#ef4444' : nEsp === 1 ? '#eab308' : '#22c55e';
@@ -708,8 +816,8 @@
                         +   '<span class="text-xs font-black ' + col.text + ' uppercase tracking-wide">' + c.anio + ' año</span>'
                         +   '<span title="' + dotTip + '" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + dotClr + ';border:1.5px solid rgba(0,0,0,.15);flex-shrink:0;"></span>'
                         + '</div>'
-                        + '<p class="text-xs font-semibold text-slate-800 leading-snug">' + c.tema + '</p>'
-                        + (c.dr ? '<p class="text-xs text-slate-500 mt-0.5">' + c.dr + '</p>' : '')
+                        + '<p class="text-xs font-semibold text-slate-800 leading-snug">' + temaDisplay + modBadge + '</p>'
+                        + (drDisplay ? '<p class="text-xs text-slate-500 mt-0.5">' + drDisplay + '</p>' : '')
                         + (esCasoRev && temaGuardado ? '<div class="mt-1.5 pt-1.5 border-t ' + col.border + ' flex items-start gap-1"><span class="text-indigo-500 text-xs">📌</span><p class="text-xs font-semibold text-indigo-800 leading-snug">' + temaGuardado + '</p></div>' : '')
                         + (esCasoRev && !temaGuardado ? '<p class="text-xs text-slate-400 italic mt-1">— tema por asignar —</p>' : '')
                         + '<div class="mt-2 pt-1.5" style="border-top:1px solid rgba(0,0,0,.08);">'
@@ -921,6 +1029,344 @@
             + '<td class="px-3 py-2 text-center">'+totalGlobal+'</td><td class="px-3 py-2 text-center"><span style="background:#e0e7ff;color:#3730a3;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">100%</span></td></tr>';
         }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // PLAN DOCENTE COMPLETO — datos y edición
+        // ══════════════════════════════════════════════════════════════════════
+        var PLAN_DOCENTE_COMPLETO = [
+            // ── I AÑO ───────────────────────────────────────────────────────
+            {anio:'I',mod:'I',   f:'25/05/2026',t:'Presentación de caso clínico',                                          dr:'Dra. Quintana',tipo:'caso'},
+            {anio:'I',mod:'I',   f:'01/06/2026',t:'Instrumental quirúrgico en neurocirugía',                                dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'I',   f:'08/06/2026',t:'Revisión de un tema y de artículos científicos',                         dr:'Dra. Quintana',tipo:'revision'},
+            {anio:'I',mod:'I',   f:'22/06/2026',t:'Posiciones básicas operatorias en cirugía craneal y espinal',            dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'I',   f:'06/07/2026',t:'Principios de craneotomía: topografía craneocerebral',                   dr:'Dra. Quintana',tipo:'clase'},
+            {anio:'I',mod:'I',   f:'13/07/2026',t:'Revisión de un tema y de artículos científicos',                         dr:'Dr. Bobb',     tipo:'revision'},
+            {anio:'I',mod:'I',   f:'27/07/2026',t:'Examen módulo I',                                                        dr:'',             tipo:'examen'},
+            {anio:'I',mod:'II',  f:'03/08/2026',t:'Manejo inicial de trauma craneoencefálico del adulto',                   dr:'Dra. Quintana',tipo:'clase'},
+            {anio:'I',mod:'II',  f:'10/08/2026',t:'Investigación clínica: el proceso y bases de la investigación',          dr:'Dra. Quintana',tipo:'clase'},
+            {anio:'I',mod:'II',  f:'17/08/2026',t:'Manejo inicial de trauma espinal',                                       dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'II',  f:'24/08/2026',t:'Presentación de caso clínico',                                           dr:'Dra. Quintana',tipo:'caso'},
+            {anio:'I',mod:'II',  f:'07/09/2026',t:'Hidrocefalia',                                                           dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'II',  f:'14/09/2026',t:'Craneotomía frontotemporal pterional',                                   dr:'Dra. Quintana',tipo:'clase'},
+            {anio:'I',mod:'II',  f:'21/09/2026',t:'Manejo en emergencias de trauma craneoencefálico pediátrico',            dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'II',  f:'05/10/2026',t:'Presentación de caso clínico',                                           dr:'Dra. Quintana',tipo:'caso'},
+            {anio:'I',mod:'II',  f:'19/10/2026',t:'Examen módulo II',                                                       dr:'',             tipo:'examen'},
+            {anio:'I',mod:'III', f:'26/10/2026',t:'Investigación clínica: ética e investigación',                           dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'III', f:'02/11/2026',t:'Nervios craneales I-II',                                                 dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'III', f:'09/11/2026',t:'Nervios craneales III-IV-VI',                                            dr:'Dra. Quintana',tipo:'clase'},
+            {anio:'I',mod:'III', f:'16/11/2026',t:'Nervios craneales V-VIII',                                               dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'III', f:'23/11/2026',t:'Nervios craneales IX-XII',                                               dr:'Dra. Quintana',tipo:'clase'},
+            {anio:'I',mod:'III', f:'01/12/2026',t:'Revisión de un tema y de artículos científicos',                         dr:'',             tipo:'revision'},
+            {anio:'I',mod:'III', f:'04/01/2027',t:'Examen módulo III',                                                      dr:'Dra. Quintana',tipo:'examen'},
+            {anio:'I',mod:'IV',  f:'11/01/2027',t:'Médula espinal (vías ascendentes)',                                      dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'IV',  f:'18/01/2027',t:'Médula espinal (vías descendentes)',                                     dr:'Dra. Quintana',tipo:'clase'},
+            {anio:'I',mod:'IV',  f:'25/01/2027',t:'Presentación de caso clínico',                                           dr:'Dr. Bobb',     tipo:'caso'},
+            {anio:'I',mod:'IV',  f:'01/02/2027',t:'Presentación de caso clínico',                                           dr:'Dra. Quintana',tipo:'caso'},
+            {anio:'I',mod:'IV',  f:'08/02/2027',t:'Irrigación del encéfalo y médula espinal',                               dr:'Dr. Bobb',     tipo:'clase'},
+            {anio:'I',mod:'IV',  f:'22/02/2027',t:'Examen módulo IV',                                                       dr:'',             tipo:'examen'},
+            {anio:'I',mod:'Cierre',f:'15/03/2027',t:'Examen final',                                                         dr:'',             tipo:'examen'},
+            {anio:'I',mod:'Cierre',f:'29/03/2027',t:'Presentación de avances de investigación y artículo científico',       dr:'Dra. Quintana',tipo:'presentacion'},
+            {anio:'I',mod:'Cierre',f:'13/04/2027',t:'Presentación de avances de investigación y artículo científico',       dr:'Dr. Bobb',     tipo:'presentacion'},
+            // ── II AÑO ──────────────────────────────────────────────────────
+            {anio:'II',mod:'I',   f:'26/05/2026',t:'Presentación de caso clínico',                                          dr:'Dr. Cuadra',   tipo:'caso'},
+            {anio:'II',mod:'I',   f:'02/06/2026',t:'Manejo en cuidados intensivos del trauma craneoencefálico',             dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'I',   f:'09/06/2026',t:'Manejo quirúrgico de trauma craneoencefálico (parte 1)',                dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'I',   f:'16/06/2026',t:'Investigación: clasificación de los tipos de estudio',                  dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'I',   f:'23/06/2026',t:'Manejo quirúrgico de trauma craneoencefálico (parte 2)',                dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'I',   f:'07/07/2026',t:'Revisión de un tema y de artículos científicos',                        dr:'Dr. Cuadra',   tipo:'revision'},
+            {anio:'II',mod:'I',   f:'14/07/2026',t:'Revisión de un tema y de artículos científicos',                        dr:'Dra. Olivas',  tipo:'revision'},
+            {anio:'II',mod:'I',   f:'21/07/2026',t:'Manejo quirúrgico de trauma craneoencefálico (parte 3)',                dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'I',   f:'28/07/2026',t:'Investigación: tipos de estudio, ensayo clínico aleatorio',             dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'I',   f:'04/08/2026',t:'Craniectomía descompresiva',                                            dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'I',   f:'17/08/2026',t:'Examen módulo I',                                                       dr:'',             tipo:'examen'},
+            {anio:'II',mod:'II',  f:'01/09/2026',t:'Trauma craneoencefálico leve',                                          dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'II',  f:'08/09/2026',t:'Hematoma subdural crónico',                                             dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'II',  f:'15/09/2026',t:'Fístula de LCR postraumática',                                          dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'II',  f:'06/10/2026',t:'Presentación de caso clínico',                                          dr:'Dra. Olivas',  tipo:'caso'},
+            {anio:'II',mod:'II',  f:'13/10/2026',t:'Presentación de caso clínico',                                          dr:'Dr. Cuadra',   tipo:'caso'},
+            {anio:'II',mod:'II',  f:'20/10/2026',t:'Evaluación y clasificación de inestabilidad espinal',                   dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'II',  f:'03/11/2026',t:'Lesiones craneocervicales',                                             dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'II',  f:'10/11/2026',t:'Lesiones de C2',                                                        dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'II',  f:'17/11/2026',t:'Presentación de avances de tesis y artículo científico',                dr:'Dr. Cuadra',   tipo:'presentacion'},
+            {anio:'II',mod:'II',  f:'24/11/2026',t:'Presentación de avances de tesis y artículo científico',                dr:'Dra. Olivas',  tipo:'presentacion'},
+            {anio:'II',mod:'II',  f:'15/12/2026',t:'Examen módulo II',                                                      dr:'',             tipo:'examen'},
+            {anio:'II',mod:'III', f:'15/01/2027',t:'Lesiones subaxiales cervicales',                                        dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'III', f:'22/01/2027',t:'Lesiones unión cervicotorácica',                                        dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'III', f:'29/01/2027',t:'Manejo médico de lesión medular',                                       dr:'Dr. Cuadra',   tipo:'clase'},
+            {anio:'II',mod:'III', f:'12/02/2027',t:'Lesiones toracolumbares',                                               dr:'Dra. Olivas',  tipo:'clase'},
+            {anio:'II',mod:'III', f:'19/02/2027',t:'Revisión de un tema y de artículos científicos',                        dr:'Dr. Cuadra',   tipo:'revision'},
+            {anio:'II',mod:'III', f:'26/02/2027',t:'Revisión de un tema y de artículos científicos',                        dr:'Dra. Olivas',  tipo:'revision'},
+            {anio:'II',mod:'III', f:'12/03/2027',t:'Examen final',                                                          dr:'',             tipo:'examen'},
+            {anio:'II',mod:'Cierre',f:'23/03/2027',t:'Presentación de avances de tesis y artículo científico',              dr:'Dr. Cuadra',   tipo:'presentacion'},
+            {anio:'II',mod:'Cierre',f:'30/03/2027',t:'Presentación de avances de tesis y artículo científico',              dr:'Dra. Olivas',  tipo:'presentacion'},
+            // ── III AÑO ─────────────────────────────────────────────────────
+            {anio:'III',mod:'I',   f:'27/05/2026',t:'Presentación de caso clínico',                                         dr:'Dra. Díaz',    tipo:'caso'},
+            {anio:'III',mod:'I',   f:'03/06/2026',t:'Hernia discal cervical',                                               dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'I',   f:'10/06/2026',t:'Hernia discal dorsal',                                                 dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'I',   f:'17/06/2026',t:'Hernia discal lumbar',                                                 dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'I',   f:'24/06/2026',t:'Estenosis cervical, dorsal y lumbar',                                  dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'I',   f:'01/07/2026',t:'Espondilolistesis degenerativa lumbar',                                dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'I',   f:'08/07/2026',t:'Mielopatía cervical degenerativa',                                     dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'I',   f:'15/07/2026',t:'Revisión de un tema y de artículos científicos',                       dr:'Dr. Cerrato',  tipo:'revision'},
+            {anio:'III',mod:'I',   f:'22/07/2026',t:'Instrumentación posterior torácica y lumbar',                          dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'I',   f:'05/08/2026',t:'Revisión de un tema y de artículos científicos',                       dr:'Dr. Cerrato',  tipo:'revision'},
+            {anio:'III',mod:'I',   f:'19/08/2026',t:'Examen módulo I',                                                      dr:'',             tipo:'examen'},
+            {anio:'III',mod:'II',  f:'02/09/2026',t:'Investigación: tipos de estudio, estudio de cohortes',                 dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'II',  f:'09/09/2026',t:'Instrumentación cervical anterior',                                    dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'II',  f:'16/09/2026',t:'PLIF, TLIF y ALIF',                                                    dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'II',  f:'23/09/2026',t:'Presentación de caso clínico',                                         dr:'',             tipo:'caso'},
+            {anio:'III',mod:'II',  f:'07/10/2026',t:'Presentación de caso clínico',                                         dr:'Dra. Díaz',    tipo:'caso'},
+            {anio:'III',mod:'II',  f:'14/10/2026',t:'Clasificación de deformidad espinal',                                  dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'II',  f:'21/10/2026',t:'Evaluación de alineación espinal',                                     dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'II',  f:'28/10/2026',t:'Evaluación y tratamiento de deformidad cervical',                      dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'II',  f:'04/11/2026',t:'Evaluación y tratamiento de la escoliosis del adulto',                 dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'II',  f:'11/11/2026',t:'Presentación de avances de tesis y artículo científico',               dr:'Dr. Cerrato',  tipo:'presentacion'},
+            {anio:'III',mod:'II',  f:'18/11/2026',t:'Presentación de avances de tesis y artículo científico',               dr:'Dra. Díaz',    tipo:'presentacion'},
+            {anio:'III',mod:'II',  f:'09/12/2026',t:'Examen módulo II',                                                     dr:'',             tipo:'examen'},
+            {anio:'III',mod:'III', f:'13/01/2027',t:'Tumores benignos del esqueleto axial',                                 dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'III', f:'20/01/2027',t:'Tumores malignos primarios del esqueleto axial',                       dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'III', f:'27/01/2027',t:'Tumores benignos intradurales extramedulares',                         dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'III', f:'03/02/2027',t:'Metástasis espinal',                                                   dr:'Dr. Cerrato',  tipo:'clase'},
+            {anio:'III',mod:'III', f:'10/02/2027',t:'Tumores malignos primarios',                                           dr:'Dra. Díaz',    tipo:'clase'},
+            {anio:'III',mod:'III', f:'17/02/2027',t:'Revisión de un tema y de artículos científicos',                       dr:'Dr. Cerrato',  tipo:'revision'},
+            {anio:'III',mod:'III', f:'24/02/2027',t:'Revisión de un tema y de artículos científicos',                       dr:'Dra. Díaz',    tipo:'revision'},
+            {anio:'III',mod:'III', f:'10/03/2027',t:'Examen módulo III',                                                    dr:'',             tipo:'examen'},
+            {anio:'III',mod:'Cierre',f:'07/04/2027',t:'Presentación de avances de tesis y artículo científico',             dr:'Dr. Cerrato',  tipo:'presentacion'},
+            {anio:'III',mod:'Cierre',f:'14/04/2027',t:'Presentación de avances de tesis y artículo científico',             dr:'Dra. Díaz',    tipo:'presentacion'},
+            // ── IV AÑO ──────────────────────────────────────────────────────
+            {anio:'IV',mod:'I',   f:'28/05/2026',t:'Presentación de caso clínico',                                          dr:'Dr. Rayo',     tipo:'caso'},
+            {anio:'IV',mod:'I',   f:'04/06/2026',t:'Gliomas de bajo grado',                                                 dr:'Dr. Reynoso',  tipo:'clase'},
+            {anio:'IV',mod:'I',   f:'11/06/2026',t:'Gliomas malignos',                                                      dr:'Dra. Blandón', tipo:'clase'},
+            {anio:'IV',mod:'I',   f:'18/06/2026',t:'Revisión de un tema y de artículos científicos',                        dr:'Dr. Rayo',     tipo:'revision'},
+            {anio:'IV',mod:'I',   f:'25/06/2026',t:'Meduloblastomas en niños y adultos',                                    dr:'Dr. Reynoso',  tipo:'clase'},
+            {anio:'IV',mod:'I',   f:'02/07/2026',t:'Ependimomas intracraneales en niños y adultos',                         dr:'Dra. Blandón', tipo:'clase'},
+            {anio:'IV',mod:'I',   f:'09/07/2026',t:'Metástasis cerebral',                                                   dr:'Dr. Rayo',     tipo:'clase'},
+            {anio:'IV',mod:'I',   f:'16/07/2026',t:'Meningiomas (no base de cráneo)',                                       dr:'Dr. Reynoso',  tipo:'clase'},
+            {anio:'IV',mod:'I',   f:'23/07/2026',t:'Revisión de un tema y de artículos científicos',                        dr:'Dra. Blandón', tipo:'revision'},
+            {anio:'IV',mod:'I',   f:'30/07/2026',t:'Revisión de un tema y de artículos científicos',                        dr:'Dr. Reynoso',  tipo:'revision'},
+            {anio:'IV',mod:'I',   f:'20/08/2026',t:'Investigación: estudios de casos control',                              dr:'Dr. Reynoso',  tipo:'clase'},
+            {anio:'IV',mod:'I',   f:'27/08/2026',t:'Investigación: estudios descriptivos',                                  dr:'Dra. Blandón', tipo:'clase'},
+            {anio:'IV',mod:'II',  f:'03/09/2026',t:'Schwannomas vestibulares',                                              dr:'Dr. Rayo',     tipo:'clase'},
+            {anio:'IV',mod:'II',  f:'10/09/2026',t:'Meningioma de base de cráneo',                                         dr:'Dra. Blandón', tipo:'clase'},
+            {anio:'IV',mod:'II',  f:'17/09/2026',t:'Tumores de hipófisis',                                                  dr:'Dr. Reynoso',  tipo:'clase'},
+            {anio:'IV',mod:'II',  f:'24/09/2026',t:'Presentación de caso clínico',                                          dr:'Dr. Rayo',     tipo:'caso'},
+            {anio:'IV',mod:'II',  f:'01/10/2026',t:'Presentación de caso clínico',                                          dr:'Dra. Blandón', tipo:'caso'},
+            {anio:'IV',mod:'II',  f:'08/10/2026',t:'Presentación de caso clínico',                                          dr:'Dr. Reynoso',  tipo:'caso'},
+            {anio:'IV',mod:'II',  f:'15/10/2026',t:'Investigación: protocolo de investigación y objetivos del estudio',     dr:'Dr. Rayo',     tipo:'clase'},
+            {anio:'IV',mod:'II',  f:'22/10/2026',t:'Cordomas y condrosarcomas',                                             dr:'Dr. Rayo',     tipo:'clase'},
+            {anio:'IV',mod:'II',  f:'05/11/2026',t:'Craneofaringiomas',                                                     dr:'Dra. Blandón', tipo:'clase'},
+            {anio:'IV',mod:'II',  f:'19/11/2026',t:'Presentación de avances de tesis y artículo científico',                dr:'Dra. Blandón', tipo:'presentacion'},
+            {anio:'IV',mod:'II',  f:'26/11/2026',t:'Presentación de avances de tesis y artículo científico',                dr:'Dr. Rayo',     tipo:'presentacion'},
+            {anio:'IV',mod:'II',  f:'03/12/2026',t:'Presentación de avances de tesis y artículo científico',                dr:'Dr. Reynoso',  tipo:'presentacion'},
+            {anio:'IV',mod:'II',  f:'10/12/2026',t:'Examen módulo II',                                                      dr:'',             tipo:'examen'},
+            {anio:'IV',mod:'III', f:'14/01/2027',t:'Evaluación de pacientes para cirugía de epilepsia',                     dr:'Dra. Blandón', tipo:'clase'},
+            {anio:'IV',mod:'III', f:'21/01/2027',t:'Lobectomía temporal anteromedial',                                      dr:'Dr. Reynoso',  tipo:'clase'},
+            {anio:'IV',mod:'III', f:'28/01/2027',t:'Resecciones extratemporales en cirugía de epilepsia',                   dr:'Dr. Rayo',     tipo:'clase'},
+            {anio:'IV',mod:'III', f:'04/02/2027',t:'Estimulación eléctrica para epilepsia (estimulación vagal, DBS)',        dr:'Dra. Blandón', tipo:'clase'},
+            {anio:'IV',mod:'III', f:'11/02/2027',t:'Revisión de un tema y de artículos científicos',                        dr:'Dr. Reynoso',  tipo:'revision'},
+            {anio:'IV',mod:'III', f:'18/02/2027',t:'Cirugía para enfermedad de Parkinson',                                  dr:'Dr. Rayo',     tipo:'clase'},
+            {anio:'IV',mod:'III', f:'25/02/2027',t:'Revisión de un tema y de artículos científicos',                        dr:'Dra. Blandón', tipo:'revision'},
+            {anio:'IV',mod:'III', f:'04/03/2027',t:'Revisión de un tema y de artículos científicos',                        dr:'Dr. Rayo',     tipo:'revision'},
+            {anio:'IV',mod:'III', f:'18/03/2027',t:'Examen módulo III',                                                     dr:'',             tipo:'examen'},
+            {anio:'IV',mod:'Cierre',f:'01/04/2027',t:'Presentación de avances de tesis y artículo científico',              dr:'Dra. Blandón', tipo:'presentacion'},
+            {anio:'IV',mod:'Cierre',f:'08/04/2027',t:'Presentación de avances de tesis y artículo científico',              dr:'Dr. Reynoso',  tipo:'presentacion'},
+            {anio:'IV',mod:'Cierre',f:'15/04/2027',t:'Presentación de avances de tesis y artículo científico',              dr:'Dr. Rayo',     tipo:'presentacion'},
+            // ── V AÑO ───────────────────────────────────────────────────────
+            {anio:'V',mod:'I',   f:'29/05/2026',t:'Presentación de caso clínico',                                           dr:'Dra. Membreño',tipo:'caso'},
+            {anio:'V',mod:'I',   f:'05/06/2026',t:'Malformaciones arteriovenosas: Principios, fisiología, anatomía, epidemiología, localización, criterios quirúrgicos/endovasculares, criterios para tratamiento',dr:'Dra. Abarca',tipo:'clase'},
+            {anio:'V',mod:'I',   f:'12/06/2026',t:'Malformaciones arteriovenosas: manejo microquirúrgico',                  dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'I',   f:'19/06/2026',t:'Malformaciones arteriovenosas: manejo endovascular',                     dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'I',   f:'26/06/2026',t:'Investigación: variable de respuesta',                                   dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'I',   f:'03/07/2026',t:'Aneurismas cerebrales: Generalidades, clasificación, criterios quirúrgicos, conservador, endovasculares, aneurismas tratados, complicaciones, aneurismas rotos, no rotos',dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'I',   f:'10/07/2026',t:'Aneurismas cerebrales: Manejo quirúrgico para ACI, AcomA, ACM',          dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'I',   f:'17/07/2026',t:'Aneurismas cerebrales: Manejo endovascular para ACI, AcomA, ACM',        dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'I',   f:'24/07/2026',t:'Revisión de un tema y artículos científicos — Guías AHA Stroke',         dr:'Dra. Abarca',  tipo:'revision'},
+            {anio:'V',mod:'I',   f:'31/07/2026',t:'Investigación: población de estudio',                                    dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'I',   f:'07/08/2026',t:'Revisión de un tema y artículos científicos — Guías AHA Stroke',         dr:'Dra. Membreño',tipo:'revision'},
+            {anio:'V',mod:'I',   f:'27/08/2026',t:'Examen módulo I',                                                        dr:'',             tipo:'examen'},
+            {anio:'V',mod:'II',  f:'04/09/2026',t:'Endoscopia ventricular',                                                 dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'II',  f:'18/09/2026',t:'Craneosinostosis no sindrómica',                                         dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'II',  f:'25/09/2026',t:'Presentación de caso clínico',                                           dr:'Dra. Abarca',  tipo:'caso'},
+            {anio:'V',mod:'II',  f:'02/10/2026',t:'Craneosinostosis sindrómica',                                            dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'II',  f:'09/10/2026',t:'Disrafismo espinal',                                                     dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'II',  f:'16/10/2026',t:'Revisión de un tema y de artículos científicos',                         dr:'Dra. Membreño',tipo:'revision'},
+            {anio:'V',mod:'II',  f:'23/10/2026',t:'Presentación de avances de tesis y artículo científico',                 dr:'Dra. Abarca',  tipo:'presentacion'},
+            {anio:'V',mod:'II',  f:'30/10/2026',t:'Presentación de avances de tesis y artículo científico',                 dr:'Dra. Membreño',tipo:'presentacion'},
+            {anio:'V',mod:'II',  f:'13/11/2026',t:'Examen módulo II',                                                       dr:'',             tipo:'examen'},
+            {anio:'V',mod:'III', f:'04/12/2026',t:'Anatomía de base de cráneo anterior y media (Rhoton)',                   dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'III', f:'08/01/2027',t:'Anatomía del ángulo pontocerebeloso y nervios de fosa craneal posterior (Rhoton)',dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'III', f:'05/02/2027',t:'Examen módulo III',                                                      dr:'',             tipo:'examen'},
+            {anio:'V',mod:'Cierre',f:'19/02/2027',t:'Examen de grado',                                                      dr:'',             tipo:'examen'},
+        ];
+
+        var PLAN_TIPO_CFG = {
+            clase:        {badge:'Clase',        style:'background:#e0e7ff;color:#3730a3'},
+            revision:     {badge:'Revisión',     style:'background:#ede9fe;color:#6d28d9'},
+            caso:         {badge:'Caso clínico', style:'background:#e0f2fe;color:#0369a1'},
+            examen:       {badge:'Examen',       style:'background:#fee2e2;color:#b91c1c'},
+            presentacion: {badge:'Presentación', style:'background:#fef3c7;color:#92400e'},
+        };
+        var PLAN_ANIO_COL = {
+            'I':  {label:'I Año',  bg:'#eef2ff',text:'#3730a3'},
+            'II': {label:'II Año', bg:'#f5f3ff',text:'#5b21b6'},
+            'III':{label:'III Año',bg:'#eff6ff',text:'#1d4ed8'},
+            'IV': {label:'IV Año', bg:'#ecfdf5',text:'#065f46'},
+            'V':  {label:'V Año',  bg:'#fef2f2',text:'#991b1b'},
+        };
+        var MOD_LABEL = {'I':'Módulo I','II':'Módulo II','III':'Módulo III','IV':'Módulo IV','Cierre':'Cierre / Evaluación final'};
+        var MESES_PLAN = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+        var _planOpen = false;
+        var _planEditIdx = null; // índice de la entrada actualmente en edición
+
+        function togglePlanDocente() {
+            _planOpen = !_planOpen;
+            var panel   = document.getElementById('planDocenteCollapsible');
+            var chevron = document.getElementById('planChevron');
+            if (_planOpen) {
+                panel.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+                renderPlanDocente();
+            } else {
+                panel.classList.add('hidden');
+                chevron.style.transform = '';
+            }
+        }
+
+        function parseFechaPlanDoc(f) {
+            var p = f.split('/'); return new Date(+p[2], +p[1]-1, +p[0]);
+        }
+
+        function renderPlanDocente() {
+            var fAnio = document.getElementById('filtroAnioPlanDoc').value;
+            var fMod  = document.getElementById('filtroModuloPlanDoc').value;
+            var hoy   = new Date(); hoy.setHours(0,0,0,0);
+
+            var datos = PLAN_DOCENTE_COMPLETO.filter(function(e) {
+                return (!fAnio || e.anio===fAnio) && (!fMod || e.mod===fMod);
+            });
+            document.getElementById('planDocContador').textContent =
+                datos.length + ' entrada' + (datos.length!==1?'s':'');
+
+            if (!datos.length) {
+                document.getElementById('planDocenteList').innerHTML =
+                    '<p style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;font-style:italic;">Sin entradas para los filtros seleccionados.</p>';
+                return;
+            }
+
+            // Agrupar por año → módulo
+            var grupos = {};
+            datos.forEach(function(e,i) {
+                var gKey = e.anio+'|'+e.mod;
+                if (!grupos[gKey]) grupos[gKey] = {anio:e.anio, mod:e.mod, items:[]};
+                grupos[gKey].items.push({e:e, globalIdx: PLAN_DOCENTE_COMPLETO.indexOf(e)});
+            });
+
+            var htmlTotal = '';
+            var orden = ['I','II','III','IV','V'];
+            var ordenMod = ['I','II','III','IV','Cierre'];
+
+            Object.values(grupos)
+                .sort(function(a,b){
+                    var ao = orden.indexOf(a.anio)-orden.indexOf(b.anio);
+                    return ao!==0 ? ao : ordenMod.indexOf(a.mod)-ordenMod.indexOf(b.mod);
+                })
+                .forEach(function(g) {
+                    var col = PLAN_ANIO_COL[g.anio]||PLAN_ANIO_COL['I'];
+                    htmlTotal += '<div style="padding:8px 20px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:2;">'
+                        +'<span style="font-size:11px;font-weight:800;padding:2px 10px;border-radius:99px;background:'+col.bg+';color:'+col.text+';">'+col.label+'</span>'
+                        +'<span style="font-size:12px;font-weight:700;color:#475569;">'+(MOD_LABEL[g.mod]||g.mod)+'</span>'
+                        +'</div>';
+
+                    g.items.forEach(function(item) {
+                        var e = item.e, idx = item.globalIdx;
+                        var fd  = parseFechaPlanDoc(e.f);
+                        var esHoy = fd.toDateString()===hoy.toDateString();
+                        var pasada = fd<hoy && !esHoy;
+                        var tc  = PLAN_TIPO_CFG[e.tipo]||PLAN_TIPO_CFG.clase;
+                        var override = getPlanEdit(e.anio, e.f);
+                        var temaShow = (override && override.tema) ? override.tema : e.t;
+                        var drShow   = (override && override.dr!==undefined) ? override.dr : e.dr;
+                        var isEditing = (_planEditIdx === idx);
+                        var rowOp = (pasada&&!esHoy) ? 'opacity:.65;' : '';
+
+                        htmlTotal += '<div id="planrow_'+idx+'" style="padding:10px 16px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid #f1f5f9;'+rowOp+'">'
+                            // Fecha
+                            +'<div style="flex-shrink:0;text-align:center;min-width:40px;">'
+                            +'<div style="font-size:18px;font-weight:900;color:'+(esHoy?'#4f46e5':pasada?'#94a3b8':'#334155')+';line-height:1;">'+fd.getDate()+'</div>'
+                            +'<div style="font-size:9px;font-weight:600;color:#94a3b8;">'+MESES_PLAN[fd.getMonth()]+' '+fd.getFullYear()+'</div>'
+                            +'</div>'
+                            // Contenido
+                            +'<div style="flex:1;min-width:0;">';
+
+                        if (isEditing) {
+                            // Modo edición
+                            htmlTotal += '<div style="background:#f8fafc;border:1.5px solid #c7d2fe;border-radius:10px;padding:10px;space-y:6px;">'
+                                +'<div style="margin-bottom:6px;">'
+                                +'<label style="font-size:10px;font-weight:700;color:#6366f1;display:block;margin-bottom:3px;">Tema</label>'
+                                +'<input id="planEditTema_'+idx+'" type="text" value="'+temaShow.replace(/"/g,'&quot;')+'" list="listaDoctores" autocomplete="off"'
+                                +' style="width:100%;padding:6px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;outline:none;box-sizing:border-box;">'
+                                +'</div>'
+                                +'<div style="margin-bottom:8px;">'
+                                +'<label style="font-size:10px;font-weight:700;color:#6366f1;display:block;margin-bottom:3px;">Doctor/a</label>'
+                                +'<input id="planEditDr_'+idx+'" type="text" value="'+drShow.replace(/"/g,'&quot;')+'" list="listaDoctores" autocomplete="off"'
+                                +' style="width:100%;padding:6px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;outline:none;box-sizing:border-box;">'
+                                +'</div>'
+                                +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+                                +'<button onclick="guardarPlanEdit('+idx+',\''+e.anio+'\',\''+e.f+'\')" style="font-size:11px;font-weight:700;background:#4f46e5;color:#fff;border:none;border-radius:7px;padding:5px 14px;cursor:pointer;">💾 Guardar</button>'
+                                +'<button onclick="resetarPlanEditUI('+idx+',\''+e.anio+'\',\''+e.f+'\')" style="font-size:11px;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:7px;padding:5px 12px;cursor:pointer;">🔄 Restaurar original</button>'
+                                +'<button onclick="cancelarPlanEdit('+idx+')" style="font-size:11px;font-weight:600;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:7px;padding:5px 12px;cursor:pointer;">✕ Cancelar</button>'
+                                +'</div>'
+                                +'</div>';
+                        } else {
+                            // Modo vista
+                            var modBadge = override ? '<span style="font-size:8px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px;">editado</span>' : '';
+                            htmlTotal += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:3px;">'
+                                +'<span style="font-size:10px;font-weight:700;padding:1px 8px;border-radius:99px;'+tc.style+'">'+tc.badge+'</span>'
+                                +(esHoy?'<span style="font-size:9px;background:#4f46e5;color:#fff;padding:1px 6px;border-radius:99px;font-weight:800;">HOY</span>':'')
+                                +'</div>'
+                                +'<p style="font-size:12px;font-weight:700;color:#1e293b;line-height:1.4;margin-bottom:2px;">'+temaShow+modBadge+'</p>'
+                                +(drShow?'<p style="font-size:11px;color:#6366f1;font-weight:600;">'+drShow+'</p>':'');
+                        }
+
+                        htmlTotal += '</div>'
+                            // Botón editar (solo si no está en modo edición)
+                            +(!isEditing ? '<button onclick="iniciarPlanEdit('+idx+')" title="Editar" style="flex-shrink:0;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:7px;padding:5px 8px;cursor:pointer;font-size:13px;margin-left:4px;">✏️</button>' : '')
+                            +'</div>';
+                    });
+                });
+
+            document.getElementById('planDocenteList').innerHTML = htmlTotal;
+        }
+
+        function iniciarPlanEdit(idx) {
+            _planEditIdx = idx;
+            renderPlanDocente();
+            // Scroll a la fila
+            var row = document.getElementById('planrow_'+idx);
+            if (row) row.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+
+        function cancelarPlanEdit(idx) {
+            _planEditIdx = null;
+            renderPlanDocente();
+        }
+
+        function guardarPlanEdit(idx, anio, fecha) {
+            var temaVal = (document.getElementById('planEditTema_'+idx)||{}).value||'';
+            var drVal   = (document.getElementById('planEditDr_'+idx)||{}).value||'';
+            setPlanEdit(anio, fecha, temaVal, drVal);
+            _planEditIdx = null;
+            renderPlanDocente();
+            renderCarousel(); // actualizar carrusel del index
+        }
+
+        function resetarPlanEditUI(idx, anio, fecha) {
+            resetPlanEdit(anio, fecha);
+            _planEditIdx = null;
+            renderPlanDocente();
+            renderCarousel();
+        }
+
         // El desplazamiento táctil del carrusel lo maneja el navegador nativamente
         // gracias a overflow-x:auto + scroll-snap-type:x mandatory en el div.
         // No se necesitan manejadores táctiles personalizados.
@@ -943,6 +1389,166 @@
                 })
                 .catch(function(){});
         });
+
+        // ═══════════════════════════════════════════════════════════════
+        // REGISTRO DE ACTIVIDAD Y ALERTAS DE EDICIÓN
+        // ═══════════════════════════════════════════════════════════════
+        var _editLog = [];
+        var _alertasOpen = false;
+        var ALERTAS_LAST_KEY = 'alertas_last_seen';
+
+        function _getLastSeen() {
+            var v = parseInt(localStorage.getItem(ALERTAS_LAST_KEY) || '0', 10);
+            return isNaN(v) ? 0 : v;
+        }
+        function _setLastSeen(ms) { localStorage.setItem(ALERTAS_LAST_KEY, String(ms)); }
+
+        function fetchEditLog() {
+            return fetch(URL_SCRIPT + '?action=getEditLog')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    _editLog = Array.isArray(data) ? data : [];
+                    updateAlertIndicator();
+                    return _editLog;
+                })
+                .catch(function () { _editLog = _editLog || []; });
+        }
+
+        function _nuevasCount() {
+            var last = _getLastSeen();
+            return _editLog.filter(function (x) { return x.tsRaw > last; }).length;
+        }
+
+        function updateAlertIndicator() {
+            var btn = document.getElementById('btnAlertas');
+            var badge = document.getElementById('alertasBadge');
+            var sub = document.getElementById('alertasSubtitle');
+            if (!btn) return;
+            var n = _nuevasCount();
+            if (n > 0) {
+                btn.style.background = 'linear-gradient(to right,#b91c1c,#7f1d1d)';
+                badge.textContent = n + (n === 1 ? ' nueva' : ' nuevas');
+                badge.classList.remove('hidden');
+                if (sub) sub.textContent = '⚠️ ' + n + ' modificación' + (n === 1 ? '' : 'es') + ' sin revisar — clic para ver y notificar';
+            } else {
+                btn.style.background = 'linear-gradient(to right,#1e293b,#0f172a)';
+                badge.classList.add('hidden');
+                if (sub) sub.textContent = 'Ediciones de evaluaciones y cambios en el plan docente';
+            }
+        }
+
+        function toggleAlertas() {
+            _alertasOpen = !_alertasOpen;
+            var panel = document.getElementById('alertasCollapsible');
+            var chevron = document.getElementById('alertasChevron');
+            if (!_alertasOpen) {
+                panel.classList.add('hidden');
+                chevron.style.transform = '';
+                return;
+            }
+            panel.classList.remove('hidden');
+            chevron.style.transform = 'rotate(180deg)';
+            document.getElementById('alertasLoading').classList.remove('hidden');
+            document.getElementById('alertasContent').classList.add('hidden');
+
+            fetchEditLog().then(function () {
+                var last = _getLastSeen();
+                var nuevas = _editLog.filter(function (x) { return x.tsRaw > last; });
+                renderAlertas();
+                document.getElementById('alertasLoading').classList.add('hidden');
+                document.getElementById('alertasContent').classList.remove('hidden');
+
+                if (nuevas.length > 0) {
+                    fetch(URL_SCRIPT + '?action=sendEditAlert&desde=' + last)
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            var nota = document.getElementById('alertasNota');
+                            if (nota && res && res.status === 'success') {
+                                nota.textContent = '✓ Se envió una alerta con ' + nuevas.length +
+                                    ' actividad(es) nueva(s) al correo pereravaldivia@gmail.com.';
+                            }
+                        })
+                        .catch(function () {});
+                    var maxTs = Math.max.apply(null, _editLog.map(function (x) { return x.tsRaw; }).concat([Date.now()]));
+                    _setLastSeen(maxTs);
+                    updateAlertIndicator();
+                } else {
+                    var nota2 = document.getElementById('alertasNota');
+                    if (nota2) nota2.textContent = 'No hay nuevas ediciones desde la última revisión. (El correo de alertas es pereravaldivia@gmail.com.)';
+                }
+                lucide.createIcons();
+            });
+        }
+
+        function renderAlertas() {
+            var cont = document.getElementById('alertasList');
+            if (!_editLog.length) {
+                cont.innerHTML = '<p style="text-align:center;padding:28px;color:#94a3b8;font-size:13px;font-style:italic;">Aún no hay actividades de edición registradas.</p>';
+                return;
+            }
+            var last = _getLastSeen();
+            var html = '';
+            _editLog.forEach(function (x) {
+                var esPlan = (x.tipo || '').indexOf('Plan') === 0;
+                var color = esPlan ? '#b45309' : '#4338ca';
+                var bg = esPlan ? '#fffbeb' : '#eef2ff';
+                var icono = esPlan ? '📝' : '✎';
+                var esNueva = x.tsRaw > last;
+                html += '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 18px;' + (esNueva ? 'background:#fef2f2;' : '') + '">'
+                    + '<div style="flex-shrink:0;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:' + bg + ';color:' + color + ';font-size:14px;">' + icono + '</div>'
+                    + '<div style="flex:1;min-width:0;">'
+                    + '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
+                    + '<span style="font-size:11px;font-weight:800;color:' + color + ';">' + x.tipo + '</span>'
+                    + (esNueva ? '<span style="font-size:9px;font-weight:800;background:#dc2626;color:#fff;padding:1px 6px;border-radius:99px;">NUEVO</span>' : '')
+                    + '<span style="font-size:10px;color:#94a3b8;margin-left:auto;">' + x.ts + '</span>'
+                    + '</div>'
+                    + '<p style="font-size:12px;color:#334155;margin-top:2px;line-height:1.4;">' + x.detalle + '</p>'
+                    + (x.autor ? '<p style="font-size:11px;color:#64748b;margin-top:1px;">' + x.autor + '</p>' : '')
+                    + '</div></div>';
+            });
+            cont.innerHTML = html;
+        }
+
+        // ─── Registrar modificaciones del plan docente en el servidor ────
+        function registrarEdicionPlan(anio, fecha, accion) {
+            var detalle;
+            if (accion === 'restaurado') {
+                detalle = anio + ' año · ' + fecha + ': restaurado al original';
+            } else {
+                var ov = (typeof getPlanEdit === 'function') ? getPlanEdit(anio, fecha) : null;
+                var tema = ov && ov.tema ? ov.tema : '';
+                var dr = ov && ov.dr ? ov.dr : '';
+                detalle = anio + ' año · ' + fecha + ': ' + (tema || '(sin tema)') + (dr ? (' — ' + dr) : '');
+            }
+            var qs = 'action=logPlanEdit'
+                + '&detalle=' + encodeURIComponent(detalle)
+                + '&autor=' + encodeURIComponent('Plan docente (index)')
+                + '&fecha=' + encodeURIComponent(fecha);
+            fetch(URL_SCRIPT + '?' + qs)
+                .then(function (r) { return r.json(); })
+                .then(function () { fetchEditLog(); })
+                .catch(function () {});
+        }
+
+        // Envolver las funciones de guardado del plan docente para registrar la actividad
+        if (typeof guardarPlanEdit === 'function') {
+            var _origGuardarPlanEdit = guardarPlanEdit;
+            guardarPlanEdit = function (idx, anio, fecha) {
+                _origGuardarPlanEdit(idx, anio, fecha);
+                registrarEdicionPlan(anio, fecha, 'editado');
+            };
+        }
+        if (typeof resetarPlanEditUI === 'function') {
+            var _origResetar = resetarPlanEditUI;
+            resetarPlanEditUI = function (idx, anio, fecha) {
+                _origResetar(idx, anio, fecha);
+                registrarEdicionPlan(anio, fecha, 'restaurado');
+            };
+        }
+
+        // Carga inicial del registro de actividad (define el estado rojo del botón)
+        document.addEventListener('DOMContentLoaded', function () { fetchEditLog(); });
+
     </script>
 </body>
 </html>
