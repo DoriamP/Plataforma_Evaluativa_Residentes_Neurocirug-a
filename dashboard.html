@@ -20,9 +20,15 @@
                     <p class="text-xs text-indigo-300 font-medium">Análisis de Rendimiento de Residentes</p>
                 </div>
             </div>
-            <a href="index.html" class="flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 transition px-4 py-2 rounded-lg border border-indigo-700 text-xs text-white font-medium">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Menú Principal
-            </a>
+            <div class="flex items-center gap-2">
+                <button id="btnRespaldar" onclick="abrirModalRespaldo()"
+                    class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 transition px-4 py-2 rounded-lg border border-emerald-500 text-xs text-white font-medium">
+                    <i data-lucide="database-backup" class="w-4 h-4"></i> Respaldar base de datos
+                </button>
+                <a href="index.html" class="flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 transition px-4 py-2 rounded-lg border border-indigo-700 text-xs text-white font-medium">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Menú Principal
+                </a>
+            </div>
         </div>
     </header>
 
@@ -126,6 +132,7 @@
                                 <th class="p-4">Componente / Detalle</th>
                                 <th class="p-4">Evaluador</th>
                                 <th class="p-4 text-center">Rendimiento</th>
+                                <th class="p-4 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="timelineTableBody" class="divide-y divide-slate-200 text-sm"></tbody>
@@ -138,6 +145,37 @@
             </div>
         </div>
     </main>
+
+    <!-- ── MODAL: RESPALDAR BASE DE DATOS ──────────────────────────────── -->
+    <div id="modalRespaldo" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-emerald-700 text-white px-6 py-5 flex items-center gap-3">
+                <i data-lucide="database-backup" class="w-6 h-6"></i>
+                <div>
+                    <h3 class="font-bold text-base leading-tight">Respaldar base de datos</h3>
+                    <p class="text-emerald-200 text-xs mt-0.5">Se enviará toda la hoja "Evaluaciones" en formato Excel</p>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label for="emailRespaldo" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Correo electrónico de destino</label>
+                    <input type="email" id="emailRespaldo" placeholder="ejemplo@correo.com"
+                        class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+                </div>
+                <div id="respaldoMsg" class="hidden text-sm rounded-xl px-4 py-3"></div>
+                <div class="flex gap-3 pt-1">
+                    <button onclick="cerrarModalRespaldo()"
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                        Cancelar
+                    </button>
+                    <button id="btnEnviarRespaldo" onclick="enviarRespaldo()"
+                        class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i> Enviar respaldo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="bg-slate-900 text-slate-400 text-center py-6 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 text-xs">
@@ -152,7 +190,16 @@
         // ═══════════════════════════════════════════════════════════════════
         const URL_SCRIPT_GOOGLE = "https://script.google.com/macros/s/AKfycbzwxFznLdmraLeYOP3VxEGm53p6MZLmYWt5AyjJ72j-vSUkhkTBDWprNCtK1yfm82m_/exec";
 
-        let dbMasterData = [];
+        // Mapa Componente → archivo del formulario de evaluación
+        const FORM_POR_COMPONENTE = {
+            "Clases Programadas":        "clases_programadas.html",
+            "Casos Clínicos y Artículos":"casos_clinicos_y_articulos.html",
+            "Sesiones Diarias":          "sesiones_diarias.html",
+            "Práctica Quirúrgica":       "practica_quirurgica.html"
+        };
+
+        let dbMasterData    = [];
+        let dbFilteredData  = [];   // registros actualmente visibles (para editar/eliminar)
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -200,6 +247,8 @@
 
             const populate = (selId, set) => {
                 const sel = document.getElementById(selId);
+                // Limpiar opciones previas (excepto la primera "Todos…")
+                while (sel.options.length > 1) sel.remove(1);
                 Array.from(set).sort().forEach(v => {
                     const o = document.createElement('option');
                     o.value = v; o.textContent = v;
@@ -212,10 +261,10 @@
 
         // ─── Helpers de normalización de campos ────────────────────────────
         function getNombreResidente(row) {
-            return (row.nombreResidente || row.residentName || row.residente || "").trim();
+            return (row.nombreResidente || row.residentName || row.residente || "").toString().trim();
         }
         function getNombreEvaluador(row) {
-            return (row.especialista || row.evaluatorName || row.evaluador || "").trim();
+            return (row.especialista || row.evaluatorName || row.evaluador || "").toString().trim();
         }
         function getPorcentaje(row) {
             let v = parseFloat((row.porcentaje || "0").toString().replace('%','').trim()) || 0;
@@ -223,7 +272,7 @@
             return Math.round(v);
         }
         function getComponente(row) {
-            return (row.tipo_evaluacion || "").trim();
+            return (row.tipo_evaluacion || "").toString().trim();
         }
 
         // ─── 3. Filtrado y render de KPIs + tabla historial ─────────────────
@@ -239,6 +288,7 @@
                 return matchR && matchE && matchC;
             });
 
+            dbFilteredData = filtrados;
             renderKPIs(filtrados);
             renderTable(filtrados);
         }
@@ -274,7 +324,7 @@
             if (data.length === 0) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
-            data.forEach(row => {
+            data.forEach((row, idx) => {
                 const fecha = row.fecha || "--/--/----";
                 const residente = getNombreResidente(row) || "No especificado";
                 const evaluador = getNombreEvaluador(row) || "No especificado";
@@ -288,6 +338,8 @@
                     : componente === 'Sesiones Diarias'
                     ? 'bg-sky-50 text-sky-800 border-sky-200'
                     : 'bg-blue-50 text-blue-800 border-blue-200';
+
+                const editable = !!FORM_POR_COMPONENTE[componente] && row._row;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
@@ -303,9 +355,184 @@
                         <div class="inline-flex items-center justify-center px-3 py-2 rounded-xl border ${badgeColor} shadow-sm min-w-[70px]">
                             <span class="text-sm font-black leading-none">${pct}%</span>
                         </div>
+                    </td>
+                    <td class="p-4 text-center whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5">
+                            <button data-idx="${idx}" class="btn-editar ${editable ? '' : 'opacity-30 cursor-not-allowed'}"
+                                ${editable ? '' : 'disabled title="Componente no editable"'}
+                                title="Editar evaluación">
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition">
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                </span>
+                            </button>
+                            <button data-idx="${idx}" class="btn-eliminar" title="Eliminar evaluación">
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </span>
+                            </button>
+                        </div>
                     </td>`;
                 tbody.appendChild(tr);
             });
+
+            // Asignar eventos a los botones
+            tbody.querySelectorAll('.btn-editar').forEach(b => {
+                if (!b.disabled) b.addEventListener('click', () => editarEvaluacion(parseInt(b.dataset.idx, 10)));
+            });
+            tbody.querySelectorAll('.btn-eliminar').forEach(b => {
+                b.addEventListener('click', () => eliminarEvaluacion(parseInt(b.dataset.idx, 10)));
+            });
+
+            lucide.createIcons();
+        }
+
+        // ─── 4. EDITAR — abre el formulario correspondiente prellenado ──────
+        const LIMITE_EDICIONES_DIA = 2;
+        const PALABRA_SEGURIDAD    = "campos123";
+
+        function editarEvaluacion(idx) {
+            const row = dbFilteredData[idx];
+            if (!row) return;
+            const componente = getComponente(row);
+            const archivo = FORM_POR_COMPONENTE[componente];
+            if (!archivo) {
+                alert('Este componente no tiene un formulario de edición asociado.');
+                return;
+            }
+
+            // Verificar el límite diario de ediciones antes de abrir el formulario
+            fetch(`${URL_SCRIPT_GOOGLE}?action=getEditCount`)
+                .then(r => r.json())
+                .then(res => {
+                    const count = (res && typeof res.count === 'number') ? res.count : 0;
+                    let clave = '';
+                    if (count >= LIMITE_EDICIONES_DIA) {
+                        const intento = prompt(
+                            `Se ha alcanzado el límite de ${LIMITE_EDICIONES_DIA} ediciones por día ` +
+                            `(${count} hoy).\n\nIngresa la palabra de seguridad para continuar editando:`);
+                        if (intento === null) return; // cancelado
+                        if (intento.trim() !== PALABRA_SEGURIDAD) {
+                            alert('Palabra de seguridad incorrecta. Edición cancelada.');
+                            return;
+                        }
+                        clave = PALABRA_SEGURIDAD;
+                    }
+                    abrirFormularioEdicion(row, archivo, clave);
+                })
+                .catch(() => {
+                    // Si no se puede verificar el conteo, abrir igualmente (la validación
+                    // del servidor sigue activa al guardar)
+                    abrirFormularioEdicion(row, archivo, '');
+                });
+        }
+
+        function abrirFormularioEdicion(row, archivo, clave) {
+            const datos = {
+                modo:        'editar',
+                fila:        row._row,
+                fecha:       row.fecha || '',
+                anio:        row.anoResidencia || '',
+                residente:   getNombreResidente(row),
+                evaluador:   getNombreEvaluador(row),
+                tema:        row.tema || row.surgeryType || '',
+                s1:          row.score1 != null ? row.score1 : '',
+                s2:          row.score2 != null ? row.score2 : '',
+                s3:          row.score3 != null ? row.score3 : '',
+                comentarios: row.comentarios || ''
+            };
+            if (clave) datos.clave = clave;
+            const params = new URLSearchParams(datos);
+            window.location.href = `${archivo}?${params.toString()}`;
+        }
+
+        // ─── 5. ELIMINAR ────────────────────────────────────────────────────
+        function eliminarEvaluacion(idx) {
+            const row = dbFilteredData[idx];
+            if (!row || !row._row) {
+                alert('No se pudo identificar el registro a eliminar.');
+                return;
+            }
+            const residente = getNombreResidente(row) || 'este registro';
+            const componente = getComponente(row);
+            if (!confirm(`¿Eliminar definitivamente la evaluación de "${residente}" (${componente}, ${row.fecha})?\n\nEsta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('loadingState').querySelector('p').textContent = 'Eliminando evaluación...';
+            document.getElementById('dashboardContent').classList.add('hidden');
+
+            fetch(`${URL_SCRIPT_GOOGLE}?action=deleteEvaluation&fila=${encodeURIComponent(row._row)}`)
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.status === 'success') {
+                        // Recargar para reflejar el cambio con datos frescos
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar: ' + (resp.message || 'desconocido'));
+                        location.reload();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error de conexión al eliminar. Intenta nuevamente.');
+                    location.reload();
+                });
+        }
+
+        // ─── 6. RESPALDAR BASE DE DATOS ─────────────────────────────────────
+        function abrirModalRespaldo() {
+            document.getElementById('modalRespaldo').classList.remove('hidden');
+            const msg = document.getElementById('respaldoMsg');
+            msg.classList.add('hidden');
+            msg.textContent = '';
+            document.getElementById('emailRespaldo').focus();
+            lucide.createIcons();
+        }
+
+        function cerrarModalRespaldo() {
+            document.getElementById('modalRespaldo').classList.add('hidden');
+        }
+
+        function enviarRespaldo() {
+            const email = document.getElementById('emailRespaldo').value.trim();
+            const msg = document.getElementById('respaldoMsg');
+            const btn = document.getElementById('btnEnviarRespaldo');
+
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                msg.className = 'text-sm rounded-xl px-4 py-3 bg-red-50 text-red-700 border border-red-200';
+                msg.textContent = 'Por favor ingresa un correo electrónico válido.';
+                msg.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span> Enviando…';
+            msg.className = 'text-sm rounded-xl px-4 py-3 bg-amber-50 text-amber-700 border border-amber-200';
+            msg.textContent = 'Generando el archivo Excel y enviando el correo… esto puede tardar unos segundos.';
+            msg.classList.remove('hidden');
+
+            fetch(`${URL_SCRIPT_GOOGLE}?action=backupExcel&email=${encodeURIComponent(email)}`)
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.status === 'success') {
+                        msg.className = 'text-sm rounded-xl px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200';
+                        msg.textContent = '✓ ' + resp.message;
+                    } else {
+                        msg.className = 'text-sm rounded-xl px-4 py-3 bg-red-50 text-red-700 border border-red-200';
+                        msg.textContent = 'Error: ' + (resp.message || 'No se pudo enviar el respaldo.');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    msg.className = 'text-sm rounded-xl px-4 py-3 bg-red-50 text-red-700 border border-red-200';
+                    msg.textContent = 'Error de conexión. Verifica tu internet e intenta nuevamente.';
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Enviar respaldo';
+                    lucide.createIcons();
+                });
         }
     </script>
 </body>
