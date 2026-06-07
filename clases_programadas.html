@@ -320,6 +320,8 @@
                 comentarios:     document.getElementById('comentarios').value || 'Ninguno'
             });
 
+            if (window.EDIT_MODE) { payload.set('action','updateEvaluation'); payload.set('fila', window.EDIT_ROW); if (window.EDIT_CLAVE) payload.set('clave', window.EDIT_CLAVE); }
+
             fetch(`${URL_SCRIPT}?${payload.toString()}`, { mode: 'no-cors' })
             .then(() => {
                 const aprobado = pct >= 70;
@@ -341,6 +343,32 @@
                 btn.className = 'w-full bg-indigo-900 hover:bg-indigo-950 active:scale-[0.98] text-white font-bold py-3.5 px-6 rounded-xl shadow transition text-sm';
             });
         });
+
+    // ─── MODO EDICIÓN (desde el dashboard docente) ──────────────────
+    (function(){
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('modo') !== 'editar') return;
+      window.EDIT_MODE = true;
+      window.EDIT_ROW  = p.get('fila') || '';
+      window.EDIT_CLAVE = p.get('clave') || '';
+      function d2iso(d){ if(!d) return ''; var a=d.split('/'); return a.length===3 ? a[2]+'-'+a[1]+'-'+a[0] : ''; }
+      function setRadio(name,val){ if(val===null||val===undefined||val==='') return; var el=document.querySelector('input[name="'+name+'"][value="'+val+'"]'); if(el){ el.checked=true; } }
+      function ensureOpt(sel,val){ if(!val) return; if(![...sel.options].some(o=>o.value===val)){ var o=document.createElement('option'); o.value=val; o.textContent=val; sel.appendChild(o);} sel.value=val; }
+      function apply(){
+        if(p.get('fecha')){ document.getElementById('fechaEvaluacion').value=p.get('fecha'); var pk=document.getElementById('fechaDatePicker'); if(pk) pk.value=d2iso(p.get('fecha')); }
+        if(p.get('anio')){ var a=document.getElementById('anoResidencia'); a.value=p.get('anio'); a.dispatchEvent(new Event('change')); }
+        if(p.get('residente')) ensureOpt(document.getElementById('residente'), p.get('residente'));
+        if(p.get('evaluador')) document.getElementById('evaluador').value=p.get('evaluador');
+        if(p.get('tema')) document.getElementById('tema').value=p.get('tema');
+        setRadio('criterio1',p.get('s1')); setRadio('criterio2',p.get('s2')); setRadio('criterio3',p.get('s3'));
+        if(p.get('comentarios')) document.getElementById('comentarios').value=p.get('comentarios');
+        if(typeof calcScore==='function') calcScore();
+        var btn=document.getElementById('btnSubmit'); if(btn) btn.textContent='Actualizar Evaluación';
+        var hh=document.querySelector('h1'); if(hh) hh.insertAdjacentHTML('afterend','<p class="mt-2 inline-block bg-amber-400 text-amber-950 text-xs font-bold px-2 py-1 rounded">\u270e Modo edici\u00f3n \u2014 modificando un registro existente</p>');
+      }
+      if(document.readyState==='loading') window.addEventListener('DOMContentLoaded',()=>setTimeout(apply,0)); else setTimeout(apply,0);
+    })();
+
     </script>
 </body>
 </html>
