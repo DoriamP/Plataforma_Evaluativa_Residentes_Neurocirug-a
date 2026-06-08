@@ -139,31 +139,12 @@
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
                     <p class="text-slate-500 text-xs md:text-sm italic">Instrumentos destinados a medir el dominio cognitivo, la preparación de sesiones y el análisis crítico de la literatura médica.</p>
                     <div class="space-y-3 pt-2">
-                        <a href="clases_programadas.html" class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl transition group">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm"><i data-lucide="presentation" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <span class="block text-sm font-semibold text-slate-800 group-hover:text-indigo-950">a) Clases Programadas</span>
-                                    <span class="block text-xs text-slate-500">Evaluación estructural y de exposición</span>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transform group-hover:translate-x-1 transition"></i>
-                        </a>
-                        <a href="casos_clinicos_y_articulos.html" class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl transition group">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm"><i data-lucide="file-text" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <span class="block text-sm font-semibold text-slate-800 group-hover:text-indigo-950">b) Casos Clínicos y Artículos</span>
-                                    <span class="block text-xs text-slate-500">Revisión de literatura y evidencia</span>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transform group-hover:translate-x-1 transition"></i>
-                        </a>
+                        <p class="text-xs text-slate-400 italic bg-slate-50 border border-slate-200 rounded-xl p-3 leading-relaxed">Las <span class="font-semibold text-slate-500">Clases Programadas</span> y los <span class="font-semibold text-slate-500">Casos Clínicos y Artículos</span> se evalúan directamente desde el carrusel «Clases Programadas» (botón ▶ Evaluar) en la parte superior, para evitar secciones redundantes.</p>
                         <a href="sesiones_diarias.html" class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl transition group">
                             <div class="flex items-center gap-3">
                                 <div class="bg-white p-2 rounded-lg border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-100 shadow-sm"><i data-lucide="message-square" class="w-5 h-5"></i></div>
                                 <div class="text-left">
-                                    <span class="block text-sm font-semibold text-slate-800 group-hover:text-indigo-950">c) Sesiones Clínicas Diarias</span>
+                                    <span class="block text-sm font-semibold text-slate-800 group-hover:text-indigo-950">a) Sesiones Clínicas Diarias</span>
                                     <span class="block text-xs text-slate-500">Participación activa matutina</span>
                                 </div>
                             </div>
@@ -358,6 +339,44 @@
                 </datalist>
                 <!-- Lista -->
                 <div id="planDocenteList" class="divide-y divide-slate-100" style="max-height:72vh;overflow-y:auto;"></div>
+            </div>
+        </section>
+
+        <!-- VIDEOS DE NEUROCIRUGÍA (colapsable) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+            <button onclick="var p=document.getElementById('videosPanel'),c=document.getElementById('videosChevron'); p.classList.toggle('hidden'); c.style.transform=p.classList.contains('hidden')?'rotate(0deg)':'rotate(180deg)';"
+                class="w-full text-left bg-gradient-to-r from-rose-800 to-red-700 px-5 py-4 text-white flex items-center justify-between focus:outline-none">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-rose-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-sm">Videos de Neurocirugía</h3>
+                        <p class="text-xs text-rose-200 mt-0.5">Biblioteca audiovisual del programa</p>
+                    </div>
+                </div>
+                <svg id="videosChevron" class="w-5 h-5 text-rose-200 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="videosPanel" class="hidden px-6 py-5">
+                <a href="https://drive.google.com/drive/folders/1E9T_DGNm9g6_oflqkxWRFsqYbkUEgMEo?usp=share_link"
+                   target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-3 p-4 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition group w-full">
+                    <div class="p-2 bg-white rounded-lg border border-rose-200 flex-shrink-0">
+                        <svg class="w-6 h-6 text-rose-600" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6.28 3l3.879 6.727H2.4L6.28 3zm11.44 0l3.879 6.727h-7.758L15.72 3zM12 3l3.879 6.727H8.12L12 3zM2.4 10.909h7.758L6.28 21 2.4 10.909zm11.44 0h7.759L17.72 21l-3.88-10.091zm-5.719 0h7.758L12 21l-3.879-10.091z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-slate-800 group-hover:text-rose-800">Videos de Neurocirugía — Google Drive</p>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">drive.google.com/drive/folders/1E9T_DGNm9g6…</p>
+                    </div>
+                    <svg class="w-4 h-4 text-rose-400 group-hover:text-rose-600 flex-shrink-0 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
             </div>
         </section>
 
@@ -586,6 +605,7 @@
             { f: "10/03/2027", desc: "Examen módulo III — III año", tipo: "examen" },
             { f: "07/04/2027", desc: "Presentación avances de tesis — Dr. Cerrato (III año)", tipo: "presentacion" },
             { f: "14/04/2027", desc: "Presentación avances de tesis — Dra. Díaz (III año)", tipo: "presentacion" },
+            { f: "13/08/2026", desc: "Examen módulo I — IV año", tipo: "examen" },
             { f: "19/11/2026", desc: "Presentación avances de tesis — Dra. Blandón (IV año)", tipo: "presentacion" },
             { f: "26/11/2026", desc: "Presentación avances de tesis — Dr. Rayo (IV año)", tipo: "presentacion" },
             { f: "03/12/2026", desc: "Presentación avances de tesis — Dr. Reynoso (IV año)", tipo: "presentacion" },
@@ -797,7 +817,6 @@
                     var temaGuardado = getTemaIdx(c.f, c.anio);
                     var esCasoRev   = esEditableIdx(c.tema);
                     var formUrl     = esCasoRev ? 'casos_clinicos_y_articulos.html' : 'clases_programadas.html';
-                    var params      = '?fecha=' + encodeURIComponent(c.f) + '&anio=' + encodeURIComponent(c.anio) + '&tema=' + encodeURIComponent(c.tema);
 
                     // Leer overrides del plan docente (editados en la sección Plan Docente)
                     var override = getPlanEdit(c.anio, c.f);
@@ -805,6 +824,15 @@
                     var drDisplay   = (override && override.dr !== undefined) ? override.dr : c.dr;
                     // Badge de modificado
                     var modBadge = override ? '<span style="font-size:8px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px;">editado</span>' : '';
+
+                    // Tarea 4: el tema que se autocompleta en el formulario es el tema específico
+                    // guardado (caso clínico / revisión) si existe; si no, el tema mostrado.
+                    var temaParaForm = (esCasoRev && temaGuardado) ? temaGuardado : temaDisplay;
+                    // Tarea 5: se envía siempre fechaProg (fecha programada) para detectar retrasos.
+                    var params = '?fecha=' + encodeURIComponent(c.f)
+                               + '&anio=' + encodeURIComponent(c.anio)
+                               + '&tema=' + encodeURIComponent(temaParaForm)
+                               + '&fechaProg=' + encodeURIComponent(c.f);
 
                     // Punto de color según evaluaciones: match por tema + residentes del año
                     var nEsp    = getNumEsp(c.tema, c.anio);
@@ -822,7 +850,7 @@
                         + (esCasoRev && !temaGuardado ? '<p class="text-xs text-slate-400 italic mt-1">— tema por asignar —</p>' : '')
                         + '<div class="mt-2 pt-1.5" style="border-top:1px solid rgba(0,0,0,.08);">'
                         + (esFutura
-                            ? '<a href="' + formUrl + params + '&aviso=futura&fechaProg=' + encodeURIComponent(c.f) + '" style="display:inline-block;font-size:9px;font-weight:700;background:#b45309;color:#fff;padding:2px 8px;border-radius:5px;text-decoration:none;">▶ Evaluar ⚠</a>'
+                            ? '<a href="' + formUrl + params + '&aviso=futura" style="display:inline-block;font-size:9px;font-weight:700;background:#b45309;color:#fff;padding:2px 8px;border-radius:5px;text-decoration:none;">▶ Evaluar ⚠</a>'
                             : '<a href="' + formUrl + params + '" style="display:inline-block;font-size:9px;font-weight:700;background:#4338ca;color:#fff;padding:2px 8px;border-radius:5px;text-decoration:none;">▶ Evaluar</a>')
                         + '</div>'
                         + '</div>';
@@ -1143,6 +1171,7 @@
             {anio:'IV',mod:'I',   f:'16/07/2026',t:'Meningiomas (no base de cráneo)',                                       dr:'Dr. Reynoso',  tipo:'clase'},
             {anio:'IV',mod:'I',   f:'23/07/2026',t:'Revisión de un tema y de artículos científicos',                        dr:'Dra. Blandón', tipo:'revision'},
             {anio:'IV',mod:'I',   f:'30/07/2026',t:'Revisión de un tema y de artículos científicos',                        dr:'Dr. Reynoso',  tipo:'revision'},
+            {anio:'IV',mod:'I',   f:'13/08/2026',t:'Examen módulo I',                                                       dr:'',             tipo:'examen'},
             {anio:'IV',mod:'I',   f:'20/08/2026',t:'Investigación: estudios de casos control',                              dr:'Dr. Reynoso',  tipo:'clase'},
             {anio:'IV',mod:'I',   f:'27/08/2026',t:'Investigación: estudios descriptivos',                                  dr:'Dra. Blandón', tipo:'clase'},
             {anio:'IV',mod:'II',  f:'03/09/2026',t:'Schwannomas vestibulares',                                              dr:'Dr. Rayo',     tipo:'clase'},
