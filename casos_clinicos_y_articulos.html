@@ -43,7 +43,7 @@
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Fecha de Evaluación
-                    <span class="ml-1 text-indigo-500 font-normal normal-case">(toque para cambiar)</span>
+                    <span id="fechaHint" class="ml-1 text-indigo-500 font-normal normal-case">(toque para cambiar)</span>
                 </label>
                 <div class="relative">
                     <input type="text" id="fechaEvaluacion"
@@ -246,7 +246,27 @@
                 // Señal de retraso: si HOY es posterior a la fecha programada en el plan docente
                 mostrarRetrasoSiAplica(params.get('fechaProg') || '');
             }
+
+            // Al venir desde "Evaluar" en el carrusel: fecha = HOY y no editable
+            if (params.get('bloquearFecha') === '1') bloquearFechaHoy();
         });
+
+        // Fija la fecha de evaluación en la fecha de hoy y bloquea su edición
+        function bloquearFechaHoy() {
+            const h   = new Date();
+            const inp = document.getElementById('fechaEvaluacion');
+            const pk  = document.getElementById('fechaDatePicker');
+            if (inp) {
+                inp.value = formatDDMMYYYY(h);
+                inp.removeAttribute('onclick');
+                inp.style.cursor = 'default';
+                inp.classList.remove('cursor-pointer', 'hover:border-indigo-500');
+                inp.title = 'La fecha se registra automáticamente con la fecha de hoy';
+            }
+            if (pk) { pk.value = h.toISOString().split('T')[0]; pk.disabled = true; pk.style.display = 'none'; }
+            const hint = document.getElementById('fechaHint');
+            if (hint) hint.textContent = '(fecha de hoy — automática)';
+        }
 
         // Muestra la advertencia de retraso comparando la fecha de hoy con la fecha programada
         function mostrarRetrasoSiAplica(fechaProg) {
