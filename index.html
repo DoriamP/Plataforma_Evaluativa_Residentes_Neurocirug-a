@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
         .scroll-snap-x { scroll-snap-type: x mandatory; }
         .scroll-snap-start { scroll-snap-align: start; }
@@ -15,6 +17,37 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- PANEL DE LOGIN DOCENTE (visible hasta autenticarse)            -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="loginPanel" class="min-h-screen flex items-center justify-center py-10 px-4 bg-slate-50">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 max-w-sm w-full text-center">
+            <div class="bg-gradient-to-r from-indigo-950 to-indigo-800 text-white rounded-xl px-5 py-6 mb-6">
+                <div class="text-3xl mb-2">🧠</div>
+                <h1 class="text-xl font-black leading-tight">Plataforma de Evaluación</h1>
+                <p class="text-indigo-200 text-xs mt-1">Acceso para docentes — Neurocirugía</p>
+            </div>
+            <p class="text-slate-600 text-sm mb-6 leading-relaxed">Inicia sesión con tu cuenta de Google de docente para acceder al menú de evaluación.</p>
+            <div id="g_id_onload"
+                 data-client_id="148157700207-r8g2es764v635uckj1d1ff3dsfsdit56.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-auto_select="true"
+                 data-cancel_on_tap_outside="false">
+            </div>
+            <div class="g_id_signin flex justify-center"
+                 data-type="standard" data-theme="filled_blue" data-size="large"
+                 data-locale="es" data-text="signin_with" data-shape="rectangular">
+            </div>
+            <p id="loginError" class="hidden mt-4 text-xs text-red-600 font-semibold bg-red-50 border border-red-200 rounded-xl p-3"></p>
+            <p class="text-xs text-slate-400 mt-5">Solo cuentas de docentes autorizados pueden acceder.</p>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- CONTENIDO (oculto hasta autenticarse)                          -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="appShell" class="hidden flex flex-col flex-grow">
 
     <header class="bg-indigo-950 text-white shadow-md border-b border-indigo-900 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -27,9 +60,18 @@
                     <p class="text-xs text-indigo-300 font-medium">Programa de Residentes de Neurocirugía</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 bg-indigo-900/50 px-3 py-1.5 rounded-full border border-indigo-800 text-xs text-indigo-200">
-                <i data-lucide="calendar" class="w-4 h-4"></i>
-                <span id="currentDate">--/--/----</span>
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <div class="flex items-center gap-2 bg-indigo-900/50 px-3 py-1.5 rounded-full border border-indigo-800 text-xs text-indigo-200">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    <span id="currentDate">--/--/----</span>
+                </div>
+                <div class="flex items-center gap-2 bg-indigo-900/50 px-3 py-1.5 rounded-full border border-indigo-800 text-xs text-indigo-200">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    <span id="docenteNombre">—</span>
+                </div>
+                <button onclick="cerrarSesionDocente()" class="flex items-center gap-1.5 bg-rose-700/80 hover:bg-rose-600 px-3 py-1.5 rounded-full border border-rose-500/50 text-xs text-white font-medium transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Salir
+                </button>
             </div>
         </div>
     </header>
@@ -413,8 +455,64 @@
         </div>
     </footer>
 
+    </div><!-- /appShell -->
+
     <script>
         lucide.createIcons();
+
+        // ═══════════════════════════════════════════════════════════════
+        // AUTENTICACIÓN GOOGLE — ACCESO DE DOCENTES AL MENÚ PRINCIPAL
+        // ═══════════════════════════════════════════════════════════════
+        // correo (minúsculas) → nombre del docente / especialista
+        var CORREO_DOCENTE = {
+            'pereravaldivia@gmail.com':   'Dr. Doriam Perera',
+            'lrzv129@gmail.com':          'Dr. Luis Zapata',
+            'matusmauricio134@gmail.com': 'Dr. Mauricio Matus',
+            'ojperez98@gmail.com':        'Dr. Oswaldo Pérez',
+            'eaheper@gmail.com':          'Dr. Edgar Herrera'
+        };
+        var _authDocente = null;
+
+        // Callback de Google Identity Services
+        function handleCredentialResponse(response) {
+            try {
+                var b64 = response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                var payload = JSON.parse(decodeURIComponent(atob(b64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join('')));
+                procesarLoginDocente((payload.email || '').toLowerCase().trim());
+            } catch (e) {
+                mostrarErrorLogin('Error al procesar las credenciales de Google. Intente de nuevo.');
+            }
+        }
+
+        function procesarLoginDocente(email) {
+            email = (email || '').toLowerCase().trim();
+            if (CORREO_DOCENTE[email]) {
+                _authDocente = { email: email, nombre: CORREO_DOCENTE[email] };
+                sessionStorage.setItem('docente_email', email);
+                var lp = document.getElementById('loginPanel'); if (lp) lp.classList.add('hidden');
+                var sh = document.getElementById('appShell');   if (sh) sh.classList.remove('hidden');
+                var nm = document.getElementById('docenteNombre'); if (nm) nm.textContent = _authDocente.nombre;
+                arrancarContenido();
+                if (window.lucide) lucide.createIcons();
+            } else {
+                mostrarErrorLogin('Acceso denegado: la cuenta ' + email + ' no está autorizada como docente. Contacte al coordinador.');
+                sessionStorage.removeItem('docente_email');
+            }
+        }
+
+        function mostrarErrorLogin(msg) {
+            var el = document.getElementById('loginError');
+            if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+        }
+
+        function cerrarSesionDocente() {
+            sessionStorage.removeItem('docente_email');
+            _authDocente = null;
+            if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+            location.reload();
+        }
 
         // ─── URL del Apps Script ──────────────────────────────────────────────────
         var URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxyGCI2a75VauHRuL0BwQt6ttVdZXoX8xLVZiYi8l1Rj2bR-cX2rfGkj6GQBAJo-xed/exec";
@@ -828,11 +926,13 @@
                     // Tarea 4: el tema que se autocompleta en el formulario es el tema específico
                     // guardado (caso clínico / revisión) si existe; si no, el tema mostrado.
                     var temaParaForm = (esCasoRev && temaGuardado) ? temaGuardado : temaDisplay;
-                    // Tarea 5: se envía siempre fechaProg (fecha programada) para detectar retrasos.
-                    var params = '?fecha=' + encodeURIComponent(c.f)
-                               + '&anio=' + encodeURIComponent(c.anio)
+                    // La fecha de evaluación se registra automáticamente con la fecha de HOY
+                    // en el formulario (bloquearFecha=1): no se envía la fecha programada como
+                    // fecha de evaluación. Sí se envía fechaProg para detectar retrasos.
+                    var params = '?anio=' + encodeURIComponent(c.anio)
                                + '&tema=' + encodeURIComponent(temaParaForm)
-                               + '&fechaProg=' + encodeURIComponent(c.f);
+                               + '&fechaProg=' + encodeURIComponent(c.f)
+                               + '&bloquearFecha=1';
 
                     // Punto de color según evaluaciones: match por tema + residentes del año
                     var nEsp    = getNumEsp(c.tema, c.anio);
@@ -1400,8 +1500,11 @@
         // gracias a overflow-x:auto + scroll-snap-type:x mandatory en el div.
         // No se necesitan manejadores táctiles personalizados.
 
-        // ─── Arranque ─────────────────────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', function() {
+        // ─── Arranque (se ejecuta SOLO tras autenticarse como docente) ──────────────
+        var _appIniciada = false;
+        function arrancarContenido() {
+            if (_appIniciada) return;
+            _appIniciada = true;
             var hoy = new Date();
             document.getElementById('currentDate').textContent =
                 String(hoy.getDate()).padStart(2,'0') + '/' + String(hoy.getMonth()+1).padStart(2,'0') + '/' + hoy.getFullYear();
@@ -1417,6 +1520,12 @@
                     _estadisticasDatos = datos; // guardar para estadísticas
                 })
                 .catch(function(){});
+        }
+
+        // Restaurar sesión de docente al cargar (si ya inició sesión en esta pestaña)
+        document.addEventListener('DOMContentLoaded', function() {
+            var em = (sessionStorage.getItem('docente_email') || '').toLowerCase();
+            if (em && CORREO_DOCENTE[em]) procesarLoginDocente(em);
         });
 
         // ═══════════════════════════════════════════════════════════════
