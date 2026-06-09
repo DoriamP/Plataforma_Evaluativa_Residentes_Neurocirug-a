@@ -6,8 +6,41 @@
     <title>Panel de Rendimiento Histórico - Neurocirugía</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- PANEL DE LOGIN DOCENTE (visible hasta autenticarse)            -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="loginPanel" class="min-h-screen flex items-center justify-center py-10 px-4 bg-slate-50">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 max-w-sm w-full text-center">
+            <div class="bg-gradient-to-r from-indigo-950 to-indigo-800 text-white rounded-xl px-5 py-6 mb-6">
+                <div class="text-3xl mb-2">📊</div>
+                <h1 class="text-xl font-black leading-tight">Dashboard Docente</h1>
+                <p class="text-indigo-200 text-xs mt-1">Acceso para docentes — Neurocirugía</p>
+            </div>
+            <p class="text-slate-600 text-sm mb-6 leading-relaxed">Inicia sesión con tu cuenta de Google de docente para gestionar las evaluaciones.</p>
+            <div id="g_id_onload"
+                 data-client_id="148157700207-r8g2es764v635uckj1d1ff3dsfsdit56.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-auto_select="true"
+                 data-cancel_on_tap_outside="false">
+            </div>
+            <div class="g_id_signin flex justify-center"
+                 data-type="standard" data-theme="filled_blue" data-size="large"
+                 data-locale="es" data-text="signin_with" data-shape="rectangular">
+            </div>
+            <p id="loginError" class="hidden mt-4 text-xs text-red-600 font-semibold bg-red-50 border border-red-200 rounded-xl p-3"></p>
+            <p class="text-xs text-slate-400 mt-5">Solo cuentas de docentes autorizados pueden acceder.</p>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- CONTENIDO (oculto hasta autenticarse)                          -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="appShell" class="hidden flex flex-col flex-grow">
 
     <header class="bg-indigo-950 text-white shadow-md border-b border-indigo-900 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -20,7 +53,15 @@
                     <p class="text-xs text-indigo-300 font-medium">Análisis de Rendimiento de Residentes</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <div class="flex items-center gap-2 bg-indigo-900/60 px-3 py-2 rounded-lg border border-indigo-700 text-xs text-indigo-200">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    <span id="docenteNombre">—</span>
+                </div>
+                <button onclick="cerrarSesionDocente()"
+                    class="flex items-center gap-2 bg-rose-700 hover:bg-rose-600 transition px-3 py-2 rounded-lg border border-rose-500 text-xs text-white font-medium">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Salir
+                </button>
                 <button id="btnRespaldar" onclick="abrirModalRespaldo()"
                     class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 transition px-4 py-2 rounded-lg border border-emerald-500 text-xs text-white font-medium">
                     <i data-lucide="database-backup" class="w-4 h-4"></i> Respaldar base de datos
@@ -184,6 +225,8 @@
         </div>
     </footer>
 
+    </div><!-- /appShell -->
+
     <script>
         // ═══════════════════════════════════════════════════════════════════
         // CONFIGURACIÓN
@@ -203,13 +246,83 @@
         let NEW_BACKEND     = false; // ¿está publicada la versión nueva del Apps Script?
         const AVISO_BACKEND = 'Esta función requiere la versión NUEVA del Apps Script, que todavía no está publicada.\n\nEn el editor de Apps Script:\nImplementar → Administrar implementaciones → (lápiz) → Versión: "Nueva versión" → Implementar.\n\nLuego recarga esta página.';
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // ═══════════════════════════════════════════════════════════════════
+        // AUTENTICACIÓN GOOGLE — ACCESO DE DOCENTES
+        // ═══════════════════════════════════════════════════════════════════
+        // correo (minúsculas) → nombre del docente / especialista (igual que en los formularios)
+        const CORREO_DOCENTE = {
+            'pereravaldivia@gmail.com':   'Dr. Doriam Perera',
+            'lrzv129@gmail.com':          'Dr. Luis Zapata',
+            'matusmauricio134@gmail.com': 'Dr. Mauricio Matus',
+            'ojperez98@gmail.com':        'Dr. Oswaldo Pérez',
+            'eaheper@gmail.com':          'Dr. Edgar Herrera'
+        };
+        // Docentes que pueden MODIFICAR/ELIMINAR cualquier evaluación
+        const DOCENTES_ADMIN = ['pereravaldivia@gmail.com', 'lrzv129@gmail.com'];
+        let _authDocente = null;
+
+        function handleCredentialResponse(response) {
+            try {
+                const b64 = response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(decodeURIComponent(atob(b64).split('').map(c =>
+                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+                procesarLoginDocente((payload.email || '').toLowerCase().trim());
+            } catch (e) {
+                mostrarErrorLogin('Error al procesar las credenciales de Google. Intente de nuevo.');
+            }
+        }
+
+        function procesarLoginDocente(email) {
+            email = (email || '').toLowerCase().trim();
+            if (CORREO_DOCENTE[email]) {
+                _authDocente = { email, nombre: CORREO_DOCENTE[email], esAdmin: DOCENTES_ADMIN.includes(email) };
+                sessionStorage.setItem('docente_email', email);
+                document.getElementById('loginPanel').classList.add('hidden');
+                document.getElementById('appShell').classList.remove('hidden');
+                const nm = document.getElementById('docenteNombre');
+                if (nm) nm.textContent = _authDocente.nombre + (_authDocente.esAdmin ? '' : ' · solo sus evaluaciones');
+                arrancarDashboard();
+            } else {
+                mostrarErrorLogin('Acceso denegado: la cuenta ' + email + ' no está autorizada como docente. Contacte al coordinador.');
+                sessionStorage.removeItem('docente_email');
+            }
+        }
+
+        function mostrarErrorLogin(msg) {
+            const el = document.getElementById('loginError');
+            if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+        }
+
+        // ¿El docente actual puede modificar/eliminar esta evaluación?
+        function puedeEditarRow(row) {
+            if (!_authDocente) return false;
+            if (_authDocente.esAdmin) return true;
+            return getNombreEvaluador(row) === _authDocente.nombre;
+        }
+
+        function cerrarSesionDocente() {
+            sessionStorage.removeItem('docente_email');
+            _authDocente = null;
+            if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+            location.reload();
+        }
+
+        // ─── Arranque del dashboard (SOLO tras autenticarse) ────────────────
+        let _dashIniciado = false;
+        function arrancarDashboard() {
+            if (_dashIniciado) return;
+            _dashIniciado = true;
             lucide.createIcons();
             fetchDataFromSheets();
-
             document.getElementById('filterResidente').addEventListener('change', applyFiltersAndRender);
             document.getElementById('filterEvaluador').addEventListener('change', applyFiltersAndRender);
             document.getElementById('filterComponente').addEventListener('change', applyFiltersAndRender);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons(); // íconos del panel de login
+            const em = (sessionStorage.getItem('docente_email') || '').toLowerCase();
+            if (em && CORREO_DOCENTE[em]) procesarLoginDocente(em);
         });
 
         // ─── 1. Fetch de Google Sheets ──────────────────────────────────────
@@ -344,7 +457,16 @@
                     ? 'bg-sky-50 text-sky-800 border-sky-200'
                     : 'bg-blue-50 text-blue-800 border-blue-200';
 
-                const editable = !!FORM_POR_COMPONENTE[componente] && row._row;
+                const permitido  = puedeEditarRow(row);
+                const motivoEdit = !FORM_POR_COMPONENTE[componente] ? 'Componente no editable'
+                                 : !row._row                        ? 'Registro sin identificador'
+                                 : !permitido                       ? 'Solo puede modificar sus propias evaluaciones'
+                                 : '';
+                const editable   = !motivoEdit;
+                const motivoElim = !row._row   ? 'Registro sin identificador'
+                                 : !permitido  ? 'Solo puede eliminar sus propias evaluaciones'
+                                 : '';
+                const eliminable = !motivoElim;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
@@ -364,13 +486,13 @@
                     <td class="p-4 text-center whitespace-nowrap">
                         <div class="inline-flex items-center gap-1.5">
                             <button data-idx="${idx}" class="btn-editar ${editable ? '' : 'opacity-30 cursor-not-allowed'}"
-                                ${editable ? '' : 'disabled title="Componente no editable"'}
-                                title="Editar evaluación">
+                                ${editable ? 'title="Editar evaluación"' : `disabled title="${motivoEdit}"`}>
                                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition">
                                     <i data-lucide="pencil" class="w-4 h-4"></i>
                                 </span>
                             </button>
-                            <button data-idx="${idx}" class="btn-eliminar" title="Eliminar evaluación">
+                            <button data-idx="${idx}" class="btn-eliminar ${eliminable ? '' : 'opacity-30 cursor-not-allowed'}"
+                                ${eliminable ? 'title="Eliminar evaluación"' : `disabled title="${motivoElim}"`}>
                                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </span>
@@ -385,7 +507,7 @@
                 if (!b.disabled) b.addEventListener('click', () => editarEvaluacion(parseInt(b.dataset.idx, 10)));
             });
             tbody.querySelectorAll('.btn-eliminar').forEach(b => {
-                b.addEventListener('click', () => eliminarEvaluacion(parseInt(b.dataset.idx, 10)));
+                if (!b.disabled) b.addEventListener('click', () => eliminarEvaluacion(parseInt(b.dataset.idx, 10)));
             });
 
             lucide.createIcons();
@@ -398,6 +520,7 @@
         function editarEvaluacion(idx) {
             const row = dbFilteredData[idx];
             if (!row) return;
+            if (!puedeEditarRow(row)) { alert('Solo puede modificar las evaluaciones realizadas por usted. Únicamente el Dr. Luis Zapata y el Dr. Doriam Perera pueden modificar cualquier evaluación.'); return; }
             if (!NEW_BACKEND) { alert(AVISO_BACKEND); return; }
             const componente = getComponente(row);
             const archivo = FORM_POR_COMPONENTE[componente];
@@ -458,6 +581,7 @@
                 alert('No se pudo identificar el registro a eliminar.');
                 return;
             }
+            if (!puedeEditarRow(row)) { alert('Solo puede eliminar las evaluaciones realizadas por usted. Únicamente el Dr. Luis Zapata y el Dr. Doriam Perera pueden eliminar cualquier evaluación.'); return; }
             if (!NEW_BACKEND) { alert(AVISO_BACKEND); return; }
             const residente = getNombreResidente(row) || 'este registro';
             const componente = getComponente(row);
