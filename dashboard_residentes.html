@@ -1070,7 +1070,7 @@ function renderNotas(residente, filas) {
             gruposDiarios[clave].c2Suma += (c2 / maxC2) * 100; gruposDiarios[clave].c2Count++;
         }
         if (!isNaN(c3) && r._comp !== "Sesiones Diarias") {
-            let maxC3 = r._comp === "Casos Clínicos y Artículos" ? 7 : 30;
+            let maxC3 = r._comp === "Clases Programadas" ? 10 : (r._comp === "Casos Clínicos y Artículos" ? 7 : 30);
             gruposDiarios[clave].c3Suma += (c3 / maxC3) * 100; gruposDiarios[clave].c3Count++;
         }
     });
