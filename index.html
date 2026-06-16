@@ -464,14 +464,27 @@
                 </svg>
             </button>
             <div id="rotacionesPanel" class="hidden">
-                <!-- Filtro por especialista -->
+                <!-- Filtros: por especialista o por residente -->
                 <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-3 items-end">
                     <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Ver por</label>
+                        <select id="rotModo" onchange="cambiarModoRot()"
+                            class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none appearance-none">
+                            <option value="especialista">Especialista</option>
+                            <option value="residente">Médico residente</option>
+                        </select>
+                    </div>
+                    <div id="rotWrapEsp">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Especialista / Rotación</label>
                         <select id="filtroEspecialistaRot" onchange="renderRotaciones()"
                             class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none appearance-none"></select>
                     </div>
-                    <p class="ml-auto self-center text-xs text-slate-400 font-medium italic">Residentes y fechas de rotación por especialista</p>
+                    <div id="rotWrapRes" class="hidden">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Médico residente</label>
+                        <select id="filtroResidenteRot" onchange="renderRotaciones()"
+                            class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none appearance-none"></select>
+                    </div>
+                    <p class="ml-auto self-center text-xs text-slate-400 font-medium italic">Mismo color = misma fecha de rotación</p>
                 </div>
                 <div id="rotacionesContent" class="p-5"></div>
             </div>
@@ -694,9 +707,9 @@
             { f: "29/05/2026", tema: "Presentación de caso clínico", dr: "Dra. Membreño", anio: "V" },
             { f: "05/06/2026", tema: "Malformaciones arteriovenosas: Principios, fisiología, anatomía, epidemiología, localización, criterios quirúrgicos/endovasculares, criterios para tratamiento", dr: "Dra. Abarca", anio: "V" },
             { f: "12/06/2026", tema: "Malformaciones arteriovenosas: manejo microquirúrgico", dr: "Dra. Abarca", anio: "V" },
-            { f: "19/06/2026", tema: "Malformaciones arteriovenosas: manejo endovascular", dr: "Dra. Abarca", anio: "V" },
-            { f: "26/06/2026", tema: "Investigación: variable de respuesta", dr: "Dra. Abarca", anio: "V" },
-            { f: "03/07/2026", tema: "Aneurismas cerebrales: Generalidades, clasificación, criterios quirúrgicos, conservador, endovasculares, aneurismas tratados, cuando volver a tratarlos, complicaciones, aneurismas rotos, no rotos", dr: "Dra. Membreño", anio: "V" },
+            { f: "19/06/2026", tema: "Aneurismas cerebrales: Generalidades, clasificación, criterios quirúrgicos, conservador, endovasculares, aneurismas tratados, cuando volver a tratarlos, complicaciones, aneurismas rotos, no rotos", dr: "Dra. Membreño", anio: "V" },
+            { f: "26/06/2026", tema: "Malformaciones arteriovenosas: manejo microquirúrgico y manejo endovascular", dr: "Dra. Abarca", anio: "V" },
+            { f: "03/07/2026", tema: "Investigación: variable de respuesta", dr: "Dra. Abarca", anio: "V" },
             { f: "10/07/2026", tema: "Aneurismas cerebrales: Manejo quirúrgico para ACI, AcomA, ACM", dr: "Dra. Abarca", anio: "V" },
             { f: "17/07/2026", tema: "Aneurismas cerebrales: Manejo endovascular para ACI, AcomA, ACM", dr: "Dra. Membreño", anio: "V" },
             { f: "24/07/2026", tema: "Revisión de un tema y artículos científicos — Guías AHA Stroke", dr: "Dra. Abarca", anio: "V" },
@@ -1342,9 +1355,9 @@
             {anio:'V',mod:'I',   f:'29/05/2026',t:'Presentación de caso clínico',                                           dr:'Dra. Membreño',tipo:'caso'},
             {anio:'V',mod:'I',   f:'05/06/2026',t:'Malformaciones arteriovenosas: Principios, fisiología, anatomía, epidemiología, localización, criterios quirúrgicos/endovasculares, criterios para tratamiento',dr:'Dra. Abarca',tipo:'clase'},
             {anio:'V',mod:'I',   f:'12/06/2026',t:'Malformaciones arteriovenosas: manejo microquirúrgico',                  dr:'Dra. Abarca',  tipo:'clase'},
-            {anio:'V',mod:'I',   f:'19/06/2026',t:'Malformaciones arteriovenosas: manejo endovascular',                     dr:'Dra. Abarca',  tipo:'clase'},
-            {anio:'V',mod:'I',   f:'26/06/2026',t:'Investigación: variable de respuesta',                                   dr:'Dra. Abarca',  tipo:'clase'},
-            {anio:'V',mod:'I',   f:'03/07/2026',t:'Aneurismas cerebrales: Generalidades, clasificación, criterios quirúrgicos, conservador, endovasculares, aneurismas tratados, complicaciones, aneurismas rotos, no rotos',dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'I',   f:'19/06/2026',t:'Aneurismas cerebrales: Generalidades, clasificación, criterios quirúrgicos, conservador, endovasculares, aneurismas tratados, cuando volver a tratarlos, complicaciones, aneurismas rotos, no rotos',dr:'Dra. Membreño',tipo:'clase'},
+            {anio:'V',mod:'I',   f:'26/06/2026',t:'Malformaciones arteriovenosas: manejo microquirúrgico y manejo endovascular',dr:'Dra. Abarca',  tipo:'clase'},
+            {anio:'V',mod:'I',   f:'03/07/2026',t:'Investigación: variable de respuesta',                                   dr:'Dra. Abarca',  tipo:'clase'},
             {anio:'V',mod:'I',   f:'10/07/2026',t:'Aneurismas cerebrales: Manejo quirúrgico para ACI, AcomA, ACM',          dr:'Dra. Abarca',  tipo:'clase'},
             {anio:'V',mod:'I',   f:'17/07/2026',t:'Aneurismas cerebrales: Manejo endovascular para ACI, AcomA, ACM',        dr:'Dra. Membreño',tipo:'clase'},
             {anio:'V',mod:'I',   f:'24/07/2026',t:'Revisión de un tema y artículos científicos — Guías AHA Stroke',         dr:'Dra. Abarca',  tipo:'revision'},
@@ -1805,6 +1818,15 @@
             craneo:'#0e7490', vascular:'#b91c1c', epilepsia:'#6d28d9', oncologica:'#047857', pediatrica:'#b45309'
         };
 
+        // Colores por periodo: los residentes que rotan en las MISMAS fechas comparten color
+        var PERIODO_COLORES = [
+            { bg:'#eff6ff', border:'#60a5fa', text:'#1e40af' },
+            { bg:'#f0fdf4', border:'#4ade80', text:'#166534' },
+            { bg:'#fef3c7', border:'#f59e0b', text:'#92400e' },
+            { bg:'#fae8ff', border:'#d946ef', text:'#86198f' },
+            { bg:'#ffe4e6', border:'#fb7185', text:'#9f1239' }
+        ];
+
         var _rotInit = false;
         function toggleRotaciones() {
             var panel   = document.getElementById('rotacionesPanel');
@@ -1817,25 +1839,55 @@
             }
         }
 
+        // Lista única de residentes (ordenada)
+        function listaResidentesRot() {
+            var vistos = {}, out = [];
+            ROTACIONES_PERIODOS.forEach(function(p){
+                ROTACIONES_ESP.forEach(function(e){
+                    (p[e.key]||[]).forEach(function(r){ if(!vistos[r]){ vistos[r]=true; out.push(r); } });
+                });
+            });
+            return out.sort();
+        }
+
         function initRotaciones() {
-            var sel = document.getElementById('filtroEspecialistaRot');
-            sel.innerHTML = '<option value="all">Todas las rotaciones</option>'
+            var selE = document.getElementById('filtroEspecialistaRot');
+            selE.innerHTML = '<option value="all">Todas las rotaciones</option>'
                 + ROTACIONES_ESP.map(function(e){ return '<option value="'+e.key+'">'+e.rot+' — '+e.dr+'</option>'; }).join('');
+            var selR = document.getElementById('filtroResidenteRot');
+            selR.innerHTML = '<option value="all">Todos los residentes</option>'
+                + listaResidentesRot().map(function(r){ return '<option value="'+r+'">'+r+'</option>'; }).join('');
             renderRotaciones();
         }
 
+        function cambiarModoRot() {
+            var modo = document.getElementById('rotModo').value;
+            document.getElementById('rotWrapEsp').classList.toggle('hidden', modo !== 'especialista');
+            document.getElementById('rotWrapRes').classList.toggle('hidden', modo !== 'residente');
+            renderRotaciones();
+        }
+
+        // Leyenda de colores por periodo
+        function legendaPeriodosRot() {
+            return '<div class="flex flex-wrap gap-2 mb-4">'
+                + ROTACIONES_PERIODOS.map(function(p,pi){ var pc=PERIODO_COLORES[pi % PERIODO_COLORES.length];
+                    return '<span style="background:'+pc.bg+';color:'+pc.text+';border:1px solid '+pc.border+';" class="text-xs font-semibold px-2 py-1 rounded-md">'+p.rango+'</span>'; }).join('')
+                + '</div>';
+        }
+
+        // Tabla por especialista — residentes coloreados según su periodo (misma fecha = mismo color)
         function tablaEspecialistaHTML(esp) {
             var col = ROT_COLORES[esp.key] || '#0e7490';
-            var filas = [];
-            ROTACIONES_PERIODOS.forEach(function(p) {
-                (p[esp.key] || []).forEach(function(res) { filas.push({ res: res, rango: p.rango }); });
+            var rows = '';
+            ROTACIONES_PERIODOS.forEach(function(p, pi) {
+                var pc = PERIODO_COLORES[pi % PERIODO_COLORES.length];
+                (p[esp.key] || []).forEach(function(res) {
+                    rows += '<tr>'
+                        + '<td style="background:'+pc.bg+';border-left:4px solid '+pc.border+';color:'+pc.text+';" class="px-4 py-2 text-sm font-semibold border-b border-white">' + res + '</td>'
+                        + '<td style="background:'+pc.bg+';color:'+pc.text+';" class="px-4 py-2 text-sm border-b border-white">' + p.rango + '</td>'
+                        + '</tr>';
+                });
             });
-            var rows = filas.map(function(f) {
-                return '<tr class="hover:bg-slate-50">'
-                    + '<td class="px-4 py-2 text-sm font-semibold text-slate-800 border-b border-slate-100">' + f.res + '</td>'
-                    + '<td class="px-4 py-2 text-sm text-slate-600 border-b border-slate-100">' + f.rango + '</td>'
-                    + '</tr>';
-            }).join('');
             return '<div class="rounded-xl border border-slate-200 overflow-hidden mb-6">'
                 + '<div style="background:' + col + ';" class="px-4 py-3 text-white">'
                 +   '<p class="font-bold text-sm">' + esp.dr + '</p>'
@@ -1850,13 +1902,49 @@
                 + '</table></div></div>';
         }
 
+        // Tabla por residente — sus rotaciones a lo largo del curso (coloreadas por periodo)
+        function tablaResidenteHTML(resName) {
+            var rows = '';
+            ROTACIONES_PERIODOS.forEach(function(p, pi) {
+                var pc = PERIODO_COLORES[pi % PERIODO_COLORES.length];
+                var espMatch = null;
+                ROTACIONES_ESP.forEach(function(e){ if ((p[e.key]||[]).indexOf(resName) !== -1) espMatch = e; });
+                if (espMatch) {
+                    rows += '<tr>'
+                        + '<td style="background:'+pc.bg+';border-left:4px solid '+pc.border+';color:'+pc.text+';" class="px-4 py-2 text-sm font-semibold border-b border-white">' + p.rango + '</td>'
+                        + '<td style="background:'+pc.bg+';color:'+pc.text+';" class="px-4 py-2 text-sm border-b border-white">' + espMatch.rot + ' — ' + espMatch.dr + '</td>'
+                        + '</tr>';
+                }
+            });
+            return '<div class="rounded-xl border border-slate-200 overflow-hidden mb-6">'
+                + '<div style="background:#0f172a;" class="px-4 py-3 text-white">'
+                +   '<p class="font-bold text-sm">' + resName + '</p>'
+                +   '<p class="text-xs opacity-90">Rotaciones del curso 2026 – 2027</p>'
+                + '</div>'
+                + '<div class="overflow-x-auto"><table class="w-full">'
+                +   '<thead><tr class="bg-slate-100">'
+                +     '<th class="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Fechas de rotación</th>'
+                +     '<th class="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Rotación / Especialista</th>'
+                +   '</tr></thead>'
+                +   '<tbody>' + rows + '</tbody>'
+                + '</table></div></div>';
+        }
+
         function renderRotaciones() {
-            var sel  = document.getElementById('filtroEspecialistaRot');
-            var val  = sel ? sel.value : 'all';
+            var modoEl = document.getElementById('rotModo');
+            var modo = modoEl ? modoEl.value : 'especialista';
             var cont = document.getElementById('rotacionesContent');
-            var lista = (val === 'all') ? ROTACIONES_ESP : ROTACIONES_ESP.filter(function(e){ return e.key === val; });
-            cont.innerHTML = lista.map(tablaEspecialistaHTML).join('')
-                + '<p class="text-xs text-slate-400 italic mt-2">Calendario de Rotaciones Prácticas — Curso Académico 2026 – 2027.</p>';
+            var html = legendaPeriodosRot();
+            if (modo === 'residente') {
+                var vr = document.getElementById('filtroResidenteRot').value;
+                var listaR = (vr === 'all') ? listaResidentesRot() : [vr];
+                html += listaR.map(tablaResidenteHTML).join('');
+            } else {
+                var ve = document.getElementById('filtroEspecialistaRot').value;
+                var listaE = (ve === 'all') ? ROTACIONES_ESP : ROTACIONES_ESP.filter(function(e){ return e.key === ve; });
+                html += listaE.map(tablaEspecialistaHTML).join('');
+            }
+            cont.innerHTML = html + '<p class="text-xs text-slate-400 italic mt-2">Calendario de Rotaciones Prácticas — Curso Académico 2026 – 2027.</p>';
         }
 
     </script>
