@@ -446,6 +446,37 @@
             </div>
         </section>
 
+        <!-- ROTACIONES PRÁCTICAS (colapsable) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+            <button onclick="toggleRotaciones()"
+                class="w-full text-left bg-gradient-to-r from-cyan-800 to-sky-900 px-5 py-4 text-white flex items-center justify-between focus:outline-none">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-cyan-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-sm">Rotaciones</h3>
+                        <p class="text-xs text-cyan-200 mt-0.5">Calendario de rotaciones prácticas · Curso 2026 – 2027</p>
+                    </div>
+                </div>
+                <svg id="rotacionesChevron" class="w-5 h-5 text-cyan-200 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="rotacionesPanel" class="hidden">
+                <!-- Filtro por especialista -->
+                <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Especialista / Rotación</label>
+                        <select id="filtroEspecialistaRot" onchange="renderRotaciones()"
+                            class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 outline-none appearance-none"></select>
+                    </div>
+                    <p class="ml-auto self-center text-xs text-slate-400 font-medium italic">Residentes y fechas de rotación por especialista</p>
+                </div>
+                <div id="rotacionesContent" class="p-5"></div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="bg-slate-900 text-slate-400 text-center py-6 border-t border-slate-800 mt-auto">
@@ -668,9 +699,9 @@
             { f: "03/07/2026", tema: "Aneurismas cerebrales: Generalidades, clasificación, criterios quirúrgicos, conservador, endovasculares, aneurismas tratados, cuando volver a tratarlos, complicaciones, aneurismas rotos, no rotos", dr: "Dra. Membreño", anio: "V" },
             { f: "10/07/2026", tema: "Aneurismas cerebrales: Manejo quirúrgico para ACI, AcomA, ACM", dr: "Dra. Abarca", anio: "V" },
             { f: "17/07/2026", tema: "Aneurismas cerebrales: Manejo endovascular para ACI, AcomA, ACM", dr: "Dra. Membreño", anio: "V" },
-            { f: "24/07/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Abarca", anio: "V" },
+            { f: "24/07/2026", tema: "Revisión de un tema y artículos científicos — Guías AHA Stroke", dr: "Dra. Abarca", anio: "V" },
             { f: "31/07/2026", tema: "Investigación: población de estudio", dr: "Dra. Membreño", anio: "V" },
-            { f: "07/08/2026", tema: "Revisión de un tema y artículos científicos", dr: "Dra. Membreño", anio: "V" },
+            { f: "07/08/2026", tema: "Revisión de un tema y artículos científicos — Guías AHA Stroke", dr: "Dra. Membreño", anio: "V" },
             { f: "04/09/2026", tema: "Endoscopia ventricular", dr: "Dra. Abarca", anio: "V" },
             { f: "18/09/2026", tema: "Craneosinostosis no sindrómica", dr: "Dra. Membreño", anio: "V" },
             { f: "25/09/2026", tema: "Presentación de caso clínico", dr: "Dra. Abarca", anio: "V" },
@@ -790,6 +821,12 @@
         function esEditableIdx(tema) {
             var t = tema.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
             return t.indexOf('presentacion de caso') !== -1 || (t.indexOf('revision') !== -1 && t.indexOf('articulo') !== -1);
+        }
+
+        // ¿La clase es de investigación? (su tema contiene "investigacion/investigación")
+        function esInvestigacionIdx(tema) {
+            var t = (tema || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+            return t.indexOf('investigacion') !== -1;
         }
 
         function getTemaIdx(fecha, anio) {
@@ -914,7 +951,9 @@
                     var col = ANIO_COLORES[c.anio] || ANIO_COLORES["I"];
                     var temaGuardado = getTemaIdx(c.f, c.anio);
                     var esCasoRev   = esEditableIdx(c.tema);
-                    var formUrl     = esCasoRev ? 'casos_clinicos_y_articulos.html' : 'clases_programadas.html';
+                    var esInvestig  = esInvestigacionIdx(c.tema);
+                    var formUrl     = esInvestig ? 'clases_investigacion.html'
+                                                 : (esCasoRev ? 'casos_clinicos_y_articulos.html' : 'clases_programadas.html');
 
                     // Leer overrides del plan docente (editados en la sección Plan Docente)
                     var override = getPlanEdit(c.anio, c.f);
@@ -1716,6 +1755,109 @@
         }
 
         document.addEventListener('DOMContentLoaded', detectarBackendYActivar);
+
+        // ══════════════════════════════════════════════════════════════════════
+        // ROTACIONES PRÁCTICAS — Calendario 2026-2027 (filtrado por especialista)
+        // ══════════════════════════════════════════════════════════════════════
+        var ROTACIONES_ESP = [
+            { key:'craneo',     dr:'Dr. Zapata',  rot:'Cirugía Base de Cráneo' },
+            { key:'vascular',   dr:'Dr. Herrera', rot:'Cirugía Vascular' },
+            { key:'epilepsia',  dr:'Dr. Perera',  rot:'Cirugía Epilepsia y Funcional' },
+            { key:'oncologica', dr:'Dr. Matus',   rot:'Cirugía Oncológica' },
+            { key:'pediatrica', dr:'Dr. Pérez',   rot:'Cirugía Pediátrica' }
+        ];
+
+        // Cada periodo asigna 2-3 residentes a cada especialista.
+        var ROTACIONES_PERIODOS = [
+            { rango:'4 mayo – 12 julio 2026',
+              craneo:['Dr. Rayo','Dr. Cuadra','Dra. Quintana'],
+              vascular:['Dra. Membreño','Dr. Cerrato'],
+              epilepsia:['Dra. Abarca','Dra. Olivas'],
+              oncologica:['Dr. Reynoso','Dra. Díaz'],
+              pediatrica:['Dra. Blandón','Dr. Bobb'] },
+            { rango:'13 julio – 27 septiembre 2026',
+              craneo:['Dra. Blandón','Dra. Díaz'],
+              vascular:['Dr. Rayo','Dra. Olivas'],
+              epilepsia:['Dra. Membreño','Dr. Cerrato','Dr. Bobb'],
+              oncologica:['Dra. Abarca','Dra. Quintana'],
+              pediatrica:['Dr. Reynoso','Dr. Cuadra'] },
+            { rango:'28 septiembre – 6 diciembre 2026',
+              craneo:['Dr. Reynoso','Dr. Bobb'],
+              vascular:['Dra. Blandón','Dr. Cuadra'],
+              epilepsia:['Dr. Rayo','Dra. Díaz'],
+              oncologica:['Dra. Membreño','Dra. Olivas'],
+              pediatrica:['Dra. Abarca','Dr. Cerrato','Dra. Quintana'] },
+            { rango:'7 diciembre 2026 – 14 febrero 2027',
+              craneo:['Dra. Abarca','Dr. Cerrato'],
+              vascular:['Dr. Reynoso','Dra. Díaz','Dr. Bobb'],
+              epilepsia:['Dra. Membreño','Dra. Quintana'],
+              oncologica:['Dr. Rayo','Dr. Cuadra'],
+              pediatrica:['Dra. Blandón','Dra. Olivas'] },
+            { rango:'15 febrero – 31 abril 2027',
+              craneo:['Dra. Membreño','Dra. Olivas'],
+              vascular:['Dra. Abarca','Dra. Quintana'],
+              epilepsia:['Dr. Reynoso','Dr. Cuadra'],
+              oncologica:['Dra. Blandón','Dr. Cerrato','Dr. Bobb'],
+              pediatrica:['Dr. Rayo','Dra. Díaz'] }
+        ];
+
+        var ROT_COLORES = {
+            craneo:'#0e7490', vascular:'#b91c1c', epilepsia:'#6d28d9', oncologica:'#047857', pediatrica:'#b45309'
+        };
+
+        var _rotInit = false;
+        function toggleRotaciones() {
+            var panel   = document.getElementById('rotacionesPanel');
+            var chevron = document.getElementById('rotacionesChevron');
+            panel.classList.toggle('hidden');
+            chevron.style.transform = panel.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (!_rotInit && !panel.classList.contains('hidden')) {
+                initRotaciones();
+                _rotInit = true;
+            }
+        }
+
+        function initRotaciones() {
+            var sel = document.getElementById('filtroEspecialistaRot');
+            sel.innerHTML = '<option value="all">Todas las rotaciones</option>'
+                + ROTACIONES_ESP.map(function(e){ return '<option value="'+e.key+'">'+e.rot+' — '+e.dr+'</option>'; }).join('');
+            renderRotaciones();
+        }
+
+        function tablaEspecialistaHTML(esp) {
+            var col = ROT_COLORES[esp.key] || '#0e7490';
+            var filas = [];
+            ROTACIONES_PERIODOS.forEach(function(p) {
+                (p[esp.key] || []).forEach(function(res) { filas.push({ res: res, rango: p.rango }); });
+            });
+            var rows = filas.map(function(f) {
+                return '<tr class="hover:bg-slate-50">'
+                    + '<td class="px-4 py-2 text-sm font-semibold text-slate-800 border-b border-slate-100">' + f.res + '</td>'
+                    + '<td class="px-4 py-2 text-sm text-slate-600 border-b border-slate-100">' + f.rango + '</td>'
+                    + '</tr>';
+            }).join('');
+            return '<div class="rounded-xl border border-slate-200 overflow-hidden mb-6">'
+                + '<div style="background:' + col + ';" class="px-4 py-3 text-white">'
+                +   '<p class="font-bold text-sm">' + esp.dr + '</p>'
+                +   '<p class="text-xs opacity-90">' + esp.rot + '</p>'
+                + '</div>'
+                + '<div class="overflow-x-auto"><table class="w-full">'
+                +   '<thead><tr class="bg-slate-100">'
+                +     '<th class="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Médico residente</th>'
+                +     '<th class="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Fechas de rotación</th>'
+                +   '</tr></thead>'
+                +   '<tbody>' + rows + '</tbody>'
+                + '</table></div></div>';
+        }
+
+        function renderRotaciones() {
+            var sel  = document.getElementById('filtroEspecialistaRot');
+            var val  = sel ? sel.value : 'all';
+            var cont = document.getElementById('rotacionesContent');
+            var lista = (val === 'all') ? ROTACIONES_ESP : ROTACIONES_ESP.filter(function(e){ return e.key === val; });
+            cont.innerHTML = lista.map(tablaEspecialistaHTML).join('')
+                + '<p class="text-xs text-slate-400 italic mt-2">Calendario de Rotaciones Prácticas — Curso Académico 2026 – 2027.</p>';
+        }
 
     </script>
 </body>
