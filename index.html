@@ -39,8 +39,28 @@
                  data-type="standard" data-theme="filled_blue" data-size="large"
                  data-locale="es" data-text="signin_with" data-shape="rectangular">
             </div>
+            <!-- ── Acceso opcional con usuario y contraseña ── -->
+            <div class="flex items-center gap-3 my-5">
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-xs text-slate-400 font-semibold">o ingresa con usuario</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
+            </div>
+            <form onsubmit="return loginConUsuario();" class="text-left space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Usuario</label>
+                    <input id="inputUsuario" type="text" autocomplete="username" placeholder="nombre.apellido (ej.: luis.zapata)"
+                        class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contraseña</label>
+                    <input id="inputPassword" type="password" autocomplete="current-password" placeholder="••••••"
+                        class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-indigo-800 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold rounded-xl text-sm transition">Ingresar</button>
+                <p class="text-center"><button type="button" onclick="abrirCambioPwd()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold underline">Cambiar contraseña</button></p>
+            </form>
             <p id="loginError" class="hidden mt-4 text-xs text-red-600 font-semibold bg-red-50 border border-red-200 rounded-xl p-3"></p>
-            <p class="text-xs text-slate-400 mt-5">Solo cuentas de docentes autorizados pueden acceder.</p>
+            <p class="text-xs text-slate-400 mt-5">Solo docentes autorizados pueden acceder (con Google o con usuario y contraseña).</p>
         </div>
     </div>
 
@@ -69,6 +89,9 @@
                     <i data-lucide="user" class="w-4 h-4"></i>
                     <span id="docenteNombre">—</span>
                 </div>
+                <button id="btnCambiarPwd" onclick="abrirCambioPwd()" style="display:none;" class="flex items-center gap-1.5 bg-indigo-800/80 hover:bg-indigo-700 px-3 py-1.5 rounded-full border border-indigo-600/60 text-xs text-white font-medium transition">
+                    <i data-lucide="key-round" class="w-4 h-4"></i> Contraseña
+                </button>
                 <button onclick="cerrarSesionDocente()" class="flex items-center gap-1.5 bg-rose-700/80 hover:bg-rose-600 px-3 py-1.5 rounded-full border border-rose-500/50 text-xs text-white font-medium transition">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Salir
                 </button>
@@ -490,6 +513,165 @@
             </div>
         </section>
 
+
+        <!-- PROCEDIMIENTOS QUIRÚRGICOS NECESARIOS DE LOS RESIDENTES (colapsable) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+            <button onclick="var p=document.getElementById('procQuirPanel'),c=document.getElementById('procQuirChevron'); p.classList.toggle('hidden'); c.style.transform=p.classList.contains('hidden')?'rotate(0deg)':'rotate(180deg)';"
+                class="w-full text-left bg-gradient-to-r from-emerald-900 to-teal-800 px-5 py-4 text-white flex items-center justify-between focus:outline-none">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-emerald-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-sm">Procedimientos Quirúrgicos Necesarios de los Residentes de Neurocirugía</h3>
+                        <p class="text-xs text-emerald-200 mt-0.5">Por año de residencia · Siempre con supervisión</p>
+                    </div>
+                </div>
+                <svg id="procQuirChevron" class="w-5 h-5 text-emerald-200 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="procQuirPanel" class="hidden">
+                <div class="px-5 py-5 space-y-6">
+
+                    <!-- I – III AÑO -->
+                    <div class="rounded-xl border border-blue-200 overflow-hidden">
+                        <div class="bg-blue-50 px-4 py-3 border-b border-blue-200">
+                            <p class="text-sm font-black text-blue-900">I – III AÑO</p>
+                            <p class="text-xs text-blue-700 mt-0.5 font-semibold">Procedimientos completos — estas cirugías el residente debe realizarlas solo, pero con supervisión</p>
+                        </div>
+                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">TRAUMA CRANEAL</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Trépanos (DVE, monitor de PIC, reservorio)</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Hematoma subdural crónico</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Craneotomía (extradural, subdural, hematoma intracerebral, contusiones)</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Fractura craneal deprimida</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Reparación dural (fístula de LCR)</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Craneoplastía</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">NEUROCIRUGÍA VASCULAR</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Hematoma (intracerebral espontáneo e intracerebelosa)</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">HIDROCEFALIA (≥16 AÑOS)</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Derivación ventriculoperitoneal (DVP)</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Revisión de DVP</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Derivación ventricular externa</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">TÉCNICAS BÁSICAS</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Craneotomía supratentorial</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Osteoma</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Lavado quirúrgico</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">TRAUMA CRANEAL Y ESPINAL</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Trépanos, monitor de PIC</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Hematoma subdural crónico, higroma</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-blue-600 font-bold flex-shrink-0">•</span><span>Hematoma subdural o epidural</span></li>
+                        </ul>
+                    </div>
+                        </div>
+                    </div>
+
+                    <!-- IV y V AÑO -->
+                    <div class="rounded-xl border border-rose-200 overflow-hidden">
+                        <div class="bg-rose-50 px-4 py-3 border-b border-rose-200">
+                            <p class="text-sm font-black text-rose-900">IV y V AÑO</p>
+                            <p class="text-xs text-rose-700 mt-0.5 font-semibold">Además de todos los procedimientos completos de I – III año, abordajes parcial o totalmente — estas cirugías el residente debe realizarlas solo en la parte inicial del abordaje o en su totalidad según sus habilidades, pero con supervisión</p>
+                        </div>
+                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">LESIONES Y TUMORES SUPRATENTORIALES</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Glioma</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Metástasis</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Meningioma</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Biopsia tumoral guiada por estereotaxia o imagen</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Adenoma hipofisiario</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Otras lesiones (epidermoide, quiste aracnoideo, etc.)</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">INFECCIÓN CRANEAL / ESPINAL</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Absceso / Empiema subdural</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">COLUMNA</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Enfermedad discal cervical espondilótica (descompresión anterior / foraminotomía)</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Enfermedad discal espondilótica y estenosis espinal — laminectomía</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Trauma espinal</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Instrumentación cervical (anterior / posterior)</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Instrumentación espinal posterior</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Tumores espinales</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">LESIONES DE FOSA POSTERIOR</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Tumores primarios y metastásicos</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Malformación de Chiari</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Craneotomía de fosa posterior</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Otras lesiones</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">NEUROCIRUGÍA VASCULAR</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Clipaje de aneurisma</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>MAV (malformación arteriovenosa)</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Malformación cavernosa</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Angiografía cerebral diagnóstica</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Embolización endovascular de aneurisma</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">HIDROCEFALIA</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Septostomía endoscópica intraventricular</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">BASE DE CRÁNEO</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Neuralgia trigeminal: descompresión microvascular</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Craneofaringioma</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Tumor del ángulo pontocerebeloso</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Meningioma de base de cráneo</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Adenoma hipofisiario</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Tumores malignos de base de cráneo</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-black text-slate-700 uppercase tracking-wide mb-1.5">NEUROCIRUGÍA FUNCIONAL</p>
+                        <ul class="space-y-1">
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>DBS, talamotomía, palidotomía</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Cirugía para epilepsia</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Electroestimulación terapéutica</span></li>
+                            <li class="text-xs text-slate-600 leading-snug flex gap-1.5"><span class="text-rose-600 font-bold flex-shrink-0">•</span><span>Implantación de puertos / bombas de administración de medicamentos intratecal</span></li>
+                        </ul>
+                    </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="bg-slate-900 text-slate-400 text-center py-6 border-t border-slate-800 mt-auto">
@@ -500,6 +682,41 @@
     </footer>
 
     </div><!-- /appShell -->
+
+    <!-- MODAL: CAMBIO DE CONTRASEÑA (acceso con usuario) -->
+    <div id="pwdModal" class="hidden fixed inset-0 flex items-center justify-center bg-slate-900/60 px-4" style="z-index:100;">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 max-w-sm w-full">
+            <h3 class="font-bold text-slate-900 text-base mb-1">Cambiar contraseña</h3>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Para el acceso con usuario y contraseña. El cambio queda guardado en este navegador.</p>
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Usuario</label>
+                    <input id="pwdUser" type="text" placeholder="nombre.apellido" autocomplete="username"
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contraseña actual</label>
+                    <input id="pwdActual" type="password" autocomplete="current-password"
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nueva contraseña</label>
+                    <input id="pwdNueva" type="password" autocomplete="new-password"
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Confirmar nueva contraseña</label>
+                    <input id="pwdNueva2" type="password" autocomplete="new-password"
+                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
+            <p id="pwdModalMsg" class="hidden mt-3 text-xs font-semibold rounded-xl p-3"></p>
+            <div class="flex gap-2 mt-5">
+                <button onclick="guardarNuevaPwd()" class="flex-1 py-2.5 bg-indigo-800 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition">Guardar</button>
+                <button onclick="cerrarCambioPwd()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm transition border border-slate-200">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         lucide.createIcons();
@@ -517,6 +734,82 @@
         };
         var _authDocente = null;
 
+        // ═══════════════════════════════════════════════════════════════
+        // ACCESO OPCIONAL CON USUARIO Y CONTRASEÑA (docentes)
+        // usuario = primer nombre + primer apellido, en minúscula, unidos con punto
+        // contraseña inicial: 12345 (se puede cambiar con «Cambiar contraseña»)
+        // ═══════════════════════════════════════════════════════════════
+        var USUARIO_DOCENTE = {
+            'doriam.perera':  'pereravaldivia@gmail.com',
+            'luis.zapata':    'lrzv129@gmail.com',
+            'mauricio.matus': 'matusmauricio134@gmail.com',
+            'oswaldo.perez':  'ojperez98@gmail.com',
+            'edgar.herrera':  'eaheper@gmail.com'
+        };
+        var PWD_INICIAL = '12345';
+
+        function _pwdHash(s) {
+            var h = 5381;
+            for (var i = 0; i < s.length; i++) h = (((h << 5) + h) + s.charCodeAt(i)) >>> 0;
+            return 'h' + h.toString(36);
+        }
+        function verificarPwdDocente(usuario, pwd) {
+            var guardada = localStorage.getItem('docente_pwd_' + usuario);
+            if (guardada) return guardada === _pwdHash(pwd);
+            return pwd === PWD_INICIAL;
+        }
+        function loginConUsuario() {
+            var u = (document.getElementById('inputUsuario').value || '').toLowerCase().trim();
+            var p = document.getElementById('inputPassword').value || '';
+            if (!u || !p) { mostrarErrorLogin('Escriba su usuario y contraseña.'); return false; }
+            if (!USUARIO_DOCENTE[u]) {
+                mostrarErrorLogin('Usuario no reconocido. Use su primer nombre y primer apellido en minúscula, unidos con un punto (ej.: luis.zapata).');
+                return false;
+            }
+            if (!verificarPwdDocente(u, p)) { mostrarErrorLogin('Contraseña incorrecta.'); return false; }
+            sessionStorage.setItem('docente_usuario', u);
+            procesarLoginDocente(USUARIO_DOCENTE[u]);
+            return false;
+        }
+        function actualizarBotonPwdHeader() {
+            var btn = document.getElementById('btnCambiarPwd');
+            if (btn) btn.style.display = sessionStorage.getItem('docente_usuario') ? '' : 'none';
+        }
+
+        // ── Modal de cambio de contraseña ────────────────────────────────
+        function abrirCambioPwd() {
+            document.getElementById('pwdUser').value   = sessionStorage.getItem('docente_usuario') || '';
+            document.getElementById('pwdActual').value = '';
+            document.getElementById('pwdNueva').value  = '';
+            document.getElementById('pwdNueva2').value = '';
+            _pwdMsg('', '');
+            document.getElementById('pwdModal').classList.remove('hidden');
+        }
+        function cerrarCambioPwd() { document.getElementById('pwdModal').classList.add('hidden'); }
+        function _pwdMsg(txt, tipo) {
+            var el = document.getElementById('pwdModalMsg');
+            if (!el) return;
+            if (!txt) { el.classList.add('hidden'); return; }
+            el.textContent = txt;
+            el.classList.remove('hidden');
+            el.style.background = tipo === 'ok' ? '#ecfdf5' : '#fef2f2';
+            el.style.color      = tipo === 'ok' ? '#047857' : '#b91c1c';
+            el.style.border     = '1px solid ' + (tipo === 'ok' ? '#a7f3d0' : '#fecaca');
+        }
+        function guardarNuevaPwd() {
+            var u  = (document.getElementById('pwdUser').value || '').toLowerCase().trim();
+            var pa = document.getElementById('pwdActual').value || '';
+            var p1 = document.getElementById('pwdNueva').value || '';
+            var p2 = document.getElementById('pwdNueva2').value || '';
+            if (!USUARIO_DOCENTE[u]) { _pwdMsg('Usuario no reconocido (ej.: luis.zapata).', 'err'); return; }
+            if (!verificarPwdDocente(u, pa)) { _pwdMsg('La contraseña actual es incorrecta.', 'err'); return; }
+            if (p1.length < 4) { _pwdMsg('La nueva contraseña debe tener al menos 4 caracteres.', 'err'); return; }
+            if (p1 !== p2) { _pwdMsg('La confirmación no coincide con la nueva contraseña.', 'err'); return; }
+            localStorage.setItem('docente_pwd_' + u, _pwdHash(p1));
+            _pwdMsg('✓ Contraseña actualizada. Quedará activa en este navegador.', 'ok');
+            setTimeout(cerrarCambioPwd, 1600);
+        }
+
         // Callback de Google Identity Services
         function handleCredentialResponse(response) {
             try {
@@ -524,6 +817,7 @@
                 var payload = JSON.parse(decodeURIComponent(atob(b64).split('').map(function(c) {
                     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
                 }).join('')));
+                sessionStorage.removeItem('docente_usuario');
                 procesarLoginDocente((payload.email || '').toLowerCase().trim());
             } catch (e) {
                 mostrarErrorLogin('Error al procesar las credenciales de Google. Intente de nuevo.');
@@ -539,6 +833,7 @@
                 var sh = document.getElementById('appShell');   if (sh) sh.classList.remove('hidden');
                 var nm = document.getElementById('docenteNombre'); if (nm) nm.textContent = _authDocente.nombre;
                 arrancarContenido();
+                actualizarBotonPwdHeader();
                 if (window.lucide) lucide.createIcons();
             } else {
                 mostrarErrorLogin('Acceso denegado: la cuenta ' + email + ' no está autorizada como docente. Contacte al coordinador.');
@@ -553,6 +848,7 @@
 
         function cerrarSesionDocente() {
             sessionStorage.removeItem('docente_email');
+            sessionStorage.removeItem('docente_usuario');
             _authDocente = null;
             if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
             location.reload();
