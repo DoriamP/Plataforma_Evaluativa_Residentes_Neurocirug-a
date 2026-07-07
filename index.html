@@ -672,6 +672,51 @@
             </div>
         </section>
 
+
+        <!-- RESUMEN ACADÉMICO (colapsable) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
+            <button onclick="toggleResumenAcademico()"
+                class="w-full text-left bg-gradient-to-r from-indigo-950 to-fuchsia-900 px-5 py-4 text-white flex items-center justify-between focus:outline-none">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-fuchsia-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m4 6V7m4 10v-3M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-sm">Resumen Académico</h3>
+                        <p class="text-xs text-fuchsia-200 mt-0.5">Consolidado de notas por residente · promedios y evaluaciones faltantes</p>
+                    </div>
+                </div>
+                <svg id="resumenChevron" class="w-5 h-5 text-fuchsia-200 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="resumenPanel" class="hidden">
+                <!-- Filtro por módulo -->
+                <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Módulo</label>
+                        <select id="filtroModuloResumen" onchange="renderResumenAcademico()"
+                            class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-fuchsia-500 outline-none appearance-none">
+                            <option value="">Todo el curso (may 2026 – abr 2027)</option>
+                            <option value="I">Módulo I (may – jun 2026)</option>
+                            <option value="II">Módulo II (jul – ago 2026)</option>
+                            <option value="III">Módulo III (sep – oct 2026)</option>
+                            <option value="IV">Módulo IV (nov – dic 2026)</option>
+                            <option value="V">Módulo V (ene – feb 2027)</option>
+                            <option value="VI">Módulo VI (mar – abr 2027)</option>
+                        </select>
+                    </div>
+                    <div id="resumenContador" class="ml-auto self-center text-xs text-slate-400 font-medium"></div>
+                </div>
+                <!-- Leyenda -->
+                <div class="px-5 py-2.5 bg-amber-50 border-b border-amber-100 flex flex-wrap gap-x-4 gap-y-1 items-center">
+                    <p class="text-xs text-amber-700 font-medium">Promedios en % por componente. En <span style="color:#dc2626;font-weight:800;">rojo</span>: secciones sin calificación y el especialista que no ha evaluado.</p>
+                    <p class="text-xs text-amber-700">Práctica quirúrgica: mínimo 1 evaluación al mes por el especialista de rotación de cada residente.</p>
+                </div>
+                <div id="resumenContenido" class="p-5 space-y-4" style="max-height:75vh;overflow-y:auto;"></div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="bg-slate-900 text-slate-400 text-center py-6 border-t border-slate-800 mt-auto">
@@ -2241,6 +2286,236 @@
                 html += listaE.map(tablaEspecialistaHTML).join('');
             }
             cont.innerHTML = html + '<p class="text-xs text-slate-400 italic mt-2">Calendario de Rotaciones Prácticas — Curso Académico 2026 – 2027.</p>';
+        }
+
+
+        // ══════════════════════════════════════════════════════════════════════
+        // RESUMEN ACADÉMICO — consolidado de notas y evaluaciones faltantes
+        // ══════════════════════════════════════════════════════════════════════
+        // Módulos por rango de fechas (mismos rangos que el Dashboard del Residente)
+        var RESUMEN_MODULOS = [
+            { mod:'I',   inicio:'2026-05-01', fin:'2026-06-30' },
+            { mod:'II',  inicio:'2026-07-01', fin:'2026-08-31' },
+            { mod:'III', inicio:'2026-09-01', fin:'2026-10-31' },
+            { mod:'IV',  inicio:'2026-11-01', fin:'2026-12-31' },
+            { mod:'V',   inicio:'2027-01-01', fin:'2027-02-28' },
+            { mod:'VI',  inicio:'2027-03-01', fin:'2027-04-30' }
+        ];
+        // Nombre corto usado en el calendario de rotaciones
+        var RESIDENTE_CORTO = {
+            'María Teresa Quintana Duarte':            'Dra. Quintana',
+            'Kevin Yassir Bobb García':                'Dr. Bobb',
+            'Axly Ivania Olivas Jiménez':              'Dra. Olivas',
+            'Fernando Antonio De Jesús Cuadra Jiménez':'Dr. Cuadra',
+            'Vivian Iveth Díaz':                       'Dra. Díaz',
+            'José Luis Cerrato Lemus':                 'Dr. Cerrato',
+            'Angel Benigno Rayo Bravo':                'Dr. Rayo',
+            'Lagree Guzman Reynoso':                   'Dr. Reynoso',
+            'Liuska Ninoska Blandón Cortés':           'Dra. Blandón',
+            'Martha Elena Abarca Morales':             'Dra. Abarca',
+            'Jissella Joammet Membreño Vivas':         'Dra. Membreño'
+        };
+        // Rangos de fechas de cada periodo de rotación (mismos índices que ROTACIONES_PERIODOS)
+        var ROT_PERIODO_RANGOS = [
+            { inicio:'2026-05-04', fin:'2026-07-12' },
+            { inicio:'2026-07-13', fin:'2026-09-27' },
+            { inicio:'2026-09-28', fin:'2026-12-06' },
+            { inicio:'2026-12-07', fin:'2027-02-14' },
+            { inicio:'2027-02-15', fin:'2027-04-30' }
+        ];
+        // Especialistas de neurocirugía (evaluadores). "apellido" para casar con el
+        // nombre que se registra en los formularios (p. ej. "Dr. Luis Zapata").
+        var ESPECIALISTAS_NEURO = [
+            { corto:'Dr. Zapata',  full:'Dr. Luis Zapata',    apellido:'zapata'  },
+            { corto:'Dr. Herrera', full:'Dr. Edgar Herrera',  apellido:'herrera' },
+            { corto:'Dr. Perera',  full:'Dr. Doriam Perera',  apellido:'perera'  },
+            { corto:'Dr. Matus',   full:'Dr. Mauricio Matus', apellido:'matus'   },
+            { corto:'Dr. Pérez',   full:'Dr. Oswaldo Pérez',  apellido:'perez'   }
+        ];
+
+        var _resumenOpen  = false;
+        var _resumenDatos = null;
+
+        function _normTxt(s) {
+            return (s || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        }
+        function _espCortoDe(nombreEsp) {
+            var n = _normTxt(nombreEsp);
+            for (var i = 0; i < ESPECIALISTAS_NEURO.length; i++)
+                if (n.indexOf(ESPECIALISTAS_NEURO[i].apellido) !== -1) return ESPECIALISTAS_NEURO[i].corto;
+            return null;
+        }
+        function _espFullDeCorto(corto) {
+            for (var i = 0; i < ESPECIALISTAS_NEURO.length; i++)
+                if (ESPECIALISTAS_NEURO[i].corto === corto) return ESPECIALISTAS_NEURO[i].full;
+            return corto;
+        }
+        function _parseFechaEval(f) {
+            if (!f) return null;
+            var p = f.toString().split('/');
+            if (p.length !== 3) return null;
+            var d = new Date(parseInt(p[2],10), parseInt(p[1],10) - 1, parseInt(p[0],10));
+            return isNaN(d.getTime()) ? null : d;
+        }
+        function _pctEval(row) {
+            var v = parseFloat((row.porcentaje == null ? '' : row.porcentaje).toString().replace('%','').trim());
+            return isNaN(v) ? null : v;
+        }
+        // Componente: teórico (clases, casos/artículos, sesiones) | práctica | investigación
+        function _compEval(tipo) {
+            var t = _normTxt(tipo);
+            if (t.indexOf('investigaci') !== -1) return 'inv';
+            if (t.indexOf('practica')    !== -1) return 'pra';
+            return 'teo';
+        }
+        // Especialista de rotación de un residente (nombre corto) en una fecha dada
+        function _rotEspecialistaEnFecha(residCorto, fecha) {
+            for (var i = 0; i < ROT_PERIODO_RANGOS.length; i++) {
+                var r   = ROT_PERIODO_RANGOS[i];
+                var ini = new Date(r.inicio + 'T00:00:00');
+                var fin = new Date(r.fin + 'T23:59:59');
+                if (fecha >= ini && fecha <= fin) {
+                    var p = ROTACIONES_PERIODOS[i];
+                    for (var k = 0; k < ROTACIONES_ESP.length; k++)
+                        if ((p[ROTACIONES_ESP[k].key] || []).indexOf(residCorto) !== -1) return ROTACIONES_ESP[k].dr;
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        function toggleResumenAcademico() {
+            _resumenOpen = !_resumenOpen;
+            var panel = document.getElementById('resumenPanel');
+            var chev  = document.getElementById('resumenChevron');
+            if (!_resumenOpen) { panel.classList.add('hidden'); chev.style.transform = ''; return; }
+            panel.classList.remove('hidden');
+            chev.style.transform = 'rotate(180deg)';
+            if (_resumenDatos) { renderResumenAcademico(); return; }
+            if (_estadisticasDatos) { _resumenDatos = _estadisticasDatos; renderResumenAcademico(); return; }
+            document.getElementById('resumenContenido').innerHTML =
+                '<p style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;font-style:italic;">Cargando evaluaciones…</p>';
+            fetch(URL_SCRIPT + '?action=getEvaluations', { mode:'cors' })
+                .then(function(r){ return r.json(); })
+                .then(function(d){ _resumenDatos = Array.isArray(d) ? d : []; renderResumenAcademico(); })
+                .catch(function(){
+                    document.getElementById('resumenContenido').innerHTML =
+                        '<p style="text-align:center;padding:30px;color:#e11d48;font-size:13px;font-weight:600;">⚠️ No se pudo conectar con Google Sheets. Cierre y vuelva a abrir esta sección para reintentar.</p>';
+                });
+        }
+
+        // Meses del curso dentro del rango filtrado, que ya hayan iniciado
+        function _mesesResumen(rango, hoy) {
+            var out = [], y = 2026, m = 4; // mayo 2026
+            for (var i = 0; i < 12; i++) {
+                var ini = new Date(y, m, 1), fin = new Date(y, m + 1, 0, 23, 59, 59);
+                if (ini <= hoy && fin >= rango.inicio && ini <= rango.fin) out.push({ ini: ini, fin: fin });
+                m++; if (m > 11) { m = 0; y++; }
+            }
+            return out;
+        }
+
+        function renderResumenAcademico() {
+            var selMod = document.getElementById('filtroModuloResumen').value;
+            var hoy = new Date(); hoy.setHours(23,59,59,999);
+            var rango = { inicio: new Date('2026-05-01T00:00:00'), fin: new Date('2027-04-30T23:59:59') };
+            if (selMod) {
+                for (var i = 0; i < RESUMEN_MODULOS.length; i++) {
+                    if (RESUMEN_MODULOS[i].mod === selMod) {
+                        rango = { inicio: new Date(RESUMEN_MODULOS[i].inicio + 'T00:00:00'),
+                                  fin:    new Date(RESUMEN_MODULOS[i].fin + 'T23:59:59') };
+                        break;
+                    }
+                }
+            }
+            var datos = (_resumenDatos || []).filter(function(r) {
+                var f = _parseFechaEval(r.fecha);
+                return f && f >= rango.inicio && f <= rango.fin;
+            });
+            var meses = _mesesResumen(rango, hoy);
+            var htmlTotal = '', totalRes = 0;
+            ['I','II','III','IV','V'].forEach(function(anio) {
+                (RESIDENTES_POR_ANIO[anio] || []).forEach(function(res) {
+                    totalRes++;
+                    htmlTotal += _cardResumenResidente(res, anio, datos, meses, hoy);
+                });
+            });
+            document.getElementById('resumenContador').textContent =
+                totalRes + ' residentes · ' + datos.length + ' evaluaciones en el periodo';
+            document.getElementById('resumenContenido').innerHTML = htmlTotal ||
+                '<p style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;font-style:italic;">Sin residentes.</p>';
+        }
+
+        function _cardResumenResidente(res, anio, datos, meses, hoy) {
+            var col = PLAN_ANIO_COL[anio] || PLAN_ANIO_COL['I'];
+            var propios = datos.filter(function(r) { return (r.nombreResidente || '').trim() === res; });
+            var comps = { teo: [], pra: [], inv: [] };
+            propios.forEach(function(r) { comps[_compEval(r.tipo_evaluacion)].push(r); });
+
+            var defs = [
+                { k:'teo', label:'Notas teóricas',         sub:'Clases · casos/artículos · sesiones', color:'#3730a3', bg:'#eef2ff', border:'#c7d2fe' },
+                { k:'pra', label:'Notas prácticas',        sub:'Práctica quirúrgica',                 color:'#065f46', bg:'#ecfdf5', border:'#a7f3d0' },
+                { k:'inv', label:'Notas de investigación', sub:'Clases de investigación',             color:'#7c2d12', bg:'#fff7ed', border:'#fed7aa' }
+            ];
+            var tiles = defs.map(function(d) {
+                var arr = comps[d.k];
+                var notas = arr.map(_pctEval).filter(function(v){ return v !== null; });
+                if (arr.length) {
+                    var prom = notas.length ? Math.round(notas.reduce(function(a,b){ return a+b; }, 0) / notas.length) : null;
+                    return '<div style="flex:1;min-width:150px;background:' + d.bg + ';border:1px solid ' + d.border + ';border-radius:10px;padding:10px 12px;">'
+                        + '<p style="font-size:10px;font-weight:800;color:' + d.color + ';text-transform:uppercase;letter-spacing:.03em;">' + d.label + '</p>'
+                        + '<p style="font-size:9px;color:#94a3b8;margin-bottom:4px;">' + d.sub + '</p>'
+                        + '<p style="font-size:22px;font-weight:900;color:' + d.color + ';line-height:1;">' + (prom !== null ? prom + '<span style="font-size:12px;">%</span>' : '—') + '</p>'
+                        + '<p style="font-size:10px;color:#64748b;margin-top:3px;">' + arr.length + ' evaluación' + (arr.length !== 1 ? 'es' : '') + '</p>'
+                        + '</div>';
+                }
+                // Sin calificación → rojo + especialistas que no han evaluado
+                var faltan = ESPECIALISTAS_NEURO.map(function(e){ return e.full; }).join(', ');
+                return '<div style="flex:1;min-width:150px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:10px 12px;">'
+                    + '<p style="font-size:10px;font-weight:800;color:#b91c1c;text-transform:uppercase;letter-spacing:.03em;">' + d.label + '</p>'
+                    + '<p style="font-size:9px;color:#f87171;margin-bottom:4px;">' + d.sub + '</p>'
+                    + '<p style="font-size:13px;font-weight:900;color:#dc2626;">✗ Sin calificación</p>'
+                    + '<p style="font-size:10px;color:#b91c1c;margin-top:3px;line-height:1.4;"><span style="font-weight:700;">No han evaluado:</span> ' + faltan + '</p>'
+                    + '</div>';
+            }).join('');
+
+            // Detalle mensual de práctica quirúrgica según rotaciones
+            var corto = RESIDENTE_CORTO[res] || '';
+            var chips = meses.map(function(mm) {
+                var mitad    = new Date(mm.ini.getFullYear(), mm.ini.getMonth(), 15);
+                var esperado = _rotEspecialistaEnFecha(corto, mitad);
+                var evalsMes = comps.pra.filter(function(r) {
+                    var f = _parseFechaEval(r.fecha); return f && f >= mm.ini && f <= mm.fin;
+                });
+                var label = MESES_ES[mm.ini.getMonth()] + ' ' + String(mm.ini.getFullYear()).slice(2);
+                if (!esperado) {
+                    return '<span style="font-size:10px;font-weight:600;background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;padding:3px 9px;border-radius:8px;">' + label + ' · sin rotación asignada</span>';
+                }
+                var okEsperado = evalsMes.some(function(r) { return _espCortoDe(r.especialista) === esperado; });
+                if (okEsperado) {
+                    var n = evalsMes.filter(function(r){ return _espCortoDe(r.especialista) === esperado; }).length;
+                    return '<span style="font-size:10px;font-weight:700;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;padding:3px 9px;border-radius:8px;">✓ ' + label + ' · ' + esperado + ' (' + n + ')</span>';
+                }
+                var esMesActual = hoy >= mm.ini && hoy <= mm.fin;
+                var extra = evalsMes.length ? ' · ' + evalsMes.length + ' de otro esp.' : '';
+                if (esMesActual) {
+                    return '<span style="font-size:10px;font-weight:700;background:#fffbeb;color:#b45309;border:1px solid #fcd34d;padding:3px 9px;border-radius:8px;">⏳ ' + label + ' (en curso) · Pendiente: ' + _espFullDeCorto(esperado) + extra + '</span>';
+                }
+                return '<span style="font-size:10px;font-weight:700;background:#fef2f2;color:#b91c1c;border:1.5px solid #fca5a5;padding:3px 9px;border-radius:8px;">✗ ' + label + ' · Falta: ' + _espFullDeCorto(esperado) + extra + '</span>';
+            }).join(' ');
+
+            return '<div style="border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">'
+                + '<div style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+                +   '<span style="font-size:11px;font-weight:800;padding:2px 10px;border-radius:99px;background:' + col.bg + ';color:' + col.text + ';">' + col.label + '</span>'
+                +   '<span style="font-size:13px;font-weight:800;color:#1e293b;">' + res + '</span>'
+                +   '<span style="margin-left:auto;font-size:10px;color:#94a3b8;font-weight:600;">' + propios.length + ' evaluación' + (propios.length !== 1 ? 'es' : '') + ' en el periodo</span>'
+                + '</div>'
+                + '<div style="padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;">' + tiles + '</div>'
+                + '<div style="padding:0 14px 12px 14px;">'
+                +   '<p style="font-size:10px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;">Práctica quirúrgica por mes — especialista de rotación</p>'
+                +   '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + (chips || '<span style="font-size:10px;color:#94a3b8;font-style:italic;">Sin meses iniciados en este periodo.</span>') + '</div>'
+                + '</div>'
+                + '</div>';
         }
 
     </script>
