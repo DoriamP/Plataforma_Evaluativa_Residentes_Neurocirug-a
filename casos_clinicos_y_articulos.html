@@ -355,6 +355,7 @@
 
             const payload = new URLSearchParams({
                 tipo_evaluacion: "Casos Clínicos y Artículos",
+                fechaProg:       new URLSearchParams(window.location.search).get('fechaProg') || '',
                 fecha:           document.getElementById('fechaEvaluacion').value,
                 anoResidencia:   document.getElementById('anoResidencia').value,
                 nombreResidente: document.getElementById('residente').value,
