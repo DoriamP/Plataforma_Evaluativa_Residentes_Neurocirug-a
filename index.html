@@ -710,7 +710,7 @@
                 </div>
                 <!-- Leyenda -->
                 <div class="px-5 py-2.5 bg-amber-50 border-b border-amber-100">
-                    <p class="text-xs text-amber-700 font-medium">Promedios en % (hoja «Evaluaciones» de Google). En <span style="color:#dc2626;font-weight:800;">rojo</span>: sin calificación, con el especialista que no ha evaluado. Práctica quirúrgica: mínimo 1 evaluación al mes por el especialista de rotación. «Todo el curso» incluye también evaluaciones sin fecha válida.</p>
+                    <p class="text-xs text-amber-700 font-medium">Promedios en % (hoja «Evaluaciones» de Google). Práctica quirúrgica: mínimo 1 evaluación al mes por el especialista de rotación; en <span style="color:#dc2626;font-weight:800;">rojo</span> se alerta cada mes ya finalizado sin nota práctica, con el especialista de la rotación que no ha evaluado. «Todo el curso» incluye también evaluaciones sin fecha válida.</p>
                 </div>
                 <div id="resumenContenido" class="p-4" style="max-height:75vh;overflow-y:auto;"></div>
             </div>
@@ -1321,10 +1321,19 @@
                     // La fecha de evaluación se registra automáticamente con la fecha de HOY
                     // en el formulario (bloquearFecha=1): no se envía la fecha programada como
                     // fecha de evaluación. Sí se envía fechaProg para detectar retrasos.
+                    // Residente de la clase (dr corto → nombre completo) para autollenar el formulario
+                    var resFull = '';
+                    var drCorto = (drDisplay || '').trim();
+                    if (drCorto && typeof RESIDENTE_CORTO !== 'undefined') {
+                        for (var rn in RESIDENTE_CORTO) {
+                            if (RESIDENTE_CORTO[rn] === drCorto) { resFull = rn; break; }
+                        }
+                    }
                     var params = '?anio=' + encodeURIComponent(c.anio)
                                + '&tema=' + encodeURIComponent(temaParaForm)
                                + '&fechaProg=' + encodeURIComponent(c.f)
-                               + '&bloquearFecha=1';
+                               + '&bloquearFecha=1'
+                               + (resFull ? '&residente=' + encodeURIComponent(resFull) : '');
 
                     // Punto de color según evaluaciones: match por tema + residentes del año
                     var nEsp    = getNumEsp(c.tema, c.anio);
@@ -2477,8 +2486,10 @@
                     + (faltanHtml || '')
                     + '</td>';
             }
-            return '<td style="padding:10px 12px;text-align:center;border-top:1px solid #e2e8f0;border-right:1px solid #f1f5f9;background:#fef2f2;vertical-align:top;">'
-                + '<span style="font-size:12px;font-weight:900;color:#dc2626;">✗ Sin calificación</span>'
+            // Sin evaluaciones: celda en blanco (solo se conservan las alertas
+            // mensuales de práctica quirúrgica que lleguen en extra)
+            return '<td style="padding:10px 12px;text-align:center;border-top:1px solid #e2e8f0;border-right:1px solid #f1f5f9;vertical-align:top;">'
+                + '<span style="font-size:14px;font-weight:700;color:#cbd5e1;">—</span>'
                 + (faltanHtml || '')
                 + '</td>';
         }
@@ -2495,13 +2506,11 @@
             var teoProm = promedioDe(comps.teo), praProm = promedioDe(comps.pra), invProm = promedioDe(comps.inv);
             var nTeo = comps.teo.length, nPra = comps.pra.length, nInv = comps.inv.length;
 
-            var faltanTodos = '<p style="font-size:9px;color:#b91c1c;margin-top:3px;line-height:1.5;text-align:left;"><span style="font-weight:800;">No han evaluado:</span><br>'
-                + ESPECIALISTAS_NEURO.map(function(e){ return e.full; }).join('<br>') + '</p>';
-
             // Control mensual de práctica según rotación
             var corto = RESIDENTE_CORTO[res] || '';
             var pendHtml = '', pendientes = 0;
             meses.forEach(function(mm) {
+                if (mm.fin >= hoy) return; // solo meses ya finalizados antes de la fecha actual
                 var mitad    = new Date(mm.ini.getFullYear(), mm.ini.getMonth(), 15);
                 var esperado = _rotEspecialistaEnFecha(corto, mitad);
                 if (!esperado) return;
@@ -2512,13 +2521,11 @@
                 if (ok) return;
                 pendientes++;
                 var label = MESES_ES[mm.ini.getMonth()] + ' ' + String(mm.ini.getFullYear()).slice(2);
-                var esActual = hoy >= mm.ini && hoy <= mm.fin;
                 var extra = evalsMes.length ? ' (' + evalsMes.length + ' de otro esp.)' : '';
-                pendHtml += esActual
-                    ? '<p style="font-size:9px;color:#b45309;font-weight:700;margin-top:2px;text-align:left;">⏳ ' + label + ': pendiente ' + _espFullDeCorto(esperado) + extra + '</p>'
-                    : '<p style="font-size:9px;color:#b91c1c;font-weight:700;margin-top:2px;text-align:left;">✗ ' + label + ': falta ' + _espFullDeCorto(esperado) + extra + '</p>';
+                pendHtml += '<p style="font-size:9px;color:#b91c1c;font-weight:700;margin-top:2px;text-align:left;">⚠ ' + label + ' sin nota práctica: no ha evaluado ' + _espFullDeCorto(esperado) + extra + '</p>';
             });
-            if (!pendientes && meses.length && nPra > 0) {
+            var mesesCerrados = meses.filter(function(mm){ return mm.fin < hoy; }).length;
+            if (!pendientes && mesesCerrados > 0 && nPra > 0) {
                 pendHtml = '<p style="font-size:9px;color:#047857;font-weight:700;margin-top:2px;">✓ Rotación al día</p>';
             }
 
@@ -2531,12 +2538,8 @@
                     + '<span style="font-size:20px;font-weight:900;color:' + colTot + ';">' + tot + '<span style="font-size:11px;">%</span></span>'
                     + '<p style="font-size:9.5px;color:#94a3b8;margin-top:1px;">(teórica + práctica) / 2</p></td>';
             } else {
-                var queFalta = [];
-                if (teoProm === null) queFalta.push('teórica');
-                if (praProm === null) queFalta.push('práctica');
-                totalCell = '<td style="padding:10px 12px;text-align:center;border-top:1px solid #e2e8f0;border-right:1px solid #f1f5f9;background:#fef2f2;vertical-align:top;">'
-                    + '<span style="font-size:12px;font-weight:900;color:#dc2626;">✗ Incompleto</span>'
-                    + '<p style="font-size:9px;color:#b91c1c;margin-top:2px;">Falta nota ' + queFalta.join(' y ') + '</p></td>';
+                totalCell = '<td style="padding:10px 12px;text-align:center;border-top:1px solid #e2e8f0;border-right:1px solid #f1f5f9;background:#f8fafc;vertical-align:top;">'
+                    + '<span style="font-size:14px;font-weight:700;color:#cbd5e1;">—</span></td>';
             }
 
             return '<tr>'
@@ -2544,10 +2547,10 @@
                 +   '<p style="font-size:12px;font-weight:800;color:#1e293b;line-height:1.3;">' + res + '</p>'
                 +   '<p style="font-size:9.5px;color:#94a3b8;margin-top:1px;">' + propios.length + ' evaluación' + (propios.length !== 1 ? 'es' : '') + ' en el periodo</p>'
                 + '</td>'
-                + _celdaNota(teoProm, nTeo, nTeo ? '' : faltanTodos)
-                + _celdaNota(praProm, nPra, pendHtml || (nPra ? '' : faltanTodos))
+                + _celdaNota(teoProm, nTeo, '')
+                + _celdaNota(praProm, nPra, pendHtml)
                 + totalCell
-                + _celdaNota(invProm, nInv, nInv ? '' : faltanTodos)
+                + _celdaNota(invProm, nInv, '')
                 + '</tr>';
         }
     </script>
