@@ -241,6 +241,12 @@
             if (params.get('tema')) {
                 document.getElementById('tema').value = params.get('tema');
             }
+            if (params.get('residente')) {
+                const selRes = document.getElementById('residente');
+                if (selRes && [...selRes.options].some(o => o.value === params.get('residente'))) {
+                    selRes.value = params.get('residente');
+                }
+            }
 
             // Advertencia si la clase está programada para una fecha futura
             if (params.get('aviso') === 'futura') {
