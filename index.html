@@ -710,7 +710,7 @@
                 </div>
                 <!-- Leyenda -->
                 <div class="px-5 py-2.5 bg-amber-50 border-b border-amber-100">
-                    <p class="text-xs text-amber-700 font-medium">Promedios en % (hoja «Evaluaciones» de Google). Práctica quirúrgica: mínimo 1 nota al mes por residente; al completarse un mes sin ninguna nota práctica aparece en <span style="color:#dc2626;font-weight:800;">rojo</span> una alerta con el especialista de la rotación de ese mes, y se van acumulando mes a mes. «Todo el curso» incluye también evaluaciones sin fecha válida.</p>
+                    <p class="text-xs text-amber-700 font-medium">Promedios en % (hoja «Evaluaciones» de Google). Práctica quirúrgica: mínimo 1 nota al mes por residente; al completarse un mes sin ninguna nota práctica aparece en <span style="color:#dc2626;font-weight:800;">rojo</span> una alerta con el especialista de la rotación de ese mes, acumulándose mes a mes; si la rotación (que puede abarcar varios meses) ya tiene al menos una nota práctica, no se alerta. «Todo el curso» incluye también evaluaciones sin fecha válida.</p>
                 </div>
                 <div id="resumenContenido" class="p-4" style="max-height:75vh;overflow-y:auto;"></div>
             </div>
@@ -2384,6 +2384,13 @@
             if (t.indexOf('practica')    !== -1) return 'pra';
             return 'teo';
         }
+        function _rotPeriodoIdx(fecha) {
+            for (var i = 0; i < ROT_PERIODO_RANGOS.length; i++) {
+                var r = ROT_PERIODO_RANGOS[i];
+                if (fecha >= new Date(r.inicio + 'T00:00:00') && fecha <= new Date(r.fin + 'T23:59:59')) return i;
+            }
+            return -1;
+        }
         function _rotEspecialistaEnFecha(residCorto, fecha) {
             for (var i = 0; i < ROT_PERIODO_RANGOS.length; i++) {
                 var r   = ROT_PERIODO_RANGOS[i];
@@ -2520,6 +2527,17 @@
                 });
                 if (evalsMes.length > 0) return; // al menos una nota práctica ese mes → sin alerta
                 var mitad    = new Date(mm.ini.getFullYear(), mm.ini.getMonth(), 15);
+                // Si la ROTACIÓN completa a la que pertenece este mes (puede abarcar
+                // varios meses) ya tiene al menos una nota práctica, no se alerta.
+                var pIdx = _rotPeriodoIdx(mitad);
+                if (pIdx !== -1) {
+                    var pIni = new Date(ROT_PERIODO_RANGOS[pIdx].inicio + 'T00:00:00');
+                    var pFin = new Date(ROT_PERIODO_RANGOS[pIdx].fin + 'T23:59:59');
+                    var hayNotaEnRotacion = comps.pra.some(function(r) {
+                        var f = _parseFechaEval(r.fecha); return f && f >= pIni && f <= pFin;
+                    });
+                    if (hayNotaEnRotacion) return;
+                }
                 var esperado = _rotEspecialistaEnFecha(corto, mitad);
                 if (!esperado) return; // sin rotación asignada ese mes
                 pendientes++;
