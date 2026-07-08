@@ -245,6 +245,12 @@
             if (params.get('tema')) {
                 document.getElementById('tema').value = params.get('tema');
             }
+            if (params.get('residente')) {
+                const selRes = document.getElementById('residente');
+                if (selRes && [...selRes.options].some(o => o.value === params.get('residente'))) {
+                    selRes.value = params.get('residente');
+                }
+            }
 
             if (params.get('aviso') === 'futura') {
                 const fechaProg = params.get('fechaProg') || '';
