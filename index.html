@@ -710,7 +710,7 @@
                 </div>
                 <!-- Leyenda -->
                 <div class="px-5 py-2.5 bg-amber-50 border-b border-amber-100">
-                    <p class="text-xs text-amber-700 font-medium">Promedios en % (hoja «Evaluaciones» de Google). Práctica quirúrgica: mínimo 1 evaluación al mes por el especialista de rotación; en <span style="color:#dc2626;font-weight:800;">rojo</span> se alerta cada mes ya finalizado sin nota práctica, con el especialista de la rotación que no ha evaluado. «Todo el curso» incluye también evaluaciones sin fecha válida.</p>
+                    <p class="text-xs text-amber-700 font-medium">Promedios en % (hoja «Evaluaciones» de Google). Práctica quirúrgica: mínimo 1 nota al mes por residente; al completarse un mes sin ninguna nota práctica aparece en <span style="color:#dc2626;font-weight:800;">rojo</span> una alerta con el especialista de la rotación de ese mes, y se van acumulando mes a mes. «Todo el curso» incluye también evaluaciones sin fecha válida.</p>
                 </div>
                 <div id="resumenContenido" class="p-4" style="max-height:75vh;overflow-y:auto;"></div>
             </div>
@@ -2509,25 +2509,22 @@
             // Control mensual de práctica según rotación
             var corto = RESIDENTE_CORTO[res] || '';
             var pendHtml = '', pendientes = 0;
+            // Alerta por cada mes YA COMPLETADO sin NINGUNA nota práctica (de cualquier
+            // docente). Aparece desde el día 1 del mes siguiente y se va acumulando.
+            // El docente señalado es el especialista de la rotación de ese mes.
+            var MESES_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
             meses.forEach(function(mm) {
-                if (mm.fin >= hoy) return; // solo meses ya finalizados antes de la fecha actual
-                var mitad    = new Date(mm.ini.getFullYear(), mm.ini.getMonth(), 15);
-                var esperado = _rotEspecialistaEnFecha(corto, mitad);
-                if (!esperado) return;
+                if (mm.fin >= hoy) return; // el mes debe haber terminado
                 var evalsMes = comps.pra.filter(function(r) {
                     var f = _parseFechaEval(r.fecha); return f && f >= mm.ini && f <= mm.fin;
                 });
-                var ok = evalsMes.some(function(r) { return _espCortoDe(r.especialista) === esperado; });
-                if (ok) return;
+                if (evalsMes.length > 0) return; // al menos una nota práctica ese mes → sin alerta
+                var mitad    = new Date(mm.ini.getFullYear(), mm.ini.getMonth(), 15);
+                var esperado = _rotEspecialistaEnFecha(corto, mitad);
+                if (!esperado) return; // sin rotación asignada ese mes
                 pendientes++;
-                var label = MESES_ES[mm.ini.getMonth()] + ' ' + String(mm.ini.getFullYear()).slice(2);
-                var extra = evalsMes.length ? ' (' + evalsMes.length + ' de otro esp.)' : '';
-                pendHtml += '<p style="font-size:9px;color:#b91c1c;font-weight:700;margin-top:2px;text-align:left;">⚠ ' + label + ' sin nota práctica: no ha evaluado ' + _espFullDeCorto(esperado) + extra + '</p>';
+                pendHtml += '<p style="font-size:9px;color:#b91c1c;font-weight:700;margin-top:2px;text-align:left;">⚠ El ' + _espFullDeCorto(esperado) + ' no ha evaluado Práctica quirúrgica del mes de ' + MESES_FULL[mm.ini.getMonth()] + '</p>';
             });
-            var mesesCerrados = meses.filter(function(mm){ return mm.fin < hoy; }).length;
-            if (!pendientes && mesesCerrados > 0 && nPra > 0) {
-                pendHtml = '<p style="font-size:9px;color:#047857;font-weight:700;margin-top:2px;">✓ Rotación al día</p>';
-            }
 
             // Total = promedio de teórica y práctica
             var totalCell;
