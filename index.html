@@ -712,7 +712,7 @@
                 <div class="px-5 py-2.5 bg-amber-50 border-b border-amber-100">
                     <p class="text-xs text-amber-700 font-medium">Promedios en % (hoja «Evaluaciones» de Google). Práctica quirúrgica: mínimo 1 nota al mes por residente; al completarse un mes sin ninguna nota práctica aparece en <span style="color:#dc2626;font-weight:800;">rojo</span> una alerta con el especialista de la rotación de ese mes, acumulándose mes a mes; si la rotación (que puede abarcar varios meses) ya tiene al menos una nota práctica, no se alerta. «Todo el curso» incluye también evaluaciones sin fecha válida.</p>
                 </div>
-                <div id="resumenContenido" class="p-4" style="max-height:75vh;overflow-y:auto;"></div>
+                <div id="resumenContenido" class="p-4"></div>
             </div>
         </section>
 
@@ -2472,14 +2472,14 @@
                 totalRes + ' residentes · ' + datos.length + ' evaluaciones en el periodo';
 
             document.getElementById('resumenContenido').innerHTML =
-                '<div style="overflow-x:auto;border:1px solid #cbd5e1;border-radius:12px;">'
+                '<div style="overflow:auto;max-height:70vh;border:1px solid #cbd5e1;border-radius:12px;">'
                 + '<table style="width:100%;border-collapse:collapse;min-width:760px;">'
                 + '<thead><tr style="background:#1e293b;color:#fff;">'
-                +   '<th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Médico Residente</th>'
-                +   '<th style="text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Nota teórica</th>'
-                +   '<th style="text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Nota práctica</th>'
-                +   '<th style="text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Total (teórica y práctica)</th>'
-                +   '<th style="text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Investigación</th>'
+                +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:left;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Médico Residente</th>'
+                +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Nota teórica</th>'
+                +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Nota práctica</th>'
+                +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Total (teórica y práctica)</th>'
+                +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Investigación</th>'
                 + '</tr></thead><tbody>' + filas + '</tbody></table></div>';
         }
 
@@ -2541,7 +2541,7 @@
                 var esperado = _rotEspecialistaEnFecha(corto, mitad);
                 if (!esperado) return; // sin rotación asignada ese mes
                 pendientes++;
-                pendHtml += '<p style="font-size:9px;color:#b91c1c;font-weight:700;margin-top:2px;text-align:left;">⚠ El ' + _espFullDeCorto(esperado) + ' no ha evaluado Práctica quirúrgica del mes de ' + MESES_FULL[mm.ini.getMonth()] + '</p>';
+                pendHtml += '<p style="font-size:12px;color:#b91c1c;font-weight:700;margin-top:4px;line-height:1.4;text-align:left;">⚠ El ' + _espFullDeCorto(esperado) + ' no ha evaluado Práctica quirúrgica del mes de ' + MESES_FULL[mm.ini.getMonth()] + '</p>';
             });
 
             // Total = promedio de teórica y práctica
