@@ -2573,7 +2573,68 @@
                 +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Nota práctica</th>'
                 +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-right:1px solid #334155;">Total (teórica y práctica)</th>'
                 +   '<th style="position:sticky;top:0;z-index:5;background:#1e293b;text-align:center;padding:10px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Investigación</th>'
-                + '</tr></thead><tbody>' + filas + '</tbody></table></div>';
+                + '</tr></thead><tbody>' + filas + '</tbody></table></div>'
+                + _tablaHonorHtml(todas, selMod, hoy);
+        }
+
+        // ── Ranking global de rendimiento total (sin importar el año) ──
+        function _rankingResumen(todas, selMod, hoy) {
+            var rank = [];
+            ['I','II','III','IV','V'].forEach(function(anio) {
+                if (selMod && !_rangoModuloResumen(anio, selMod)) return;
+                (RESIDENTES_POR_ANIO[anio] || []).forEach(function(res) {
+                    var c = _calcResumenResidente(res, anio, todas, selMod, hoy);
+                    rank.push({ res: res, anio: anio, teo: c.teoProm, pra: c.praProm, inv: c.invProm, tot: c.tot });
+                });
+            });
+            rank.sort(function(a, b) {
+                var ta = a.tot === null ? -1 : a.tot, tb = b.tot === null ? -1 : b.tot;
+                if (tb !== ta) return tb - ta;
+                var sa = a.teo === null ? -1 : a.teo, sb = b.teo === null ? -1 : b.teo;
+                return sb - sa;
+            });
+            return rank;
+        }
+
+        function _tablaHonorHtml(todas, selMod, hoy) {
+            var rank = _rankingResumen(todas, selMod, hoy);
+            if (!rank.length) return '';
+            var fmt = function(v) {
+                if (v === null) return '<span style="color:#cbd5e1;font-weight:700;">—</span>';
+                var col = v >= 80 ? '#047857' : v >= 70 ? '#1d4ed8' : v >= 60 ? '#b45309' : '#b91c1c';
+                return '<span style="color:' + col + ';font-weight:800;">' + v + '%</span>';
+            };
+            var filas = rank.map(function(r, i) {
+                var bg = r.tot === null ? '' : i === 0 ? 'background:#fef3c7;' : i === 1 ? 'background:#f1f5f9;' : i === 2 ? 'background:#ffedd5;' : '';
+                var medalla = r.tot === null ? '' : i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+                var colA = PLAN_ANIO_COL[r.anio] || PLAN_ANIO_COL['I'];
+                return '<tr style="' + bg + '">'
+                    + '<td style="padding:8px 12px;text-align:center;border-top:1px solid #e2e8f0;font-weight:900;color:#334155;">' + medalla + (i + 1) + '.º</td>'
+                    + '<td style="padding:8px 12px;border-top:1px solid #e2e8f0;font-size:12px;font-weight:800;color:#1e293b;">' + r.res + '</td>'
+                    + '<td style="padding:8px 12px;text-align:center;border-top:1px solid #e2e8f0;"><span style="font-size:10px;font-weight:800;padding:2px 9px;border-radius:99px;background:' + colA.bg + ';color:' + colA.text + ';">' + r.anio + ' año</span></td>'
+                    + '<td style="padding:8px 12px;text-align:center;border-top:1px solid #e2e8f0;font-size:13px;">' + fmt(r.teo) + '</td>'
+                    + '<td style="padding:8px 12px;text-align:center;border-top:1px solid #e2e8f0;font-size:13px;">' + fmt(r.pra) + '</td>'
+                    + '<td style="padding:8px 12px;text-align:center;border-top:1px solid #e2e8f0;font-size:15px;">' + fmt(r.tot) + '</td>'
+                    + '<td style="padding:8px 12px;text-align:center;border-top:1px solid #e2e8f0;font-size:13px;">' + fmt(r.inv) + '</td>'
+                    + '</tr>';
+            }).join('');
+            return '<div style="margin-top:18px;">'
+                + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">'
+                + '<span style="font-size:17px;">🏆</span>'
+                + '<span style="font-size:13px;font-weight:900;color:#1e293b;">Tabla de Honor</span>'
+                + '<span style="font-size:10px;color:#94a3b8;">Rendimiento total (teórica + práctica) ÷ 2 · orden descendente · todos los años de residencia</span>'
+                + '</div>'
+                + '<div style="overflow-x:auto;border:1px solid #cbd5e1;border-radius:12px;">'
+                + '<table style="width:100%;border-collapse:collapse;min-width:680px;">'
+                + '<thead><tr style="background:#78350f;color:#fff;">'
+                +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Puesto</th>'
+                +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;text-align:left;">Médico Residente</th>'
+                +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Año</th>'
+                +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Teórica</th>'
+                +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Práctica</th>'
+                +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Total</th>'
+                +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Investigación</th>'
+                + '</tr></thead><tbody>' + filas + '</tbody></table></div></div>';
         }
 
         // Celda de promedio: verde/normal con nota, o roja con los especialistas faltantes
@@ -2594,47 +2655,38 @@
                 + '</td>';
         }
 
-        function _filaResumenResidente(res, anio, todas, selMod, hoy) {
+        // Cálculo consolidado de UN residente (promedios, total y alertas de práctica).
+        // Lo usan: la tabla en pantalla, la Tabla de Honor y el PDF.
+        function _calcResumenResidente(res, anio, todas, selMod, hoy) {
             var propiosTodos = todas.filter(function(r) { return _mismoNombre(r.nombreResidente, res); });
-            // Filtro por módulo según el PLAN del año de ESTE residente
             var propios = !selMod ? propiosTodos : propiosTodos.filter(function(r) {
                 var f = _parseFechaEval(r.fecha);
                 if (!f) return true; // sin fecha válida → cuenta siempre
                 return getModuloResumen(f, anio) === selMod;
             });
-            // Meses a vigilar en práctica quirúrgica: los del módulo (según su año) o todo el curso
             var rangoMeses = selMod ? _rangoModuloResumen(anio, selMod)
                                     : { inicio: new Date(2026, 4, 1), fin: new Date(2027, 3, 30, 23, 59, 59) };
             var meses = rangoMeses ? _mesesResumen(rangoMeses, hoy) : [];
-            // Para las ALERTAS mensuales se usan TODAS las prácticas del residente
-            // (sin filtrar), para no alertar meses ya cubiertos fuera del módulo visible.
             var prasTodas = propiosTodos.filter(function(r) { return _compEval(r.tipo_evaluacion) === 'pra'; });
             var comps = { teo: [], pra: [], inv: [] };
             propios.forEach(function(r) { comps[_compEval(r.tipo_evaluacion)].push(r); });
-
             function promedioDe(arr) {
-                var notas = arr.map(_pctEval).filter(function(v){ return v !== null; });
-                return notas.length ? Math.round(notas.reduce(function(a,b){ return a+b; }, 0) / notas.length) : null;
+                var notas = arr.map(_pctEval).filter(function(v) { return v !== null; });
+                return notas.length ? Math.round(notas.reduce(function(a, b) { return a + b; }, 0) / notas.length) : null;
             }
             var teoProm = promedioDe(comps.teo), praProm = promedioDe(comps.pra), invProm = promedioDe(comps.inv);
-            var nTeo = comps.teo.length, nPra = comps.pra.length, nInv = comps.inv.length;
-
-            // Control mensual de práctica según rotación
+            // Alertas: mes COMPLETADO sin ninguna nota práctica, salvo que la
+            // rotación completa (que puede abarcar varios meses) ya tenga una nota.
             var corto = RESIDENTE_CORTO[res] || '';
-            var pendHtml = '', pendientes = 0;
-            // Alerta por cada mes YA COMPLETADO sin NINGUNA nota práctica (de cualquier
-            // docente). Aparece desde el día 1 del mes siguiente y se va acumulando.
-            // El docente señalado es el especialista de la rotación de ese mes.
             var MESES_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            var alertas = [];
             meses.forEach(function(mm) {
                 if (mm.fin >= hoy) return; // el mes debe haber terminado
                 var evalsMes = prasTodas.filter(function(r) {
                     var f = _parseFechaEval(r.fecha); return f && f >= mm.ini && f <= mm.fin;
                 });
-                if (evalsMes.length > 0) return; // al menos una nota práctica ese mes → sin alerta
-                var mitad    = new Date(mm.ini.getFullYear(), mm.ini.getMonth(), 15);
-                // Si la ROTACIÓN completa a la que pertenece este mes (puede abarcar
-                // varios meses) ya tiene al menos una nota práctica, no se alerta.
+                if (evalsMes.length > 0) return; // al menos una nota ese mes → sin alerta
+                var mitad = new Date(mm.ini.getFullYear(), mm.ini.getMonth(), 15);
                 var pIdx = _rotPeriodoIdx(mitad);
                 if (pIdx !== -1) {
                     var pIni = new Date(ROT_PERIODO_RANGOS[pIdx].inicio + 'T00:00:00');
@@ -2645,43 +2697,52 @@
                     if (hayNotaEnRotacion) return;
                 }
                 var esperado = _rotEspecialistaEnFecha(corto, mitad);
-                if (!esperado) return; // sin rotación asignada ese mes
-                pendientes++;
-                pendHtml += '<p style="font-size:12px;color:#b91c1c;font-weight:700;margin-top:4px;line-height:1.4;text-align:left;">⚠ El ' + _espFullDeCorto(esperado) + ' no ha evaluado Práctica quirúrgica del mes de ' + MESES_FULL[mm.ini.getMonth()] + '</p>';
+                if (!esperado) return;
+                alertas.push('El ' + _espFullDeCorto(esperado) + ' no ha evaluado Práctica quirúrgica del mes de ' + MESES_FULL[mm.ini.getMonth()]);
             });
+            var tot = (teoProm !== null && praProm !== null) ? Math.round((teoProm + praProm) / 2) : null;
+            return { n: propios.length,
+                     teoProm: teoProm, nTeo: comps.teo.length,
+                     praProm: praProm, nPra: comps.pra.length,
+                     invProm: invProm, nInv: comps.inv.length,
+                     tot: tot, alertas: alertas };
+        }
 
-            // Total = promedio de teórica y práctica
+        function _filaResumenResidente(res, anio, todas, selMod, hoy) {
+            var c = _calcResumenResidente(res, anio, todas, selMod, hoy);
+            var pendHtml = c.alertas.map(function(a) {
+                return '<p style="font-size:12px;color:#b91c1c;font-weight:700;margin-top:4px;line-height:1.4;text-align:left;">⚠ ' + a + '</p>';
+            }).join('');
             var totalCell;
-            if (teoProm !== null && praProm !== null) {
-                var tot = Math.round((teoProm + praProm) / 2);
-                var colTot = tot >= 80 ? '#047857' : tot >= 70 ? '#1d4ed8' : tot >= 60 ? '#b45309' : '#b91c1c';
+            if (c.tot !== null) {
+                var colTot = c.tot >= 80 ? '#047857' : c.tot >= 70 ? '#1d4ed8' : c.tot >= 60 ? '#b45309' : '#b91c1c';
                 totalCell = '<td style="padding:10px 12px;text-align:center;border-top:1px solid #e2e8f0;border-right:1px solid #f1f5f9;vertical-align:top;background:#f8fafc;">'
-                    + '<span style="font-size:20px;font-weight:900;color:' + colTot + ';">' + tot + '<span style="font-size:11px;">%</span></span>'
+                    + '<span style="font-size:20px;font-weight:900;color:' + colTot + ';">' + c.tot + '<span style="font-size:11px;">%</span></span>'
                     + '<p style="font-size:9.5px;color:#94a3b8;margin-top:1px;">(teórica + práctica) / 2</p></td>';
             } else {
                 totalCell = '<td style="padding:10px 12px;text-align:center;border-top:1px solid #e2e8f0;border-right:1px solid #f1f5f9;background:#f8fafc;vertical-align:top;">'
                     + '<span style="font-size:14px;font-weight:700;color:#cbd5e1;">—</span></td>';
             }
-
             var _filaHtml = '<tr>'
                 + '<td style="padding:10px 12px;border-top:1px solid #e2e8f0;border-right:1px solid #f1f5f9;vertical-align:top;">'
                 +   '<p style="font-size:12px;font-weight:800;color:#1e293b;line-height:1.3;">' + res + '</p>'
-                +   '<p style="font-size:9.5px;color:#94a3b8;margin-top:1px;">' + propios.length + ' evaluación' + (propios.length !== 1 ? 'es' : '') + ' en el periodo</p>'
+                +   '<p style="font-size:9.5px;color:#94a3b8;margin-top:1px;">' + c.n + ' evaluación' + (c.n !== 1 ? 'es' : '') + ' en el periodo</p>'
                 + '</td>'
-                + _celdaNota(teoProm, nTeo, '')
-                + _celdaNota(praProm, nPra, pendHtml)
+                + _celdaNota(c.teoProm, c.nTeo, '')
+                + _celdaNota(c.praProm, c.nPra, pendHtml)
                 + totalCell
-                + _celdaNota(invProm, nInv, '')
+                + _celdaNota(c.invProm, c.nInv, '')
                 + '</tr>';
-            return { html: _filaHtml, n: propios.length };
+            return { html: _filaHtml, n: c.n };
         }
 
         // ══════════════════════════════════════════════════════════════════════
-        // RESUMEN ACADÉMICO → PDF (lo que se esté mostrando: global o por módulo)
+        // RESUMEN ACADÉMICO → PDF (tablas vectoriales: nítidas, compactas y sin
+        // filas cortadas entre páginas; incluye la Tabla de Honor)
         // ══════════════════════════════════════════════════════════════════════
         var _pdfLibsPromesa = null;
         function _cargarLibsPDF() {
-            if (window.html2canvas && window.jspdf) return Promise.resolve();
+            if (window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable) return Promise.resolve();
             if (_pdfLibsPromesa) return _pdfLibsPromesa;
             function carga(src) {
                 return new Promise(function(res, rej) {
@@ -2690,16 +2751,24 @@
                     document.head.appendChild(sc);
                 });
             }
-            _pdfLibsPromesa = Promise.all([
-                carga('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
-                carga('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
-            ]);
+            _pdfLibsPromesa = carga('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+                .then(function() { return carga('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'); });
             return _pdfLibsPromesa;
         }
+        function _hexRGB(h) {
+            h = (h || '#000000').replace('#', '');
+            return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)];
+        }
+        function _tonoNotaPDF(v) {
+            return v >= 80 ? [4, 120, 87] : v >= 70 ? [29, 78, 216] : v >= 60 ? [180, 83, 9] : [185, 28, 28];
+        }
+        function _celdaNotaPDF(prom, n, grande) {
+            if (!n) return { content: '—', styles: { halign: 'center', textColor: [203, 213, 225], fontStyle: 'bold' } };
+            return { content: prom + '%' + (n !== undefined && !grande ? '  (' + n + ' ev.)' : ''),
+                     styles: { halign: 'center', fontStyle: 'bold', fontSize: grande ? 10 : 8.5, textColor: _tonoNotaPDF(prom) } };
+        }
         function descargarResumenPDF() {
-            var cont = document.getElementById('resumenContenido');
-            var wrapper = cont ? cont.firstElementChild : null;
-            if (!wrapper || !wrapper.querySelector || !wrapper.querySelector('table')) {
+            if (!_resumenDatos || !_resumenDatos.length) {
                 alert('Abra la sección y espere a que carguen las evaluaciones antes de generar el PDF.');
                 return;
             }
@@ -2708,49 +2777,119 @@
             if (btn) { btn.disabled = true; btn.textContent = '⏳ Generando PDF…'; }
             function restaurar() { if (btn) { btn.disabled = false; btn.textContent = txtOrig; } }
             _cargarLibsPDF().then(function() {
-                var oldMax = wrapper.style.maxHeight, oldOv = wrapper.style.overflow;
-                wrapper.style.maxHeight = 'none'; wrapper.style.overflow = 'visible';
-                return html2canvas(wrapper, { scale: 2, backgroundColor: '#ffffff' }).then(function(canvas) {
-                    wrapper.style.maxHeight = oldMax; wrapper.style.overflow = oldOv;
-                    var selMod = document.getElementById('filtroModuloResumen').value;
-                    var titulo = 'Resumen Académico — ' + (selMod
-                        ? (selMod === 'Cierre' ? 'Cierre / Evaluación final' : 'Módulo ' + selMod)
-                        : 'Todo el curso 2026 – 2027');
-                    var hoy = new Date();
-                    var f2 = function(n) { return ('0' + n).slice(-2); };
-                    var fechaTxt  = f2(hoy.getDate()) + '/' + f2(hoy.getMonth() + 1) + '/' + hoy.getFullYear();
-                    var fechaFile = hoy.getFullYear() + '-' + f2(hoy.getMonth() + 1) + '-' + f2(hoy.getDate());
+                var selMod = document.getElementById('filtroModuloResumen').value;
+                var hoy = new Date(); hoy.setHours(23, 59, 59, 999);
+                var todas = _resumenDatos || [];
+                var subMod = selMod ? (selMod === 'Cierre' ? 'Cierre / Evaluación final' : 'Módulo ' + selMod) : 'Todo el curso 2026 – 2027';
+                var f2 = function(n) { return ('0' + n).slice(-2); };
+                var ahora = new Date();
+                var fechaTxt  = f2(ahora.getDate()) + '/' + f2(ahora.getMonth() + 1) + '/' + ahora.getFullYear();
+                var fechaFile = ahora.getFullYear() + '-' + f2(ahora.getMonth() + 1) + '-' + f2(ahora.getDate());
 
-                    var pdf = new jspdf.jsPDF('l', 'mm', 'a4'); // horizontal: la tabla es ancha
-                    var pw = pdf.internal.pageSize.getWidth();
-                    var ph = pdf.internal.pageSize.getHeight();
-                    var margen = 10, y0 = 22;
-                    var imgW = pw - margen * 2;
-                    var imgH = canvas.height * imgW / canvas.width;
-                    var img  = canvas.toDataURL('image/png');
+                var doc = new jspdf.jsPDF('l', 'mm', 'a4');
+                var pw = doc.internal.pageSize.getWidth();
+                var ph = doc.internal.pageSize.getHeight();
 
-                    pdf.setFontSize(14); pdf.setTextColor(30, 41, 59);
-                    pdf.text(titulo, margen, 12);
-                    pdf.setFontSize(9); pdf.setTextColor(120, 120, 120);
-                    pdf.text('Generado el ' + fechaTxt + ' · Plataforma de Evaluación de Residentes de Neurocirugía', margen, 17);
+                // ── Encabezado de portada ──
+                doc.setFillColor(30, 41, 59); doc.rect(0, 0, pw, 24, 'F');
+                doc.setFillColor(217, 119, 6); doc.rect(0, 24, pw, 1.2, 'F');
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(255, 255, 255);
+                doc.text('Resumen Académico — ' + subMod, 12, 11);
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(199, 210, 254);
+                doc.text('Programa de Residentes de Neurocirugía · Plan Docente 2026 – 2027', 12, 17);
+                doc.setTextColor(148, 163, 184);
+                doc.text('Generado el ' + fechaTxt, pw - 12, 17, { align: 'right' });
 
-                    pdf.addImage(img, 'PNG', margen, y0, imgW, imgH);
-                    var restante = imgH - (ph - y0 - margen);
-                    while (restante > 0) {
-                        pdf.addPage();
-                        var pos = margen - (imgH - restante);
-                        pdf.addImage(img, 'PNG', margen, pos, imgW, imgH);
-                        restante -= (ph - margen * 2);
-                    }
-                    pdf.save('Resumen_Academico_' + (selMod ? (selMod === 'Cierre' ? 'Cierre' : 'Modulo_' + selMod) : 'Curso_completo') + '_' + fechaFile + '.pdf');
-                    restaurar();
+                // ── Tabla principal: una fila por residente, agrupada por año ──
+                var body = [];
+                ['I','II','III','IV','V'].forEach(function(anio) {
+                    if (selMod && !_rangoModuloResumen(anio, selMod)) return;
+                    var colA = PLAN_ANIO_COL[anio] || PLAN_ANIO_COL['I'];
+                    body.push([{ content: colA.label.toUpperCase() + ' DE RESIDENCIA', colSpan: 6,
+                        styles: { fillColor: _hexRGB(colA.bg), textColor: _hexRGB(colA.text), fontStyle: 'bold', fontSize: 7, cellPadding: 1.4, halign: 'left' } }]);
+                    (RESIDENTES_POR_ANIO[anio] || []).forEach(function(res) {
+                        var c = _calcResumenResidente(res, anio, todas, selMod, hoy);
+                        body.push([
+                            { content: res + '\n' + c.n + ' evaluación' + (c.n !== 1 ? 'es' : '') + ' en el periodo',
+                              styles: { fontStyle: 'bold', fontSize: 8, textColor: [30, 41, 59] } },
+                            _celdaNotaPDF(c.teoProm, c.nTeo),
+                            _celdaNotaPDF(c.praProm, c.nPra),
+                            c.tot === null
+                                ? { content: '—', styles: { halign: 'center', textColor: [203, 213, 225], fontStyle: 'bold', fillColor: [248, 250, 252] } }
+                                : { content: c.tot + '%', styles: { halign: 'center', fontStyle: 'bold', fontSize: 10.5, textColor: _tonoNotaPDF(c.tot), fillColor: [248, 250, 252] } },
+                            _celdaNotaPDF(c.invProm, c.nInv),
+                            { content: c.alertas.length ? c.alertas.map(function(a) { return '! ' + a; }).join('\n') : (c.nPra > 0 ? 'Al día' : '—'),
+                              styles: { fontSize: 6.6, halign: 'left', valign: 'middle',
+                                        textColor: c.alertas.length ? [185, 28, 28] : [148, 163, 184],
+                                        fontStyle: c.alertas.length ? 'bold' : 'normal' } }
+                        ]);
+                    });
                 });
+
+                doc.autoTable({
+                    startY: 29,
+                    head: [['Médico Residente', 'Nota teórica', 'Nota práctica', 'Total (teórica y práctica)', 'Investigación', 'Alertas de práctica quirúrgica']],
+                    body: body,
+                    theme: 'grid',
+                    styles: { font: 'helvetica', fontSize: 8, cellPadding: 1.8, lineColor: [226, 232, 240], lineWidth: 0.15, valign: 'middle' },
+                    headStyles: { fillColor: [30, 41, 59], textColor: 255, fontSize: 7.4, fontStyle: 'bold', halign: 'center', cellPadding: 2 },
+                    columnStyles: { 0: { cellWidth: 62 }, 1: { cellWidth: 27 }, 2: { cellWidth: 27 }, 3: { cellWidth: 30 }, 4: { cellWidth: 27 }, 5: { cellWidth: 'auto' } },
+                    rowPageBreak: 'avoid',
+                    margin: { left: 10, right: 10, top: 29, bottom: 13 }
+                });
+
+                // ── Tabla de Honor ──
+                var rank = _rankingResumen(todas, selMod, hoy);
+                var honorBody = rank.map(function(r, i) {
+                    var fill = r.tot === null ? null : i === 0 ? [254, 243, 199] : i === 1 ? [241, 245, 249] : i === 2 ? [255, 237, 213] : null;
+                    function st(extra) { var o = extra || {}; if (fill) o.fillColor = fill; return o; }
+                    function nota(v, grande) {
+                        if (v === null) return { content: '—', styles: st({ halign: 'center', textColor: [203, 213, 225], fontStyle: 'bold' }) };
+                        return { content: v + '%', styles: st({ halign: 'center', fontStyle: 'bold', fontSize: grande ? 10.5 : 9, textColor: _tonoNotaPDF(v) }) };
+                    }
+                    var colA = PLAN_ANIO_COL[r.anio] || PLAN_ANIO_COL['I'];
+                    return [
+                        { content: (i + 1) + '.º', styles: st({ halign: 'center', fontStyle: 'bold', fontSize: 10, textColor: [51, 65, 85] }) },
+                        { content: r.res, styles: st({ fontStyle: 'bold', textColor: [30, 41, 59] }) },
+                        { content: r.anio + ' año', styles: st({ halign: 'center', fontStyle: 'bold', textColor: _hexRGB(colA.text) }) },
+                        nota(r.teo), nota(r.pra), nota(r.tot, true), nota(r.inv)
+                    ];
+                });
+                var yH = doc.lastAutoTable.finalY + 10;
+                var altoEstimado = 14 + (honorBody.length + 1) * 7;
+                if (yH + altoEstimado > ph - 12) { doc.addPage(); yH = 14; }
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(120, 53, 15);
+                doc.text('TABLA DE HONOR', 10, yH);
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(148, 163, 184);
+                doc.text('Rendimiento total = (teórica + práctica) / 2 · orden descendente · todos los años de residencia', 48, yH);
+                doc.autoTable({
+                    startY: yH + 3,
+                    head: [['Puesto', 'Médico Residente', 'Año', 'Nota teórica', 'Nota práctica', 'TOTAL', 'Investigación']],
+                    body: honorBody,
+                    theme: 'grid',
+                    styles: { font: 'helvetica', fontSize: 9, cellPadding: 2.2, lineColor: [226, 232, 240], lineWidth: 0.15, valign: 'middle' },
+                    headStyles: { fillColor: [120, 53, 15], textColor: 255, fontSize: 7.6, fontStyle: 'bold', halign: 'center', cellPadding: 2 },
+                    columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 22 }, 3: { cellWidth: 30 }, 4: { cellWidth: 30 }, 5: { cellWidth: 30 }, 6: { cellWidth: 30 } },
+                    rowPageBreak: 'avoid',
+                    margin: { left: 10, right: 10, top: 14, bottom: 13 }
+                });
+
+                // ── Pie de página en todas las páginas ──
+                var totalPag = doc.getNumberOfPages();
+                for (var p = 1; p <= totalPag; p++) {
+                    doc.setPage(p);
+                    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(148, 163, 184);
+                    doc.text('Plataforma de Evaluación de Residentes de Neurocirugía · ' + subMod, 10, ph - 6);
+                    doc.text('Página ' + p + ' de ' + totalPag, pw - 10, ph - 6, { align: 'right' });
+                }
+
+                doc.save('Resumen_Academico_' + (selMod ? (selMod === 'Cierre' ? 'Cierre' : 'Modulo_' + selMod) : 'Curso_completo') + '_' + fechaFile + '.pdf');
+                restaurar();
             }).catch(function() {
                 restaurar();
                 alert('No se pudo generar el PDF. Verifique su conexión a internet e intente de nuevo.');
             });
         }
-
 
         // ══════════════════════════════════════════════════════════════════════
         // NOTAS DE ROTACIONES EXTERNAS — visor para docentes (hoja Rotaciones_Externas)
