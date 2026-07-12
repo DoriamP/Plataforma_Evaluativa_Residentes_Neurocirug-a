@@ -270,17 +270,39 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxyGCI2a75VauHRuL0Bw
 // ── Caché de temas manuales (sincronizado con Google Sheets) ──
 let _temasCache = {};
 
+// Normaliza la fecha de un tema a "dd/MM/yyyy" (acepta texto dd/M/yyyy,
+// yyyy-MM-dd o fechas ISO que devuelve Sheets cuando la celda quedó como Fecha)
+function _normFechaTema(f) {
+    if (!f) return '';
+    f = String(f).trim();
+    let m = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) return ('0'+m[1]).slice(-2) + '/' + ('0'+m[2]).slice(-2) + '/' + m[3];
+    m = f.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (m) return ('0'+m[3]).slice(-2) + '/' + ('0'+m[2]).slice(-2) + '/' + m[1];
+    if (f.indexOf('T') !== -1) {
+        const d = new Date(f);
+        if (!isNaN(d.getTime())) return ('0'+d.getDate()).slice(-2) + '/' + ('0'+(d.getMonth()+1)).slice(-2) + '/' + d.getFullYear();
+    }
+    return f;
+}
+
 async function fetchTemas() {
     try {
         const resp = await fetch(`${URL_SCRIPT}?action=getTemas`, { mode: 'cors' });
         const data = await resp.json();
         if (Array.isArray(data)) {
+            // Si hay filas duplicadas del mismo día/año se queda con la más
+            // reciente (ts, si el backend lo envía; si no, la última en la hoja).
+            const best = {};
             data.forEach(t => {
-                if (t.fecha && t.anio && t.tema) {
-                    const key = 'manual_tema_' + t.anio + '_' + t.fecha;
-                    _temasCache[key] = t.tema;
-                    localStorage.setItem(key, t.tema); // sincroniza localStorage
-                }
+                if (!t.fecha || !t.anio || !t.tema) return;
+                const key = 'manual_tema_' + String(t.anio).trim() + '_' + _normFechaTema(t.fecha);
+                const ts  = +t.ts || 0;
+                if (!(key in best) || ts >= best[key].ts) best[key] = { tema: t.tema, ts: ts };
+            });
+            Object.keys(best).forEach(key => {
+                _temasCache[key] = best[key].tema;
+                try { localStorage.setItem(key, best[key].tema); } catch(e){}
             });
         }
     } catch(e) { /* usa localStorage como fallback */ }
