@@ -307,6 +307,8 @@
                 <div id="statsLoading" class="p-6 text-center text-slate-400 text-sm italic">Cargando estadísticas…</div>
                 <div id="statsError" class="hidden p-6 text-rose-500 text-sm font-medium">⚠️ No se pudo conectar con Google Sheets.</div>
                 <div id="statsContent" class="hidden p-6 space-y-8">
+                    <div id="statsHonor"></div>
+                    <div class="border-t border-slate-100"></div>
                     <div>
                         <div class="flex items-center gap-2 mb-4">
                             <div class="w-1 h-5 bg-violet-600 rounded-full"></div>
@@ -1590,6 +1592,44 @@
 
             document.getElementById('statsLoading').classList.add('hidden');
             document.getElementById('statsContent').classList.remove('hidden');
+
+            // ── Tabla de Honor Docente: participaciones totales, orden descendente ──
+            var rankEsp = especialistas.map(function(e, i) {
+                return { esp: e, total: totalesPorEsp[i], pct: pctPorEsp[i] };
+            }).sort(function(a, b) { return b.total - a.total; });
+            var maxTotalEsp = rankEsp.length ? Math.max(rankEsp[0].total, 1) : 1;
+            var honorEl = document.getElementById('statsHonor');
+            if (honorEl) {
+                var filasHonor = rankEsp.map(function(r, i) {
+                    var bg = i === 0 ? 'background:#fef3c7;' : i === 1 ? 'background:#f1f5f9;' : i === 2 ? 'background:#ffedd5;' : '';
+                    var medalla = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+                    var barW = Math.round((r.total / maxTotalEsp) * 100);
+                    return '<tr style="' + bg + '">'
+                        + '<td style="padding:9px 12px;text-align:center;border-top:1px solid #e2e8f0;font-weight:900;color:#334155;white-space:nowrap;">' + medalla + (i + 1) + '.º</td>'
+                        + '<td style="padding:9px 12px;border-top:1px solid #e2e8f0;font-size:12.5px;font-weight:800;color:#1e293b;">' + r.esp + '</td>'
+                        + '<td style="padding:9px 12px;text-align:center;border-top:1px solid #e2e8f0;"><span style="font-size:16px;font-weight:900;color:#4c1d95;">' + r.total + '</span><span style="font-size:9px;color:#94a3b8;"> eval.</span></td>'
+                        + '<td style="padding:9px 12px;text-align:center;border-top:1px solid #e2e8f0;"><span style="background:#ede9fe;color:#5b21b6;font-size:10px;font-weight:800;padding:2px 9px;border-radius:99px;">' + r.pct + '%</span></td>'
+                        + '<td style="padding:9px 12px;border-top:1px solid #e2e8f0;min-width:140px;">'
+                        +   '<div style="width:100%;background:#f1f5f9;border-radius:99px;height:8px;overflow:hidden;">'
+                        +   '<div style="height:8px;border-radius:99px;background:linear-gradient(to right,#7c3aed,#4c1d95);width:' + barW + '%;"></div>'
+                        +   '</div></td>'
+                        + '</tr>';
+                }).join('');
+                honorEl.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'
+                    + '<span style="font-size:17px;">🏆</span>'
+                    + '<span style="font-size:13px;font-weight:900;color:#1e293b;">Tabla de Honor Docente</span>'
+                    + '<span style="font-size:10px;color:#94a3b8;">Participaciones totales (evaluaciones registradas en todos los formularios) · orden descendente</span>'
+                    + '</div>'
+                    + '<div style="overflow-x:auto;border:1px solid #cbd5e1;border-radius:12px;">'
+                    + '<table style="width:100%;border-collapse:collapse;min-width:580px;">'
+                    + '<thead><tr style="background:#4c1d95;color:#fff;">'
+                    +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Puesto</th>'
+                    +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;text-align:left;">Docente / Especialista</th>'
+                    +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Evaluaciones totales</th>'
+                    +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">% de participación</th>'
+                    +   '<th style="padding:9px 12px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;text-align:left;">Participación relativa</th>'
+                    + '</tr></thead><tbody>' + filasHonor + '</tbody></table></div>';
+            }
 
             if (_chartTotal) _chartTotal.destroy();
             _chartTotal = new Chart(document.getElementById('chartTotalEsp').getContext('2d'), {
