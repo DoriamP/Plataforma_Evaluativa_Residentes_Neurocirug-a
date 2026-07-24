@@ -249,6 +249,47 @@
         <div id="secPendientes" class="hidden space-y-5"></div>
     </div>
 
+    <!-- NOTAS DE ROTACIONES EXTERNAS (colapsable · todos los registros) -->
+    <section class="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
+        <button onclick="toggleRotExtDash1()"
+            class="w-full text-left bg-gradient-to-r from-orange-800 to-amber-700 px-5 py-4 text-white flex items-center justify-between focus:outline-none">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-amber-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <div>
+                    <h3 class="font-bold text-sm">Notas de Rotaciones Externas</h3>
+                    <p class="text-xs text-amber-100 mt-0.5">Todos los registros de los residentes · notas y evaluación escrita</p>
+                </div>
+            </div>
+            <svg id="rotExtD1Chevron" class="w-5 h-5 text-amber-200 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div id="rotExtD1Panel" class="hidden">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-3 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Médico residente</label>
+                    <select id="rotExtD1Filtro" onchange="renderRotExtDash1()"
+                        class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none appearance-none">
+                        <option value="">Todos los residentes</option>
+                    </select>
+                </div>
+                <button onclick="_rotExtD1Datos=null; cargarRotExtDash1();"
+                    class="px-3 py-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-600 text-xs font-bold rounded-lg transition self-end">🔄 Actualizar</button>
+                <div id="rotExtD1Contador" class="ml-auto self-center text-xs text-slate-400 font-medium"></div>
+            </div>
+            <div id="rotExtD1Lista" class="p-5"></div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Lightbox para ampliar la foto -->
+<div id="rotExtD1Lightbox" onclick="this.style.display='none'"
+    style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.88);z-index:200;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;">
+    <img id="rotExtD1LightImg" alt="Evaluación escrita" style="max-width:95%;max-height:92%;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
 </div>
 
 <style>
@@ -1521,6 +1562,86 @@ document.addEventListener('input', ev => {
 document.addEventListener('focusin', ev => {
     if (ev.target && /^inp-\d+$/.test(ev.target.id || '')) { _cargarTemasGuardados(); if (ev.target.value.trim()) mostrarTemasSimilares(ev.target); }
 });
+
+
+// ══════════════════════════════════════════════════════════════════════
+// NOTAS DE ROTACIONES EXTERNAS — visor de TODOS los registros
+// ══════════════════════════════════════════════════════════════════════
+var _rotExtD1Datos = null;
+var _rotExtD1Open = false;
+function toggleRotExtDash1() {
+    _rotExtD1Open = !_rotExtD1Open;
+    var panel = document.getElementById('rotExtD1Panel');
+    var chev  = document.getElementById('rotExtD1Chevron');
+    if (!_rotExtD1Open) { panel.classList.add('hidden'); chev.style.transform=''; return; }
+    panel.classList.remove('hidden'); chev.style.transform='rotate(180deg)';
+    var filtro = document.getElementById('rotExtD1Filtro');
+    if (filtro.options.length <= 1) {
+        Object.keys(RESIDENTE_ANIO).forEach(function(r){
+            var o=document.createElement('option'); o.value=r; o.textContent=r+' ('+RESIDENTE_ANIO[r]+' año)'; filtro.appendChild(o);
+        });
+    }
+    if (_rotExtD1Datos) { renderRotExtDash1(); return; }
+    cargarRotExtDash1();
+}
+function cargarRotExtDash1() {
+    document.getElementById('rotExtD1Lista').innerHTML =
+        '<p style="text-align:center;padding:26px;color:#94a3b8;font-size:13px;font-style:italic;">Cargando rotaciones externas…</p>';
+    fetch(URL_SCRIPT + '?action=getRotacionesExternas', { mode:'cors' })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ _rotExtD1Datos = Array.isArray(d) ? d : []; renderRotExtDash1(); })
+        .catch(function(){
+            document.getElementById('rotExtD1Lista').innerHTML =
+                '<p style="text-align:center;padding:26px;color:#e11d48;font-size:13px;font-weight:600;">⚠️ No se pudieron cargar los registros. Verifique que el Apps Script esté republicado.</p>';
+        });
+}
+function verFotoRotExtD1(idx) {
+    var reg = (_rotExtD1Datos||[])[idx];
+    if (!reg || !reg.foto) return;
+    document.getElementById('rotExtD1LightImg').src = reg.foto;
+    document.getElementById('rotExtD1Lightbox').style.display = 'flex';
+}
+function renderRotExtDash1() {
+    var filtro = document.getElementById('rotExtD1Filtro').value;
+    var datos = (_rotExtD1Datos||[]).map(function(x,i){ x._idx=i; return x; });
+    if (filtro) datos = datos.filter(function(x){ return (x.residente||'').trim()===filtro; });
+    document.getElementById('rotExtD1Contador').textContent = datos.length + ' registro' + (datos.length!==1?'s':'');
+    var esc = function(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    if (!datos.length) {
+        document.getElementById('rotExtD1Lista').innerHTML =
+            '<p style="text-align:center;padding:26px;color:#94a3b8;font-size:13px;font-style:italic;">Aún no hay rotaciones externas registradas'+(filtro?' para este residente':'')+'.</p>';
+        return;
+    }
+    var orden=[]; ['I','II','III','IV','V'].forEach(function(a){ (ANIO_RESIDENTES[a]||[]).forEach(function(r){ orden.push(r); }); });
+    var porRes={}; datos.forEach(function(x){ var r=(x.residente||'—').trim(); (porRes[r]=porRes[r]||[]).push(x); });
+    var claves=Object.keys(porRes).sort(function(a,b){ var ia=orden.indexOf(a),ib=orden.indexOf(b); return (ia===-1?99:ia)-(ib===-1?99:ib); });
+    var html='';
+    claves.forEach(function(res){
+        var anio=RESIDENTE_ANIO[res]||''; var col=ANIO_COLORS[anio]||ANIO_COLORS['I'];
+        html += '<div style="margin-bottom:16px;">'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+            + (anio?'<span style="font-size:11px;font-weight:800;padding:2px 10px;border-radius:99px;'+col.badge+'">'+anio+' Año</span>':'')
+            + '<span style="font-size:13px;font-weight:800;color:#1e293b;">'+esc(res)+'</span>'
+            + '<span style="font-size:10px;color:#94a3b8;">'+porRes[res].length+' rotación'+(porRes[res].length!==1?'es':'')+'</span>'
+            + '</div>'
+            + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;">'
+            + porRes[res].sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).map(function(x){
+                return '<div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#fff;">'
+                    + (x.foto
+                        ? '<img src="'+x.foto+'" onclick="verFotoRotExtD1('+x._idx+')" alt="Evaluación escrita" style="width:100%;height:130px;object-fit:cover;cursor:zoom-in;display:block;border-bottom:1px solid #f1f5f9;">'
+                        : '<div style="height:60px;display:flex;align-items:center;justify-content:center;background:#f8fafc;color:#cbd5e1;font-size:11px;border-bottom:1px solid #f1f5f9;">Sin foto</div>')
+                    + '<div style="padding:10px 12px;">'
+                    + '<p style="font-size:12px;font-weight:800;color:#1e293b;line-height:1.35;">'+esc(x.rotacion)+'</p>'
+                    + (x.fecha?'<p style="font-size:10px;color:#94a3b8;margin-top:2px;">Registrada el '+esc(x.fecha)+'</p>':'')
+                    + '<p style="margin-top:6px;">'
+                    + (x.notaTeorica?'<span style="font-size:10px;background:#eef2ff;color:#3730a3;font-weight:800;padding:2px 8px;border-radius:99px;margin-right:4px;">Teórica: '+esc(x.notaTeorica)+'%</span>':'')
+                    + (x.notaPractica?'<span style="font-size:10px;background:#ecfdf5;color:#065f46;font-weight:800;padding:2px 8px;border-radius:99px;">Práctica: '+esc(x.notaPractica)+'%</span>':'')
+                    + '</p></div></div>';
+            }).join('')
+            + '</div></div>';
+    });
+    document.getElementById('rotExtD1Lista').innerHTML = html;
+}
 
 </script>
 </body>
