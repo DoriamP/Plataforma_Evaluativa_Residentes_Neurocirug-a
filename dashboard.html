@@ -408,6 +408,23 @@
                 return matchR && matchE && matchC;
             });
 
+            // Ordenar de la evaluación MÁS RECIENTE a la más antigua.
+            // Criterio: fecha (dd/MM/yyyy) desc; empate → número de fila desc
+            // (las filas más nuevas se agregan al final de la hoja).
+            function _fechaOrden(row) {
+                const f = (row.fecha || '').toString().trim();
+                let m = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                if (m) return new Date(+m[3], +m[2] - 1, +m[1]).getTime();
+                m = f.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+                if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+                return 0;
+            }
+            filtrados.sort((a, b) => {
+                const df = _fechaOrden(b) - _fechaOrden(a);
+                if (df !== 0) return df;
+                return (Number(b._row) || 0) - (Number(a._row) || 0);
+            });
+
             dbFilteredData = filtrados;
             renderKPIs(filtrados);
             renderTable(filtrados);
